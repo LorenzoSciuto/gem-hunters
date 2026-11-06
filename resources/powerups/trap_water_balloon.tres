@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PowerUpData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/powerups/PowerUpData.gd" id="1_powerup"]
+
+[resource]
+script = ExtResource("1_powerup")
+type = 2
+pool_weight = 3

@@ -1,0 +1,150 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/player/Player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/player/CharacterModel.tscn" id="2_model"]
+[ext_resource type="PackedScene" path="res://scenes/gems/GemLoose.tscn" id="3_gem"]
+[ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjSpringGlove.tscn" id="4_glove"]
+[ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjMagnet.tscn" id="5_magnet"]
+[ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjTickleRay.tscn" id="6_tickle"]
+[ext_resource type="PackedScene" path="res://scenes/traps/TrapCake.tscn" id="7_cake"]
+[ext_resource type="PackedScene" path="res://scenes/traps/TrapWaterBalloon.tscn" id="8_balloon"]
+[ext_resource type="PackedScene" path="res://scenes/traps/TrapSpeaker.tscn" id="9_speaker"]
+[ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjSnowball.tscn" id="10_snowball"]
+[ext_resource type="PackedScene" path="res://scenes/traps/TrapBanana.tscn" id="11_banana"]
+[ext_resource type="PackedScene" path="res://scenes/traps/TrapBlackBox.tscn" id="12_blackbox"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_root"]
+radius = 0.4
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ice"]
+transparency = 1
+albedo_color = Color(0.55, 0.85, 1, 0.55)
+roughness = 0.05
+rim_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_ice"]
+material = SubResource("StandardMaterial3D_ice")
+size = Vector3(1.1, 1.8, 1.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_star"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.3, 1)
+billboard_mode = 3
+
+[sub_resource type="QuadMesh" id="QuadMesh_star"]
+material = SubResource("StandardMaterial3D_star")
+size = Vector2(0.18, 0.18)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_stars"]
+emission_shape = 6
+emission_ring_axis = Vector3(0, 1, 0)
+emission_ring_height = 0.05
+emission_ring_radius = 0.45
+emission_ring_inner_radius = 0.4
+orbit_velocity_min = 0.6
+orbit_velocity_max = 0.8
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bubble"]
+transparency = 1
+albedo_color = Color(0.6, 0.9, 1, 0.35)
+roughness = 0.05
+rim_enabled = true
+rim = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_bubble"]
+material = SubResource("StandardMaterial3D_bubble")
+radius = 1.05
+height = 2.1
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
+radius = 1.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ring"]
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+material = SubResource("StandardMaterial3D_ring")
+inner_radius = 0.55
+outer_radius = 0.7
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_spring"]
+radius = 0.25
+
+[node name="Player" type="CharacterBody3D" groups=["players"]]
+collision_layer = 2
+collision_mask = 3
+floor_snap_length = 0.3
+script = ExtResource("1_player")
+gem_loose_scene = ExtResource("3_gem")
+spring_glove_scene = ExtResource("4_glove")
+magnet_scene = ExtResource("5_magnet")
+tickle_ray_scene = ExtResource("6_tickle")
+trap_cake_scene = ExtResource("7_cake")
+trap_water_balloon_scene = ExtResource("8_balloon")
+trap_speaker_scene = ExtResource("9_speaker")
+snowball_scene = ExtResource("10_snowball")
+trap_banana_scene = ExtResource("11_banana")
+trap_black_box_scene = ExtResource("12_blackbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_root")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="PlayerRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0.04, 0)
+mesh = SubResource("TorusMesh_ring")
+
+[node name="NameTag" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+billboard = 1
+no_depth_test = true
+text = "P1"
+font_size = 72
+outline_size = 18
+
+[node name="CameraOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraOrigin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, 0)
+collision_mask = 1
+shape = SubResource("SphereShape3D_spring")
+spring_length = 4.5
+margin = 0.2
+
+[node name="CameraTarget" type="Node3D" parent="CameraOrigin/SpringArm3D"]
+
+[node name="IceEffect" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
+mesh = SubResource("BoxMesh_ice")
+
+[node name="ConfusionStars" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+emitting = false
+amount = 8
+lifetime = 1.2
+process_material = SubResource("ParticleProcessMaterial_stars")
+draw_pass_1 = SubResource("QuadMesh_star")
+
+[node name="BubbleShield" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+visible = false
+mesh = SubResource("SphereMesh_bubble")
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("SphereShape3D_interact")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -0.8)

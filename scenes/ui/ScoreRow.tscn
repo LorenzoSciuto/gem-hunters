@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/ScoreRow.gd" id="1_row"]
+
+[node name="ScoreRow" type="HBoxContainer"]
+script = ExtResource("1_row")
+
+[node name="RankLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "#1"
+
+[node name="NameLabel" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeadingLabel"
+text = "P1"
+
+[node name="ScoreLabel" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "0"
+horizontal_alignment = 2

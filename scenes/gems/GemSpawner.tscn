@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/gems/GemSpawner.gd" id="1_spawner"]
+
+[node name="GemSpawner" type="Node3D"]
+script = ExtResource("1_spawner")
+
+[node name="GoldenGemMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

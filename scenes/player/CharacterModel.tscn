@@ -1,0 +1,221 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/player/CharacterModel.gd" id="1_model"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.38
+height = 1.45
+radial_segments = 24
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_default_body"]
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.98, 0.85, 0.3, 1)
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_white"]
+shading_mode = 2
+diffuse_mode = 3
+albedo_color = Color(1, 1, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+material = SubResource("StandardMaterial3D_white")
+radius = 0.1
+height = 0.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pupil"]
+shading_mode = 2
+albedo_color = Color(0.08, 0.08, 0.14, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_pupil"]
+material = SubResource("StandardMaterial3D_pupil")
+radius = 0.05
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cheek"]
+shading_mode = 2
+albedo_color = Color(1, 0.45, 0.65, 0.85)
+
+[sub_resource type="SphereMesh" id="SphereMesh_cheek"]
+material = SubResource("StandardMaterial3D_cheek")
+radius = 0.06
+height = 0.04
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_headband"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.25, 0.2, 1)
+roughness = 0.3
+
+[sub_resource type="TorusMesh" id="TorusMesh_headband"]
+material = SubResource("StandardMaterial3D_headband")
+inner_radius = 0.37
+outer_radius = 0.43
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_antenna"]
+diffuse_mode = 3
+albedo_color = Color(0.2, 0.85, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_antenna_rod"]
+material = SubResource("StandardMaterial3D_antenna")
+top_radius = 0.03
+bottom_radius = 0.03
+height = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yellow"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.9, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_antenna_ball"]
+material = SubResource("StandardMaterial3D_yellow")
+radius = 0.08
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_armor"]
+diffuse_mode = 3
+albedo_color = Color(0.45, 0.45, 0.55, 1)
+roughness = 0.25
+metallic = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_shoulder"]
+material = SubResource("StandardMaterial3D_armor")
+size = Vector3(0.25, 0.18, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_horns"]
+diffuse_mode = 3
+albedo_color = Color(0.95, 0.45, 0.1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_horn"]
+material = SubResource("StandardMaterial3D_horns")
+top_radius = 0.01
+bottom_radius = 0.07
+height = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crown"]
+albedo_color = Color(1, 0.82, 0.2, 1)
+metallic = 0.6
+roughness = 0.25
+emission_enabled = true
+emission = Color(1, 0.7, 0.1, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_crown_band"]
+material = SubResource("StandardMaterial3D_crown")
+top_radius = 0.3
+bottom_radius = 0.26
+height = 0.16
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_crown_spike"]
+material = SubResource("StandardMaterial3D_crown")
+top_radius = 0.0
+bottom_radius = 0.08
+height = 0.22
+radial_segments = 6
+
+[node name="CharacterModel" type="Node3D"]
+script = ExtResource("1_model")
+
+[node name="Rig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, 0)
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Rig"]
+mesh = SubResource("CapsuleMesh_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_default_body")
+
+[node name="Eyes" type="Node3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0.32)
+
+[node name="LeftEye" type="MeshInstance3D" parent="Rig/Eyes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0, 0)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="Pupil" type="MeshInstance3D" parent="Rig/Eyes/LeftEye"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.07)
+mesh = SubResource("SphereMesh_pupil")
+
+[node name="RightEye" type="MeshInstance3D" parent="Rig/Eyes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, 0)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="Pupil" type="MeshInstance3D" parent="Rig/Eyes/RightEye"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.07)
+mesh = SubResource("SphereMesh_pupil")
+
+[node name="Cheeks" type="Node3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, 0.34)
+
+[node name="LeftCheek" type="MeshInstance3D" parent="Rig/Cheeks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.21, 0, 0)
+mesh = SubResource("SphereMesh_cheek")
+
+[node name="RightCheek" type="MeshInstance3D" parent="Rig/Cheeks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21, 0, 0)
+mesh = SubResource("SphereMesh_cheek")
+
+[node name="Accessories" type="Node3D" parent="Rig"]
+
+[node name="DashyHeadband" type="MeshInstance3D" parent="Rig/Accessories"]
+transform = Transform3D(1, 0, 0, 0, 0.9659, 0.2588, 0, -0.2588, 0.9659, 0, 0.44, 0)
+mesh = SubResource("TorusMesh_headband")
+
+[node name="BouncerSpring" type="Node3D" parent="Rig/Accessories"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+visible = false
+
+[node name="Rod" type="MeshInstance3D" parent="Rig/Accessories/BouncerSpring"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
+mesh = SubResource("CylinderMesh_antenna_rod")
+
+[node name="Ball" type="MeshInstance3D" parent="Rig/Accessories/BouncerSpring"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mesh = SubResource("SphereMesh_antenna_ball")
+
+[node name="TankyArmor" type="Node3D" parent="Rig/Accessories"]
+visible = false
+
+[node name="LeftShoulder" type="MeshInstance3D" parent="Rig/Accessories/TankyArmor"]
+transform = Transform3D(0.9659, -0.2588, 0, 0.2588, 0.9659, 0, 0, 0, 1, -0.45, 0.3, 0)
+mesh = SubResource("BoxMesh_shoulder")
+
+[node name="RightShoulder" type="MeshInstance3D" parent="Rig/Accessories/TankyArmor"]
+transform = Transform3D(0.9659, 0.2588, 0, -0.2588, 0.9659, 0, 0, 0, 1, 0.45, 0.3, 0)
+mesh = SubResource("BoxMesh_shoulder")
+
+[node name="TrickyHorns" type="Node3D" parent="Rig/Accessories"]
+visible = false
+
+[node name="LeftHorn" type="MeshInstance3D" parent="Rig/Accessories/TrickyHorns"]
+transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, -0.26, 0.7, 0)
+mesh = SubResource("CylinderMesh_horn")
+
+[node name="RightHorn" type="MeshInstance3D" parent="Rig/Accessories/TrickyHorns"]
+transform = Transform3D(0.866, 0.5, 0, -0.5, 0.866, 0, 0, 0, 1, 0.26, 0.7, 0)
+mesh = SubResource("CylinderMesh_horn")
+
+[node name="Crown" type="Node3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+visible = false
+
+[node name="Band" type="MeshInstance3D" parent="Rig/Crown"]
+mesh = SubResource("CylinderMesh_crown_band")
+
+[node name="Spike0" type="MeshInstance3D" parent="Rig/Crown"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.240, 0.18, 0.000)
+mesh = SubResource("CylinderMesh_crown_spike")
+
+[node name="Spike1" type="MeshInstance3D" parent="Rig/Crown"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.074, 0.18, 0.228)
+mesh = SubResource("CylinderMesh_crown_spike")
+
+[node name="Spike2" type="MeshInstance3D" parent="Rig/Crown"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.194, 0.18, 0.141)
+mesh = SubResource("CylinderMesh_crown_spike")
+
+[node name="Spike3" type="MeshInstance3D" parent="Rig/Crown"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.194, 0.18, -0.141)
+mesh = SubResource("CylinderMesh_crown_spike")
+
+[node name="Spike4" type="MeshInstance3D" parent="Rig/Crown"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.074, 0.18, -0.228)
+mesh = SubResource("CylinderMesh_crown_spike")

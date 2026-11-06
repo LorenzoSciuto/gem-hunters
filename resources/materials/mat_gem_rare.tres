@@ -1,0 +1,11 @@
+; mat_gem_rare.tres — Rare tier gem material (purple).
+; Uses gem_shine.gdshader for animated iridescent rainbow effect.
+[gd_resource type="ShaderMaterial" format=3 uid="uid://mat_gem_rare"]
+
+[ext_resource type="Shader" path="res://shaders/gem_shine.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/base_color      = Color(0.72, 0.28, 1.0, 1.0)
+shader_parameter/shine_speed     = 1.3
+shader_parameter/shine_intensity = 0.55

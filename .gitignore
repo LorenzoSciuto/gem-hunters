@@ -1,0 +1,17 @@
+# Godot 4 editor/import cache: regenerated on open
+.godot/
+# Generated from assets/localization/strings.csv on import
+*.translation
+
+# Bundled Godot binary (112 MB, over GitHub's file limit): see start.sh / CLAUDE.md
+.tools/
+
+# Export output
+/build/
+/export/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*~
+*.tmp

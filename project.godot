@@ -1,0 +1,60 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; but the file format is fully documented anyway.
+;
+; Gem Hunters: Tag & Trap — project.godot
+; Godot 4.3
+
+[application]
+
+config/name="Gem Hunters: Tag & Trap"
+config/description="Gem Hunters: Tag & Trap by Wennovate"
+config/version="1.0.0"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.129, 0.078, 0.267, 1)
+boot_splash/image="res://assets/ui/splash.png"
+boot_splash/fullsize=true
+
+[autoload]
+
+Constants="*res://autoloads/Constants.gd"
+GameManager="*res://autoloads/GameManager.gd"
+AudioManager="*res://autoloads/AudioManager.gd"
+LocalizationManager="*res://autoloads/LocalizationManager.gd"
+InputManager="*res://autoloads/InputManager.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=3
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+
+[gui]
+
+theme/custom="res://resources/theme/game_theme.tres"
+
+[layer_names]
+
+3d_physics/layer_1="world"
+3d_physics/layer_2="players"
+3d_physics/layer_3="gems"
+3d_physics/layer_4="powerups"
+3d_physics/layer_5="traps"
+
+[physics]
+
+3d/default_gravity=9.8
+3d/default_gravity_vector=Vector3(0, -1, 0)
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=2
+textures/default_filters/anisotropic_filtering_level=3
+environment/defaults/default_clear_color=Color(0.118, 0.071, 0.251, 1)
