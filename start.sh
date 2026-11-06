@@ -24,14 +24,15 @@ cat <<'BANNER'
   GEM HUNTERS: TAG & TRAP  -  split-screen party game by Wennovate
 ==============================================================================
   PLAYER 1  (keyboard + mouse)
-    Move WASD | Look mouse | Jump Space | Use item Left Click / F
-    Drop trap Right Click / G | Switch 1st/3rd person V
-  PLAYER 2  (keyboard, or the first gamepad)
-    Move arrows | Look Numpad 8 4 2 6 | Jump Enter | Use item Numpad 0
-    Drop trap Numpad . | Switch view Numpad +
+    Move WASD | Look mouse | Jump Space / right click | Items Q E R | Superpower F
+    Mouse wheel picks item or superpower, left click fires it | View V
+  PLAYER 2  (keyboard)
+    Move arrows | Look Numpad 8 4 5 6 | Jump Numpad 0 | Items Numpad 7 9 1
+    Superpower Numpad 3 | View Numpad +
   GAMEPADS
-    Move left stick | Look right stick | Jump A | Use item X / RB
-    Drop trap B / LB | Switch view Y / R3
+    Move left stick | Look right stick | Jump RB / RT | Items X A B | Superpower Y
+    View R3
+  Run into a rival to tackle them. Controls can be remapped from the menu.
   ESC or START pauses the match.
 ==============================================================================
 BANNER
