@@ -53,6 +53,9 @@ const SCORE_TARGETS: Array[int] = [30, 50, 80]
 ## SCORE mode safety cap so a match can never last forever (seconds).
 const SCORE_MODE_TIME_CAP: float = 600.0
 
+## Last language and match setup, restored at startup (controls live in user://controls.cfg).
+const SETTINGS_PATH: String = "user://settings.cfg"
+
 ## Seconds of 3-2-1 countdown before play starts.
 const COUNTDOWN_SECONDS: int = 3
 
