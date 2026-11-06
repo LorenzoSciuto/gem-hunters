@@ -68,7 +68,35 @@ var scores: Dictionary = {}
 # ─── Lifecycle ────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	_load_last_setup()
 	_reset_scores()
+
+
+## Restores the last configured match; anything missing or invalid keeps the default.
+func _load_last_setup() -> void:
+	var cfg: ConfigFile = ConfigFile.new()
+	if cfg.load(Constants.SETTINGS_PATH) != OK:
+		return
+	_num_players = clampi(int(cfg.get_value("match", "players", _num_players)), Constants.MIN_PLAYERS, Constants.MAX_PLAYERS)
+	var mode: int = int(cfg.get_value("match", "mode", match_mode))
+	if mode in Constants.MatchMode.values():
+		match_mode = mode as Constants.MatchMode
+	var targets: Array[int] = Constants.TIME_TARGETS if match_mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
+	var target: int = int(cfg.get_value("match", "target", match_target))
+	match_target = target if target in targets else targets[1]
+	var arena: String = str(cfg.get_value("match", "arena", ""))
+	if arena in Constants.LEVEL_CONFIGS:
+		level_config = load(arena) as LevelConfig
+
+
+func _save_last_setup() -> void:
+	var cfg: ConfigFile = ConfigFile.new()
+	cfg.load(Constants.SETTINGS_PATH)  # keep the other sections (missing file is fine)
+	cfg.set_value("match", "players", _num_players)
+	cfg.set_value("match", "mode", match_mode)
+	cfg.set_value("match", "target", match_target)
+	cfg.set_value("match", "arena", level_config.resource_path if level_config else "")
+	cfg.save(Constants.SETTINGS_PATH)
 
 
 func _process(delta: float) -> void:
@@ -85,6 +113,7 @@ func configure(num_players: int, mode: Constants.MatchMode, target: int, config:
 	match_target = maxi(target, 1)
 	level_config = config
 	_reset_scores()
+	_save_last_setup()
 
 
 func get_num_players() -> int:

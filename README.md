@@ -38,7 +38,9 @@ The in-game **How to play** screen explains all of this; **Controls** shows and 
 | Pause         | Esc                          | Esc             | Start            |
 
 Gamepads go to P2, P3, P4 in connection order; P1 gets a pad only when every other player has one.
-Menus work with the pad too (A confirm, B back). Rebinds are saved to `user://controls.cfg`.
+Menus work with the pad too (A confirm, B back). Rebinds are saved to `user://controls.cfg`;
+the language and the last match setup (players, goal, arena) to `user://settings.cfg`, both
+restored at startup.
 
 ## Running
 
