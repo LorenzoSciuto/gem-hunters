@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/powerups/projectiles/ProjSnowball.gd" id="1_snow"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_snow"]
+radius = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_snow"]
+diffuse_mode = 3
+albedo_color = Color(0.95, 0.98, 1, 1)
+roughness = 0.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_snow"]
+material = SubResource("StandardMaterial3D_snow")
+radius = 0.3
+height = 0.6
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_snow"]
+emission_shape = 1
+emission_sphere_radius = 0.3
+color = Color(0.85, 0.95, 1, 1)
+
+[node name="ProjSnowball" type="Area3D"]
+collision_layer = 16
+collision_mask = 3
+script = ExtResource("1_snow")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_snow")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_snow")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+emitting = false
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_snow")

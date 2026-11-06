@@ -1,0 +1,11 @@
+; mat_gem_standard.tres — Standard tier gem material (cyan).
+; Uses gem_shine.gdshader for animated iridescent rainbow effect.
+[gd_resource type="ShaderMaterial" format=3 uid="uid://mat_gem_standard"]
+
+[ext_resource type="Shader" path="res://shaders/gem_shine.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/base_color      = Color(0.2, 0.9, 1.0, 1.0)
+shader_parameter/shine_speed     = 1.0
+shader_parameter/shine_intensity = 0.45

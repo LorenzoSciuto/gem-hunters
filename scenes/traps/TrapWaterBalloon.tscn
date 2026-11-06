@@ -1,0 +1,82 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scenes/traps/TrapWaterBalloon.gd" id="1_balloon"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_balloon"]
+radius = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_balloon"]
+transparency = 1
+diffuse_mode = 3
+albedo_color = Color(0.15, 0.65, 1, 0.82)
+roughness = 0.08
+rim_enabled = true
+rim = 0.8
+rim_tint = 0.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_balloon"]
+material = SubResource("StandardMaterial3D_balloon")
+radius = 0.38
+height = 0.68
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_knot"]
+diffuse_mode = 3
+albedo_color = Color(0.08, 0.45, 0.85, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_knot"]
+material = SubResource("StandardMaterial3D_knot")
+top_radius = 0.08
+bottom_radius = 0.04
+height = 0.12
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_splash"]
+direction = Vector3(0, 1, 0)
+spread = 85.0
+initial_velocity_min = 4.5
+initial_velocity_max = 8.0
+gravity = Vector3(0, -9.8, 0)
+scale_min = 0.08
+scale_max = 0.2
+color = Color(0.4, 0.8, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water_drop"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.5, 0.85, 1, 0.9)
+
+[sub_resource type="SphereMesh" id="SphereMesh_drop"]
+material = SubResource("StandardMaterial3D_water_drop")
+radius = 0.08
+height = 0.08
+
+[node name="TrapWaterBalloon" type="Area3D"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_balloon")
+gems_stolen = 3
+effect_duration = 3.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+shape = SubResource("SphereShape3D_balloon")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="BalloonMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
+mesh = SubResource("SphereMesh_balloon")
+
+[node name="KnotMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+mesh = SubResource("CylinderMesh_knot")
+
+[node name="SplashParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+emitting = false
+amount = 18
+one_shot = true
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_splash")
+draw_pass_1 = SubResource("SphereMesh_drop")
+
+[node name="TrapSFX" type="AudioStreamPlayer3D" parent="."]

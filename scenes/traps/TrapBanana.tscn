@@ -1,0 +1,65 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scenes/traps/TrapBanana.gd" id="1_banana"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_banana"]
+height = 0.5
+radius = 0.65
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_peel"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.86, 0.2, 1)
+roughness = 0.35
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_peel"]
+material = SubResource("StandardMaterial3D_peel")
+radius = 0.1
+height = 0.7
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_banana"]
+direction = Vector3(0, 1, 0)
+spread = 75.0
+initial_velocity_min = 3.0
+initial_velocity_max = 6.0
+gravity = Vector3(0, -9.8, 0)
+scale_min = 0.08
+scale_max = 0.2
+color = Color(1, 0.9, 0.3, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_drop"]
+radius = 0.1
+height = 0.1
+
+[node name="TrapBanana" type="Area3D"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_banana")
+gems_stolen = 2
+effect_duration = 3.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("CylinderShape3D_banana")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Peel1" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("CapsuleMesh_peel")
+
+[node name="Peel2" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.5, -0.866, 0, 0, 0, -1, 0.866, 0.5, 0, 0, 0.1, 0)
+mesh = SubResource("CapsuleMesh_peel")
+
+[node name="Peel3" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-0.5, -0.866, 0, 0, 0, 1, -0.866, 0.5, 0, 0, 0.1, 0)
+mesh = SubResource("CapsuleMesh_peel")
+
+[node name="BananaParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+emitting = false
+amount = 12
+one_shot = true
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_banana")
+draw_pass_1 = SubResource("SphereMesh_drop")

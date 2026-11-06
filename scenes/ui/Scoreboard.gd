@@ -1,0 +1,29 @@
+## Scoreboard.gd
+## Live standings + clock shown in the spare viewport in 3-player mode.
+## Each row is a ScoreRow instance exposing set_data(rank, player_id, name, gems).
+extends CenterContainer
+
+@export var timer_label: Label
+@export var row_container: VBoxContainer
+@export var row_scene: PackedScene
+
+
+func _ready() -> void:
+	GameManager.score_updated.connect(func(_pid: int, _score: int) -> void: _refresh_rows())
+	GameManager.timer_updated.connect(_on_timer_updated)
+	_refresh_rows()
+
+
+## Rows are created once and updated in place so frequent score changes don't churn nodes.
+func _refresh_rows() -> void:
+	var standings: Array = GameManager.get_standings()
+	while row_container.get_child_count() < standings.size():
+		row_container.add_child(row_scene.instantiate())
+	for i: int in standings.size():
+		var pid: int = standings[i]["player_id"]
+		row_container.get_child(i).set_data(i + 1, pid, tr("UI_PLAYER_SHORT").format([pid + 1]), standings[i]["score"])
+
+
+func _on_timer_updated(seconds: float) -> void:
+	var total: int = int(ceilf(seconds))
+	timer_label.text = "%d:%02d" % [total / 60, total % 60]

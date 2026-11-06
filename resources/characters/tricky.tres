@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/CharacterData.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "tricky"
+name_key = "CHAR_TRICKY_NAME"
+bio_key = "CHAR_TRICKY_BIO"
+trait_key = "CHAR_TRICKY_TRAIT"
+trait_type = 4
+color = Color(0.4, 0.75, 1.0, 1)
+speed_multiplier = 1.0
+jump_multiplier = 1.0
+knockback_resistance = 1.0
+gem_loss_multiplier = 1.0
+mesh_scale = Vector3(1.0, 1.0, 1.0)
+stat_speed = 3
+stat_jump = 3
+stat_defense = 3
+stat_tricks = 5

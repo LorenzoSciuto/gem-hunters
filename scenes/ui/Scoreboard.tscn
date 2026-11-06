@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/Scoreboard.gd" id="1_board"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ScoreRow.tscn" id="2_row"]
+
+[node name="Scoreboard" type="CenterContainer" node_paths=PackedStringArray("timer_label", "row_container")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_board")
+timer_label = NodePath("Panel/VBox/TimerLabel")
+row_container = NodePath("Panel/VBox/Rows")
+row_scene = ExtResource("2_row")
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"BannerLabel"
+text = "UI_STANDINGS"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HudValueLabel"
+text = "0:00"
+horizontal_alignment = 1
+
+[node name="Rows" type="VBoxContainer" parent="Panel/VBox"]
+layout_mode = 2

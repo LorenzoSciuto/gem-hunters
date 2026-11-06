@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="LevelConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/levels/LevelConfig.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+id = "roman"
+name_key = "LEVEL_ROMAN_NAME"
+description_key = "LEVEL_ROMAN_DESC"
+layout = 2
+style = 3
+columns = 13
+rows = 13
+cell_size = 5.5
+wall_height = 2.8
+loop_chance = 0.0
+surprise_box_count = 7
+trampoline_count = 4
+floor_color_a = Color(0.88, 0.75, 0.55, 1)
+floor_color_b = Color(0.82, 0.66, 0.48, 1)
+wall_color_a = Color(0.86, 0.8, 0.72, 1)
+wall_color_b = Color(0.99, 0.97, 0.94, 1)
+accent_colors = Array[Color]([Color(0.82, 0.45, 0.3, 1), Color(0.95, 0.75, 0.3, 1)])
+outer_ground_color = Color(0.72, 0.7, 0.45, 1)
+sky_top_color = Color(0.3, 0.55, 0.95, 1)
+sky_horizon_color = Color(1, 0.88, 0.72, 1)
+sun_color = Color(1, 0.92, 0.8, 1)
+sun_energy = 1.2
+ambient_color = Color(0.85, 0.78, 0.7, 1)
+decoration_count = 30

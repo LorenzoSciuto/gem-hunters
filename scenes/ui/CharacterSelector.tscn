@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/CharacterSelector.gd" id="1_char_sel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CharacterPreview3D.tscn" id="2_preview"]
+
+[node name="CharacterSelector" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_char_sel")
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="PlayerTitle" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_SELECT_HERO"
+horizontal_alignment = 1
+
+[node name="CharacterPreview3D" parent="Panel/VBox" instance=ExtResource("2_preview")]
+custom_minimum_size = Vector2(280, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="NameRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="PrevButton" type="Button" parent="Panel/VBox/NameRow"]
+layout_mode = 2
+focus_mode = 0
+text = "<"
+
+[node name="CharName" type="Label" parent="Panel/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BannerLabel"
+horizontal_alignment = 1
+
+[node name="NextButton" type="Button" parent="Panel/VBox/NameRow"]
+layout_mode = 2
+focus_mode = 0
+text = ">"
+
+[node name="CharBio" type="Label" parent="Panel/VBox"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CharTrait" type="Label" parent="Panel/VBox"]
+modulate = Color(1, 0.86, 0.3, 1)
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CharSuper" type="Label" parent="Panel/VBox"]
+modulate = Color(0.55, 0.85, 1, 1)
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Stats" type="GridContainer" parent="Panel/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="SpeedLabel" type="Label" parent="Panel/VBox/Stats"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+text = "UI_SPEED"
+
+[node name="SpeedBar" type="ProgressBar" parent="Panel/VBox/Stats"]
+custom_minimum_size = Vector2(180, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 5.0
+show_percentage = false
+
+[node name="JumpLabel" type="Label" parent="Panel/VBox/Stats"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+text = "UI_JUMP"
+
+[node name="JumpBar" type="ProgressBar" parent="Panel/VBox/Stats"]
+custom_minimum_size = Vector2(180, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 5.0
+show_percentage = false
+
+[node name="DefenseLabel" type="Label" parent="Panel/VBox/Stats"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+text = "UI_DEFENSE"
+
+[node name="DefenseBar" type="ProgressBar" parent="Panel/VBox/Stats"]
+custom_minimum_size = Vector2(180, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 5.0
+show_percentage = false
+
+[node name="PromptLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+horizontal_alignment = 1
+
+[node name="ReadyBadge" type="Label" parent="Panel/VBox"]
+visible = false
+modulate = Color(0.45, 1, 0.55, 1)
+layout_mode = 2
+theme_type_variation = &"BannerLabel"
+text = "UI_READY"
+horizontal_alignment = 1

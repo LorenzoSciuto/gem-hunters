@@ -1,0 +1,152 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="Script" path="res://scenes/powerups/SurpriseBox.gd" id="1_box"]
+[ext_resource type="Resource" path="res://resources/powerups/trap_cake.tres" id="2_cake"]
+[ext_resource type="Resource" path="res://resources/powerups/trap_water_balloon.tres" id="3_balloon"]
+[ext_resource type="Resource" path="res://resources/powerups/trap_speaker.tres" id="4_speaker"]
+[ext_resource type="Resource" path="res://resources/powerups/attack_spring_glove.tres" id="5_glove"]
+[ext_resource type="Resource" path="res://resources/powerups/attack_magnet.tres" id="6_magnet"]
+[ext_resource type="Resource" path="res://resources/powerups/attack_tickle_ray.tres" id="7_tickle"]
+[ext_resource type="Resource" path="res://resources/powerups/utility_spring_shoes.tres" id="8_shoes"]
+[ext_resource type="Resource" path="res://resources/powerups/utility_bubble.tres" id="9_bubble"]
+[ext_resource type="Resource" path="res://resources/powerups/trap_banana.tres" id="10_banana"]
+[ext_resource type="Resource" path="res://resources/powerups/attack_snowball.tres" id="11_snowball"]
+[ext_resource type="Resource" path="res://resources/powerups/attack_thunder.tres" id="12_thunder"]
+[ext_resource type="Resource" path="res://resources/powerups/utility_jackpot.tres" id="13_jackpot"]
+[ext_resource type="Resource" path="res://resources/powerups/utility_warp.tres" id="14_warp"]
+[ext_resource type="Resource" path="res://resources/powerups/utility_radar.tres" id="15_radar"]
+[ext_resource type="Resource" path="res://resources/powerups/trap_black_box.tres" id="16_blackbox"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_box"]
+size = Vector3(1.3, 1.3, 1.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wrapping"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.25, 0.5, 1)
+roughness = 0.25
+
+[sub_resource type="BoxMesh" id="BoxMesh_box"]
+material = SubResource("StandardMaterial3D_wrapping")
+size = Vector3(0.85, 0.85, 0.85)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ribbon"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.88, 0.15, 1)
+roughness = 0.15
+
+[sub_resource type="BoxMesh" id="BoxMesh_ribbon_h"]
+material = SubResource("StandardMaterial3D_ribbon")
+size = Vector3(0.88, 0.18, 0.88)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ribbon_v"]
+material = SubResource("StandardMaterial3D_ribbon")
+size = Vector3(0.18, 0.88, 0.88)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bow"]
+material = SubResource("StandardMaterial3D_ribbon")
+radius = 0.14
+height = 0.18
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aura"]
+emission_shape = 1
+emission_sphere_radius = 0.6
+gravity = Vector3(0, 0.5, 0)
+scale_min = 0.06
+scale_max = 0.14
+color = Color(1, 0.9, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_star"]
+shading_mode = 0
+albedo_color = Color(1, 0.95, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sparkle"]
+material = SubResource("StandardMaterial3D_star")
+size = Vector3(0.08, 0.08, 0.08)
+
+[sub_resource type="Animation" id="Animation_idle"]
+resource_name = "idle_bounce"
+length = 2.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Model:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.2, 2.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0.6, 0), Vector3(0, 0.95, 0), Vector3(0, 0.6, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Model:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 6.28318, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_box"]
+_data = {
+"idle_bounce": SubResource("Animation_idle")
+}
+
+[node name="SurpriseBox" type="Area3D" groups=["powerup_boxes"]]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_box")
+powerup_pool = [ExtResource("2_cake"), ExtResource("3_balloon"), ExtResource("4_speaker"), ExtResource("5_glove"), ExtResource("6_magnet"), ExtResource("7_tickle"), ExtResource("8_shoes"), ExtResource("9_bubble"), ExtResource("10_banana"), ExtResource("11_snowball"), ExtResource("12_thunder"), ExtResource("13_jackpot"), ExtResource("14_warp"), ExtResource("15_radar"), ExtResource("16_blackbox")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_box")
+
+[node name="Model" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="BoxBody" type="MeshInstance3D" parent="Model"]
+mesh = SubResource("BoxMesh_box")
+
+[node name="RibbonH" type="MeshInstance3D" parent="Model"]
+mesh = SubResource("BoxMesh_ribbon_h")
+
+[node name="RibbonV" type="MeshInstance3D" parent="Model"]
+mesh = SubResource("BoxMesh_ribbon_v")
+
+[node name="Bow" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("SphereMesh_bow")
+
+[node name="GlowLight" type="OmniLight3D" parent="Model"]
+light_color = Color(1, 0.85, 0.3, 1)
+light_energy = 1.2
+omni_range = 3.5
+
+[node name="AuraParticles" type="GPUParticles3D" parent="Model"]
+amount = 8
+lifetime = 1.2
+process_material = SubResource("ParticleProcessMaterial_aura")
+draw_pass_1 = SubResource("BoxMesh_sparkle")
+
+[node name="PickupParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+emitting = false
+amount = 20
+one_shot = true
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_aura")
+draw_pass_1 = SubResource("BoxMesh_sparkle")
+
+
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_box")
+}
+autoplay = "idle_bounce"

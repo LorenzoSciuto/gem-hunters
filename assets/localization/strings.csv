@@ -1,0 +1,173 @@
+keys,en,it
+UI_TITLE,Gem Hunters,Gem Hunters
+UI_SUBTITLE,Tag & Trap,Acchiappa & Intrappola
+UI_START,PLAY!,GIOCA!
+UI_QUIT,Quit,Esci
+UI_CONTROLS,Controls,Comandi
+UI_CLOSE,Close,Chiudi
+UI_LANGUAGE,Language: English,Lingua: Italiano
+UI_SELECT_PLAYERS,Players,Giocatori
+UI_PLAYERS_N,{0} Players,{0} Giocatori
+UI_SELECT_MODE,Goal,Obiettivo
+UI_MODE_TIME,Time Attack,A Tempo
+UI_MODE_SCORE,Gem Race,Corsa alle Gemme
+UI_MODE_TIME_DESC,Most gems when the clock hits zero wins!,Vince chi ha più gemme allo scadere del tempo!
+UI_MODE_SCORE_DESC,First to {0} gems wins!,Vince il primo che arriva a {0} gemme!
+UI_TARGET_GEMS,{0} gems,{0} gemme
+UI_SELECT_ARENA,Arena,Arena
+UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
+UI_GAMEPADS_FOUND,Gamepads: {0},Gamepad: {0}
+LEVEL_CANDY_NAME,Candy Kingdom,Regno dei Dolci
+LEVEL_CANDY_DESC,Lollipop corridors and sugary plazas,Corridoi di lecca-lecca e piazze di zucchero
+LEVEL_FOREST_NAME,Enchanted Forest,Foresta Incantata
+LEVEL_FOREST_DESC,"A big, misty maze of trees and mushrooms",Un grande labirinto nebbioso di alberi e funghi
+LEVEL_GARDEN_NAME,Secret Garden,Giardino Segreto
+LEVEL_GARDEN_DESC,Flower hedges and sneaky sprinklers,Siepi fiorite e irrigatori dispettosi
+LEVEL_ROMAN_NAME,Roman Colosseum,Colosseo Romano
+LEVEL_ROMAN_DESC,Marble rings around the golden arena,Anelli di marmo attorno all'arena d'oro
+LEVEL_EGYPT_NAME,Desert Temple,Tempio del Deserto
+LEVEL_EGYPT_DESC,Tall sandstone walls beneath the pyramids,Alte mura di arenaria all'ombra delle piramidi
+LEVEL_WINTER_NAME,Frozen Peaks,Vette Ghiacciate
+LEVEL_WINTER_DESC,Slippery ice patches and snowy plazas,Lastre di ghiaccio scivolose e piazze innevate
+UI_POWERUP_CAKE,Cake Trap,Trappola Torta
+UI_POWERUP_BALLOON,Water Balloon,Palloncino d'Acqua
+UI_POWERUP_SPEAKER,Prank Speaker,Altoparlante Scherzoso
+UI_POWERUP_GLOVE,Spring Glove,Guanto a Molla
+UI_POWERUP_MAGNET,Gem Magnet,Calamita di Gemme
+UI_POWERUP_TICKLE,Tickle Ray,Raggio Solletico
+UI_POWERUP_SHOES,Spring Shoes,Scarpe a Molla
+UI_POWERUP_BUBBLE,Bubble Shield,Scudo a Bolla
+HUD_GOAL,Goal {0},Obiettivo {0}
+MSG_GO,GO!,VIA!
+MSG_FRENZY,FRENZY! Gems x2,FRENESIA! Gemme x2
+MSG_PAUSED,Paused,Pausa
+UI_RESUME,Resume,Riprendi
+UI_MAIN_MENU,Main Menu,Menu Principale
+UI_REMATCH,Rematch,Rivincita
+MSG_MATCH_END,Match Over!,Fine Partita!
+MSG_WINNER,{0} wins!,Vince {0}!
+MSG_DRAW,It's a draw!,Pareggio!
+UI_PLAYER_SHORT,P{0},G{0}
+UI_GEMS,gems,gemme
+UI_SELECT_HERO,Choose your hunter,Scegli il tuo hunter
+UI_READY,READY!,PRONTO!
+UI_PROMPT_PAD,Stick / D-Pad: browse   (A): ready,Leva / Croce: scorri   (A): pronto
+UI_SPEED,Speed,Velocità
+UI_JUMP,Jump,Salto
+UI_DEFENSE,Defense,Difesa
+CHAR_DASHY_NAME,Dashy,Dashy
+CHAR_DASHY_BIO,Fast as lightning! Loves zoomies.,Veloce come un fulmine! Ama sfrecciare.
+CHAR_DASHY_TRAIT,"Sprinter: +25% speed, shakes off ice twice as fast","Scattista: +25% velocità, si libera dal ghiaccio il doppio più in fretta"
+CHAR_BOUNCER_NAME,Bouncer,Bouncer
+CHAR_BOUNCER_BIO,Always hopping! Walls are just suggestions.,Sempre a saltellare! I muri sono solo consigli.
+CHAR_BOUNCER_TRAIT,High Flyer: bigger jump & built-in double jump,Saltatore: salto più alto e doppio salto
+CHAR_TANKY_NAME,Tanky,Tanky
+CHAR_TANKY_BIO,Heavyweight giant! An immovable rock.,Campione dei pesi massimi! Una roccia inamovibile.
+CHAR_TANKY_TRAIT,"Colossus: barely pushed, loses fewer gems","Colosso: quasi inamovibile, perde meno gemme"
+CHAR_TRICKY_NAME,Tricky,Tricky
+CHAR_TRICKY_BIO,Mischievous prankster! Trap genius.,Furbetto monello! Genio delle trappole.
+CHAR_TRICKY_TRAIT,Trickster: steals 2 gems at a time,Monello: ruba 2 gemme alla volta
+UI_STANDINGS,Standings,Classifica
+UI_PROMPT_KB,{0} / {1}: browse   {2}: ready,{0} / {1}: scorri   {2}: pronto
+UI_CONTROLS_HINT,"Move: WASD / Arrows / left stick   Look: mouse, IJKL / Numpad 8 4 5 6 / right stick   Pause: Esc / Start
+Mouse: wheel picks the item or superpower, left click fires it, right click jumps.
+Pick a button, then press the new key or pad button (Esc cancels). The right trigger also jumps.
+Run into a rival to tackle them and steal a gem - the crowned leader drops two!","Muovi: WASD / Frecce / leva sinistra   Guarda: mouse, IJKL / Tastierino 8 4 5 6 / leva destra   Pausa: Esc / Start
+Mouse: la rotella sceglie l'oggetto o il superpotere, il clic sinistro lo usa, il clic destro salta.
+Scegli un tasto, poi premi il nuovo tasto o pulsante (Esc annulla). Anche il grilletto destro salta.
+Corri contro un rivale per placcarlo e rubargli una gemma - il leader con la corona ne perde due!"
+UI_RESET_CONTROLS,Reset defaults,Ripristina
+UI_PRESS_KEY,Press...,Premi...
+UI_SCHEME_P1,P1 Keyboard,G1 Tastiera
+UI_SCHEME_P2,P2 Keyboard,G2 Tastiera
+UI_SCHEME_PAD,Gamepad,Gamepad
+ACTION_JUMP,Jump,Salta
+ACTION_ITEM_1,Item 1,Oggetto 1
+ACTION_ITEM_2,Item 2,Oggetto 2
+ACTION_ITEM_3,Item 3,Oggetto 3
+ACTION_SUPER,Superpower,Superpotere
+ACTION_VIEW,Camera view,Visuale
+UI_POWERUP_BANANA,Banana Peel,Buccia di Banana
+UI_POWERUP_SNOWBALL,Snowball,Palla di Neve
+UI_POWERUP_THUNDER,Thunder,Fulmine
+UI_POWERUP_JACKPOT,Jackpot,Jackpot
+UI_POWERUP_WARP,Warp Ticket,Biglietto Warp
+UI_POWERUP_RADAR,Radar,Radar
+UI_POWERUP_CAKE_DESC,Drop it: whoever steps on it gets a face full of cake,Lasciala: chi la pesta si prende una torta in faccia
+UI_POWERUP_BALLOON_DESC,"Drop it: soaks and freezes, then leaves ice","Lascialo: bagna e congela, poi lascia ghiaccio"
+UI_POWERUP_SPEAKER_DESC,Drop it: a loud scare for whoever comes close,Lascialo: uno spavento per chi si avvicina
+UI_POWERUP_GLOVE_DESC,Fire it: punches a rival away,Sparalo: spedisce lontano un rivale
+UI_POWERUP_MAGNET_DESC,Fire it: pulls gems out of a rival,Sparala: strappa gemme a un rivale
+UI_POWERUP_TICKLE_DESC,Fire it: the rival giggles and can't use items,Sparalo: il rivale ride e non può usare oggetti
+UI_POWERUP_SHOES_DESC,Use it: double jump and speed boost,Usale: doppio salto e più velocità
+UI_POWERUP_BUBBLE_DESC,Use it: blocks the next hit,Usala: blocca il prossimo colpo
+UI_POWERUP_BANANA_DESC,Drop it: rivals slip and slide,Lasciala: i rivali scivolano
+UI_POWERUP_SNOWBALL_DESC,Throw it: freezes a rival - bump them to steal!,Lanciala: congela un rivale - urtalo per rubare!
+UI_POWERUP_THUNDER_DESC,Use it: every rival drops a gem,Usalo: ogni rivale perde una gemma
+UI_POWERUP_JACKPOT_DESC,Use it: free gems!,Usalo: gemme gratis!
+UI_POWERUP_WARP_DESC,Use it: teleport somewhere in the maze,Usalo: teletrasporto nel labirinto
+UI_POWERUP_RADAR_DESC,Use it: see everyone on the map,Usalo: vedi tutti sulla mappa
+SUPER_TURBO,Turbo,Turbo
+SUPER_TURBO_DESC,a few seconds at top speed,qualche secondo a tutta velocità
+SUPER_POUND,Ground Pound,Schianto
+SUPER_POUND_DESC,leap up and slam down: nearby rivals fly and drop gems,salta e schiantati: i rivali vicini volano e perdono gemme
+SUPER_SHIELD,Iron Shield,Scudo di Ferro
+SUPER_SHIELD_DESC,nothing can touch you for a while,per un po' niente ti può toccare
+SUPER_SWAP,Swap,Scambio
+SUPER_SWAP_DESC,trade places with the leader,scambia di posto con il leader
+MSG_TACKLE_TIP,"Run into rivals to steal gems!
+Catch the leader under the golden beam!","Corri addosso ai rivali per rubare gemme!
+Acchiappa il leader sotto il raggio d'oro!"
+ZONE_CRYSTAL,Crystal Spire,Guglia di Cristallo
+ZONE_ORB,Orb Tower,Torre della Sfera
+ZONE_PYRAMID,Pyramid,Piramide
+ZONE_CASTLE,Castle,Castello
+ZONE_CENTER,Golden Plaza,Piazza d'Oro
+UI_HOW_TO_PLAY,How to play,Come si gioca
+HELP_TAB_GOAL,Goal,Obiettivo
+HELP_TAB_HUNTERS,Hunters,Hunter
+HELP_TAB_ITEMS,Items,Oggetti
+HELP_TAB_ARENA,Arena,Arena
+HELP_GOAL,"You are a Gem Hunter! Run through the maze and grab as many gems as you can.
+
+- Time Attack: whoever has the most gems when the clock hits zero wins.
+- Gem Race: the first hunter to reach the target wins.
+
+Gems: small ones are worth 1, rare ones 3 and 5, and the big golden gem in the center is worth 10!
+
+Steal from the others: run into a hunter to tackle them and take a gem. The leader wears a crown and a golden beam of light: everyone can see where they are, and a tackle on the leader takes 2 gems!
+
+Gift boxes give you items (up to 3). Every hunter also has a superpower that recharges every 30 seconds.
+
+In the final frenzy every gem counts double: never give up!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
+
+- A Tempo: vince chi ha più gemme allo scadere del tempo.
+- Corsa alle Gemme: vince il primo hunter che raggiunge l'obiettivo.
+
+Gemme: le piccole valgono 1, le rare 3 e 5, e la grande gemma d'oro al centro vale 10!
+
+Ruba agli altri: corri addosso a un hunter per placcarlo e prendergli una gemma. Il leader ha la corona e un raggio di luce d'oro: tutti vedono dov'è, e placcare il leader vale 2 gemme!
+
+I pacchi regalo danno oggetti (fino a 3). Ogni hunter ha anche un superpotere che si ricarica ogni 30 secondi.
+
+Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!"
+HELP_HUNTERS_INTRO,"Each hunter has a special trait and a superpower (Y on the pad, F on the keyboard, or pick it with the mouse wheel). The icon shows when it is ready again.","Ogni hunter ha una dote speciale e un superpotere (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse). L'icona mostra quando è di nuovo pronto."
+HELP_ITEMS_INTRO,"Open gift boxes to get items: you can carry 3 (X, A, B on the pad - Q, E, R on the keyboard - or wheel + left click). Watch out: some boxes are pranks, some hold two items! Careful: the traps you drop catch you too!","Apri i pacchi regalo per avere oggetti: ne puoi tenere 3 (X, A, B sul pad - Q, E, R sulla tastiera - o rotella + clic sinistro). Attenzione: alcuni pacchi sono scherzi, altri contengono due oggetti! Attento: le trappole che lasci prendono anche te!"
+HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the center. Each zone has its own floor color and a giant landmark (Crystal Spire, Orb Tower, Pyramid, Castle), and your screen shows the zone name: peek at the others' screens to find out where they are!
+
+- Portals: step into a glowing ring to come out of its twin on the other side of the maze.
+- Map boards: walk up to a map board (look for the red pin) to see everyone on the map for a few seconds.
+- Moving gates: colored walls that open and close by themselves - new shortcuts appear!
+- Mushroom trampolines in dead ends launch you over the walls.","Ogni arena è divisa in 4 zone più la Piazza d'Oro al centro. Ogni zona ha il suo colore di pavimento e un monumento gigante (Guglia di Cristallo, Torre della Sfera, Piramide, Castello), e sul tuo schermo c'è il nome della zona: sbircia gli schermi degli altri per scoprire dove sono!
+
+- Portali: entra in un anello luminoso per uscire dal suo gemello dall'altra parte del labirinto.
+- Bacheche mappa: avvicinati a una bacheca con la mappa (cerca lo spillo rosso) per vedere tutti sulla mappa per qualche secondo.
+- Cancelli mobili: muri colorati che si aprono e chiudono da soli - spuntano nuove scorciatoie!
+- I funghi trampolino nei vicoli ciechi ti lanciano oltre i muri."
+MSG_HIT,POW!,POW!
+MSG_HIT_TAKEN,OUCH!,AHIA!
+UI_POWERUP_BLACKBOX,Black Box,Pacco Nero
+UI_POWERUP_BLACKBOX_DESC,Drop it: a fake gift box - whoever opens it loses all items and the superpower,Lascialo: un finto pacco - chi lo apre perde tutti gli oggetti e il superpotere
+MSG_ITEMS_STRIPPED,"BLACK BOX!
+Items and superpower lost","PACCO NERO!
+Oggetti e superpotere persi"

@@ -1,0 +1,165 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/MainMenu.gd" id="1_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ArenaBackdrop.tscn" id="2_backdrop"]
+[ext_resource type="Script" path="res://scenes/ui/ControlsDialog.gd" id="3_controls"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HowToPlayDialog.tscn" id="4_help"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_menu")
+
+[node name="ArenaBackdrop" parent="." instance=ExtResource("2_backdrop")]
+layout_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 900.0
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "UI_TITLE"
+
+[node name="SubtitleLabel" type="Label" parent="Margin/VBox"]
+modulate = Color(1, 0.55, 0.75, 1)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_SUBTITLE"
+
+[node name="Panel" type="PanelContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="Options" type="VBoxContainer" parent="Margin/VBox/Panel"]
+layout_mode = 2
+
+[node name="PlayersTitle" type="Label" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_SELECT_PLAYERS"
+
+[node name="PlayersRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+
+[node name="ModeTitle" type="Label" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_SELECT_MODE"
+
+[node name="ModeRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+
+[node name="TargetRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+
+[node name="ModeDesc" type="Label" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+
+[node name="ArenaTitle" type="Label" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_SELECT_ARENA"
+
+[node name="ArenaGrid" type="GridContainer" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+columns = 3
+
+[node name="ArenaDesc" type="Label" parent="Margin/VBox/Panel/Options"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+
+[node name="StartButton" type="Button" parent="Margin/VBox"]
+layout_mode = 2
+theme_type_variation = &"BigButton"
+text = "UI_START"
+
+[node name="BottomRow" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="HelpButton" type="Button" parent="Margin/VBox/BottomRow"]
+layout_mode = 2
+text = "UI_HOW_TO_PLAY"
+
+[node name="ControlsButton" type="Button" parent="Margin/VBox/BottomRow"]
+layout_mode = 2
+text = "UI_CONTROLS"
+
+[node name="LangButton" type="Button" parent="Margin/VBox/BottomRow"]
+layout_mode = 2
+text = "UI_LANGUAGE"
+
+[node name="QuitButton" type="Button" parent="Margin/VBox/BottomRow"]
+layout_mode = 2
+text = "UI_QUIT"
+
+[node name="GamepadStatusLabel" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+
+[node name="ControlsDialog" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("3_controls")
+
+[node name="Dim" type="ColorRect" parent="ControlsDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.04, 0.16, 0.6)
+
+[node name="Center" type="CenterContainer" parent="ControlsDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="ControlsDialog/Center"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="ControlsDialog/Center/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="ControlsDialog/Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"BannerLabel"
+text = "UI_CONTROLS"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="ControlsDialog/Center/Panel/VBox"]
+layout_mode = 2
+columns = 4
+
+[node name="Hint" type="Label" parent="ControlsDialog/Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+text = "UI_CONTROLS_HINT"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="ControlsDialog/Center/Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="ResetButton" type="Button" parent="ControlsDialog/Center/Panel/VBox/Buttons"]
+layout_mode = 2
+text = "UI_RESET_CONTROLS"
+
+[node name="CloseButton" type="Button" parent="ControlsDialog/Center/Panel/VBox/Buttons"]
+layout_mode = 2
+text = "UI_CLOSE"
+
+[node name="HowToPlayDialog" parent="." instance=ExtResource("4_help")]
+layout_mode = 1

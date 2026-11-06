@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="LevelConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/levels/LevelConfig.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+id = "winter"
+name_key = "LEVEL_WINTER_NAME"
+description_key = "LEVEL_WINTER_DESC"
+layout = 1
+style = 5
+columns = 11
+rows = 11
+cell_size = 6.0
+wall_height = 3.0
+loop_chance = 0.2
+room_count = 2
+surprise_box_count = 6
+trampoline_count = 3
+ice_patch_count = 7
+floor_color_a = Color(0.82, 0.9, 1, 1)
+floor_color_b = Color(0.72, 0.84, 0.97, 1)
+wall_color_a = Color(0.45, 0.72, 0.95, 1)
+wall_color_b = Color(1, 1, 1, 1)
+accent_colors = Array[Color]([Color(0.2, 0.45, 0.38, 1), Color(0.9, 0.3, 0.35, 1)])
+outer_ground_color = Color(0.85, 0.9, 0.98, 1)
+sky_top_color = Color(0.45, 0.65, 0.95, 1)
+sky_horizon_color = Color(0.9, 0.95, 1, 1)
+sun_color = Color(0.95, 0.97, 1, 1)
+ambient_color = Color(0.75, 0.82, 0.95, 1)
+fog_density = 0.004
+fog_color = Color(0.92, 0.95, 1, 1)
+decoration_count = 30

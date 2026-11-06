@@ -1,0 +1,12 @@
+; mat_gem_golden.tres — King of the Hill golden gem.
+; Uses golden_highlight.gdshader: depth_test_disabled, pulsing emissive gold,
+; visible through walls at all times.
+[gd_resource type="ShaderMaterial" format=3 uid="uid://mat_gem_golden"]
+
+[ext_resource type="Shader" path="res://shaders/golden_highlight.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/gold_color   = Color(1.0, 0.839, 0.0, 1.0)
+shader_parameter/pulse_speed  = 2.0
+shader_parameter/pulse_min    = 0.5

@@ -1,0 +1,110 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scenes/traps/TrapCake.gd" id="1_cake"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cake"]
+height = 0.5
+radius = 0.65
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_plate"]
+diffuse_mode = 3
+albedo_color = Color(0.2, 0.22, 0.32, 1)
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_plate"]
+material = SubResource("StandardMaterial3D_plate")
+top_radius = 0.52
+bottom_radius = 0.48
+height = 0.04
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cake_base"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.4, 0.65, 1)
+roughness = 0.25
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+material = SubResource("StandardMaterial3D_cake_base")
+top_radius = 0.42
+bottom_radius = 0.44
+height = 0.18
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cream"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.96, 0.92, 1)
+roughness = 0.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_top"]
+material = SubResource("StandardMaterial3D_cream")
+top_radius = 0.34
+bottom_radius = 0.36
+height = 0.14
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cherry"]
+diffuse_mode = 3
+albedo_color = Color(0.95, 0.08, 0.2, 1)
+roughness = 0.1
+metallic = 0.2
+
+[sub_resource type="SphereMesh" id="SphereMesh_cherry"]
+material = SubResource("StandardMaterial3D_cherry")
+radius = 0.1
+height = 0.18
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cake"]
+direction = Vector3(0, 1, 0)
+spread = 75.0
+initial_velocity_min = 4.0
+initial_velocity_max = 7.5
+gravity = Vector3(0, -9.8, 0)
+scale_min = 0.08
+scale_max = 0.22
+color = Color(1, 0.45, 0.75, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_splash"]
+shading_mode = 0
+albedo_color = Color(1, 0.4, 0.7, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_drop"]
+material = SubResource("StandardMaterial3D_splash")
+radius = 0.1
+height = 0.1
+
+[node name="TrapCake" type="Area3D"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_cake")
+gems_stolen = 4
+effect_duration = 3.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("CylinderShape3D_cake")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Plate" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_plate")
+
+[node name="CakeBase" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+mesh = SubResource("CylinderMesh_base")
+
+[node name="CakeTop" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26, 0)
+mesh = SubResource("CylinderMesh_top")
+
+[node name="Cherry" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.41, 0)
+mesh = SubResource("SphereMesh_cherry")
+
+[node name="CakeParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+emitting = false
+amount = 16
+one_shot = true
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_cake")
+draw_pass_1 = SubResource("SphereMesh_drop")
+
+[node name="TrapSFX" type="AudioStreamPlayer3D" parent="."]
