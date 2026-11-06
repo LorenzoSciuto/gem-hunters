@@ -40,7 +40,8 @@ The in-game **How to play** screen explains all of this; **Controls** shows and 
 Gamepads go to P2, P3, P4 in connection order; P1 gets a pad only when every other player has one.
 Menus work with the pad too (A confirm, B back). Rebinds are saved to `user://controls.cfg`;
 the language and the last match setup (players, goal, arena) to `user://settings.cfg`, both
-restored at startup.
+restored at startup. `user://` is `~/.local/share/gem-hunters/` on Linux
+(`%APPDATA%\gem-hunters` on Windows).
 
 ## Running
 
