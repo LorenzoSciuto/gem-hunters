@@ -10,9 +10,9 @@ const SLIP_STUN: float = 2.0
 
 
 func _apply_trap_effect(player: Player) -> void:
-	if player.apply_debuff(Constants.DebuffType.ICE_SLIDE, effect_duration):
+	if player.status.apply_debuff(Constants.DebuffType.ICE_SLIDE, effect_duration):
 		player.apply_knockback(player.global_transform.basis.x * SLIP_PUSH)
-		player.stun(SLIP_STUN)
+		player.status.stun(SLIP_STUN)
 
 
 func _play_trap_sfx() -> void:

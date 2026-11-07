@@ -47,7 +47,7 @@ func _ready() -> void:
 	_apply_material()
 	pickup_range.body_entered.connect(_on_pickup_range_body_entered)
 	pickup_range.monitoring = false
-	get_tree().create_timer(PICKUP_DELAY).timeout.connect(func() -> void:
+	get_tree().create_timer(PICKUP_DELAY, false).timeout.connect(func() -> void:
 		pickup_range.monitoring = true
 		_pickable = true
 		visual.visible = true)

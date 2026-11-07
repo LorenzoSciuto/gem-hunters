@@ -17,6 +17,8 @@ const EMPTY_VICTIM_BONUS: int = 2
 ## Time left for particles and sounds before the trap is freed.
 const DESTROY_DELAY: float = 1.2
 const GEM_BURST_HEIGHT: float = 0.4
+## After a trap goes off, other traps let the victim pass for this long (no chain-trapping).
+const TRAP_GRACE: float = 2.0
 
 ## Player ID of the player who placed this trap.
 @export var owner_player_id: int = -1
@@ -36,7 +38,7 @@ var _is_armed: bool = false
 func _ready() -> void:
 	add_to_group(Constants.GROUP_TRAPS)
 	body_entered.connect(_on_body_entered)
-	get_tree().create_timer(ARM_DELAY).timeout.connect(func() -> void: _is_armed = true)
+	get_tree().create_timer(ARM_DELAY, false).timeout.connect(func() -> void: _is_armed = true)
 	if anim_player and anim_player.has_animation("idle_wobble"):
 		anim_player.play("idle_wobble")
 
@@ -51,9 +53,9 @@ func _try_trigger(player: Player) -> void:
 		return
 	if player.player_id == owner_player_id and (not _is_armed or not can_self_trigger):
 		return
-	if not player.can_be_trapped():
+	if player.status.in_grace(PlayerStatus.Grace.TRAP):
 		return  # Just caught by another trap; this one stays armed.
-	player.mark_trapped()
+	player.status.grant_grace(PlayerStatus.Grace.TRAP, TRAP_GRACE)
 	_trigger(player)
 
 
@@ -61,7 +63,8 @@ func _trigger(player: Player) -> void:
 	_triggered = true
 	set_deferred("monitoring", false)
 	# Read before taking gems: that pops the bubble, which must also absorb the effect.
-	var protected: bool = player.is_protected()
+	var protected: bool = player.status.is_protected()
+	player.take_item_hit()
 
 	var removed: int = player.lose_gems(gems_stolen, false)
 	if removed > 0:
@@ -132,5 +135,5 @@ func _self_destruct() -> void:
 			(child as GPUParticles3D).restart()
 		elif child is VisualInstance3D:
 			(child as VisualInstance3D).visible = false
-	await get_tree().create_timer(DESTROY_DELAY).timeout
+	await get_tree().create_timer(DESTROY_DELAY, false).timeout
 	queue_free()

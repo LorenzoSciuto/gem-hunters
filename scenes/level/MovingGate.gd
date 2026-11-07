@@ -36,7 +36,7 @@ func _ready() -> void:
 
 func _cycle() -> void:
 	while is_inside_tree():
-		await get_tree().create_timer(randf_range(Constants.GATE_MIN_INTERVAL, Constants.GATE_MAX_INTERVAL)).timeout
+		await get_tree().create_timer(randf_range(Constants.GATE_MIN_INTERVAL, Constants.GATE_MAX_INTERVAL), false).timeout
 		if not is_inside_tree():
 			return
 		_open = not _open

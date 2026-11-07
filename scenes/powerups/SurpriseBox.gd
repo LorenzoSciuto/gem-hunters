@@ -13,6 +13,7 @@
 ##   Active:   mesh visible, idle_bounce animation playing.
 ##   Inactive: mesh hidden, monitoring disabled until respawn completes.
 extends Area3D
+class_name SurpriseBox
 
 ## Weight multiplier for attack power-ups handed to the player in last place.
 const TRAILING_ATTACK_WEIGHT_MULTIPLIER: int = 3
@@ -69,7 +70,7 @@ func _ready() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if not _is_active:
 		return
-	if not body is Player or not (body as Player).has_free_slot():
+	if not body is Player or not (body as Player).items.has_free_slot():
 		return
 
 	var player: Player = body as Player
@@ -77,7 +78,7 @@ func _on_body_entered(body: Node3D) -> void:
 		_prank(player)
 	else:
 		_give_powerup(player)
-		if randf() < Constants.BOX_DOUBLE_CHANCE and player.has_free_slot():
+		if randf() < Constants.BOX_DOUBLE_CHANCE and player.items.has_free_slot():
 			_give_powerup(player)
 	_start_respawn()
 
@@ -86,7 +87,7 @@ func _on_body_entered(body: Node3D) -> void:
 ## controls for a moment. Announced in the world and on the opener's HUD.
 func _prank(player: Player) -> void:
 	player.velocity.y = PRANK_LAUNCH_VELOCITY
-	player.apply_debuff(Constants.DebuffType.INVERTED, PRANK_CONFUSION)
+	player.status.apply_debuff(Constants.DebuffType.INVERTED, PRANK_CONFUSION)
 	player.notify("MSG_PRANK_BOX")
 	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * PRANK_TEXT_HEIGHT,
 		tr("MSG_PRANK_POP"), PRANK_TEXT_COLOR)
@@ -101,11 +102,11 @@ func _give_powerup(player: Player) -> void:
 		return
 
 	var chasing: bool = GameManager.get_leader() != player.player_id
-	var data: PowerUpData = _pick_weighted(_is_trailing(player.player_id), chasing, player.last_box_item)
+	var data: PowerUpData = _pick_weighted(_is_trailing(player.player_id), chasing, player.items.last_box_item)
 	if not data:
 		return
 
-	player.equip_powerup(data.type)
+	player.items.equip(data.type)
 
 	if pickup_particles:
 		pickup_particles.restart()
@@ -166,7 +167,7 @@ func _start_respawn() -> void:
 	if anim.is_playing():
 		anim.stop()
 
-	await get_tree().create_timer(respawn_time).timeout
+	await get_tree().create_timer(respawn_time, false).timeout
 	_relocate_to_new_spot()
 	_activate()
 
@@ -188,7 +189,7 @@ func _relocate_to_new_spot() -> void:
 		# Check distance from currently active boxes
 		var too_close: bool = false
 		for b in other_boxes:
-			if b != self and b.get("_is_active") == true:
+			if b != self and (b as SurpriseBox).is_active():
 				if (b as Node3D).global_position.distance_to(m_pos) < MIN_BOX_SPACING:
 					too_close = true
 					break
@@ -199,6 +200,10 @@ func _relocate_to_new_spot() -> void:
 	var chosen: Vector3 = (pool[randi() % pool.size()] as Node3D).global_position
 	# Markers float at gem height; boxes sit on the floor.
 	global_position = Vector3(chosen.x, _initial_position.y, chosen.z)
+
+
+func is_active() -> bool:
+	return _is_active
 
 
 ## Restore the box to its active, visible state.

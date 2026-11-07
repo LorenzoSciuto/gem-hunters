@@ -24,6 +24,9 @@ const WINNER_DISPLAY_DURATION: float = 3.5
 ## Camera jolt for the hunter who lands a hit and, harder, for the one hit.
 const ATTACKER_SHAKE: float = 0.12
 const VICTIM_SHAKE: float = 0.3
+## 2D (HUD, selection cards) is drawn this much smaller in the quarter-screen
+## views of a 3-4 player match, so it doesn't crowd the action.
+const QUARTER_UI_SCALE: float = 0.68
 
 @onready var world: Node3D = $World
 @onready var viewport_grid: GridContainer = $ViewportGrid
@@ -61,6 +64,7 @@ func _ready() -> void:
 	GameManager.frenzy_started.connect(_on_frenzy_started)
 	GameManager.timer_updated.connect(_on_timer_updated)
 	GameManager.match_ended.connect(_on_match_ended)
+	GameManager.player_eliminated.connect(_on_player_eliminated)
 
 	if GameManager.chosen_characters.size() == count:
 		_start_with_chosen_characters()
@@ -78,11 +82,18 @@ func _build_arena() -> void:
 	world.add_child(GEM_SPAWNER_SCENE.instantiate())
 
 
-## 2 players: side by side. 3–4 players: 2×2 grid (slot 4 is the overview in 3P).
+## 2 players: side by side. 3–4 players: 2×2 grid (slot 4 is the overview in 3P),
+## with the 2D layer of each quarter rendered on a larger virtual canvas and
+## scaled down (anchors keep working; the 3D view is unaffected).
 func _configure_layout(num_players: int) -> void:
 	viewport_grid.columns = 2
 	for i: int in SLOT_COUNT:
 		_sv_containers[i].visible = num_players > 2 or i < 2
+		if num_players > 2:
+			var viewport: SubViewport = _subviewports[i]
+			viewport.size_2d_override_stretch = true
+			viewport.size_changed.connect(func() -> void:
+				viewport.size_2d_override = Vector2i(Vector2(viewport.size) / QUARTER_UI_SCALE))
 
 
 func _spawn_players(count: int) -> void:
@@ -110,19 +121,19 @@ func _bind_huds() -> void:
 		var player: Player = _players[i]
 		var hud: CanvasLayer = HUD_SCENE.instantiate() as CanvasLayer
 		_subviewports[i].add_child(hud)
-		hud.setup(i, Constants.PLAYER_COLORS[i])
+		hud.setup(player, Constants.PLAYER_COLORS[i])
 		hud.visible = false
-		player.inventory_changed.connect(hud.update_inventory)
-		player.item_received.connect(hud.show_item_received)
-		player.powerup_activated.connect(hud.show_activated)
-		player.superpower_changed.connect(hud.update_superpower)
-		player.superpower_used.connect(hud.show_superpower_used)
-		player.items_stripped.connect(hud.show_items_stripped)
-		player.selection_changed.connect(hud.update_selection)
+		player.items.inventory_changed.connect(hud.update_inventory)
+		player.items.item_received.connect(hud.show_item_received)
+		player.items.powerup_activated.connect(hud.show_activated)
+		player.items.superpower_changed.connect(hud.update_superpower)
+		player.items.superpower_used.connect(hud.show_superpower_used)
+		player.items.items_stripped.connect(hud.show_items_stripped)
+		player.items.selection_changed.connect(hud.update_selection)
 		player.map_reveal_requested.connect(hud.show_map)
-		player.impact.connect(_on_impact)
-		player.screen_effect_requested.connect(hud.show_screen_effect)
-		player.debuff_cleared.connect(hud.clear_screen_effect)
+		player.combat.impact.connect(_on_impact)
+		player.status.screen_effect_requested.connect(hud.show_screen_effect)
+		player.status.debuff_cleared.connect(hud.clear_screen_effect)
 		player.notice_requested.connect(hud.show_notice)
 		player.view_changed.connect(_on_view_changed)
 		_huds.append(hud)
@@ -217,6 +228,27 @@ func _on_impact(attacker_id: int, victim_id: int, gems: int) -> void:
 	_cameras[victim_id].shake(VICTIM_SHAKE)
 	_huds[attacker_id].show_impact(true, gems)
 	_huds[victim_id].show_impact(false, gems)
+
+
+## Survival: the knocked-out hunter disappears and their screen follows a survivor.
+func _on_player_eliminated(pid: int) -> void:
+	_players[pid].eliminate()
+	_huds[pid].show_eliminated()
+	_retarget_spectators()
+
+
+## Every knocked-out screen watches the first hunter still standing.
+func _retarget_spectators() -> void:
+	var survivor: Player = null
+	for player: Player in _players:
+		if GameManager.is_alive(player.player_id):
+			survivor = player
+			break
+	if survivor == null:
+		return
+	for player: Player in _players:
+		if not GameManager.is_alive(player.player_id):
+			_cameras[player.player_id].set_target(survivor.get_camera_target())
 
 
 func _on_leader_changed(leader_id: int) -> void:

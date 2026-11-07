@@ -36,6 +36,12 @@ signal frenzy_started
 ## Dictionaries sorted descending by score: [code]{ "player_id": int, "score": int }[/code]
 signal match_ended(results: Array)
 
+## Survival mode: [param player_id] now has [param lives] lives.
+signal lives_changed(player_id: int, lives: int)
+
+## Survival mode: [param player_id] ran out of lives and is out of the match.
+signal player_eliminated(player_id: int)
+
 ## The once-per-match Chaos Gem appeared somewhere in the arena.
 signal chaos_gem_appeared
 
@@ -67,9 +73,15 @@ var _countdown_left: int = 0
 var _current_state: Constants.GameState = Constants.GameState.LOBBY
 var _frenzy: bool = false
 var _leader: int = -1
+## Seconds of actual play this match: frozen in countdown, pause and game over.
+var _play_time: float = 0.0
 
 ## Per-player gem counts. Keys are player_id (int), values are score (int).
 var scores: Dictionary = {}
+## Survival mode: player_id → lives left.
+var lives: Dictionary = {}
+## Survival mode: player_ids in the order they were knocked out.
+var _eliminated: Array[int] = []
 
 
 # ─── Lifecycle ────────────────────────────────────────────────────────────
@@ -88,9 +100,10 @@ func _load_last_setup() -> void:
 	var mode: int = int(cfg.get_value("match", "mode", match_mode))
 	if mode in Constants.MatchMode.values():
 		match_mode = mode as Constants.MatchMode
-	var targets: Array[int] = Constants.TIME_TARGETS if match_mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
-	var target: int = int(cfg.get_value("match", "target", match_target))
-	match_target = target if target in targets else targets[1]
+	if match_mode != Constants.MatchMode.LIVES:
+		var targets: Array[int] = Constants.TIME_TARGETS if match_mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
+		var target: int = int(cfg.get_value("match", "target", match_target))
+		match_target = target if target in targets else targets[1]
 	var arena: String = str(cfg.get_value("match", "arena", ""))
 	if arena in Constants.LEVEL_CONFIGS:
 		level_config = load(arena) as LevelConfig
@@ -107,8 +120,16 @@ func _save_last_setup() -> void:
 
 
 func _process(delta: float) -> void:
+	if _current_state == Constants.GameState.PLAYING:
+		_play_time += delta
 	if _current_state == Constants.GameState.COUNTDOWN or _current_state == Constants.GameState.PLAYING:
 		_tick(delta)
+
+
+## Gameplay clock (seconds): every debuff, cooldown and grace period is measured
+## on this, so pausing the game also pauses them.
+func game_time() -> float:
+	return _play_time
 
 
 # ─── Public API ───────────────────────────────────────────────────────────
@@ -135,6 +156,7 @@ func start_match() -> void:
 	_reset_scores()
 	_frenzy = false
 	_leader = -1
+	_play_time = 0.0
 	_clock = float(match_target) if match_mode == Constants.MatchMode.TIME else 0.0
 	_tick_accumulator = 0.0
 	_countdown_left = Constants.COUNTDOWN_SECONDS
@@ -201,6 +223,51 @@ func remove_gems(player_id: int, amount: int) -> int:
 	return removed
 
 
+func is_survival() -> bool:
+	return match_mode == Constants.MatchMode.LIVES
+
+
+func get_lives(player_id: int) -> int:
+	return lives.get(player_id, 0) as int
+
+
+## Still in the match (always true outside survival mode).
+func is_alive(player_id: int) -> bool:
+	return not is_survival() or get_lives(player_id) > 0
+
+
+## Survival: a hit from a box item costs a life; at zero the player is out, and
+## when one hunter is left standing the match ends. Returns the lives left.
+func lose_life(player_id: int) -> int:
+	if not is_survival() or not is_playing() or get_lives(player_id) <= 0:
+		return get_lives(player_id)
+	_set_lives(player_id, get_lives(player_id) - 1)
+	if get_lives(player_id) == 0:
+		_eliminated.append(player_id)
+		player_eliminated.emit(player_id)
+		if lives.values().filter(func(l: int) -> bool: return l > 0).size() <= 1:
+			end_match()
+	return get_lives(player_id)
+
+
+## Survival: life gem (+[param amount], no cap).
+func add_life(player_id: int, amount: int = 1) -> void:
+	if is_survival() and is_playing() and is_alive(player_id):
+		_set_lives(player_id, get_lives(player_id) + amount)
+
+
+## Survival: golden gem — back up to at least [param minimum] lives.
+func refill_lives(player_id: int, minimum: int) -> void:
+	if is_survival() and is_playing() and is_alive(player_id) and get_lives(player_id) < minimum:
+		_set_lives(player_id, minimum)
+
+
+func _set_lives(player_id: int, value: int) -> void:
+	lives[player_id] = value
+	lives_changed.emit(player_id, value)
+	_update_leader()
+
+
 ## Chaos Gem: every player except [param finder_id] loses half their gems
 ## (rounded down). Returns rival player_id → gems lost.
 func halve_rivals(finder_id: int) -> Dictionary:
@@ -217,11 +284,18 @@ func get_score(player_id: int) -> int:
 
 
 ## Returns standings sorted by score descending; ties keep the lower player_id first.
+## Survival ranks survivors first (most lives), then the knocked-out in reverse
+## order of elimination; gems break ties.
 func get_standings() -> Array:
 	var entries: Array = []
 	for pid: int in scores:
-		entries.append({ "player_id": pid, "score": scores[pid] as int })
+		entries.append({ "player_id": pid, "score": scores[pid] as int, "lives": get_lives(pid),
+			"out_rank": _eliminated.find(pid) })
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if is_survival() and a["lives"] != b["lives"]:
+			return a["lives"] > b["lives"]
+		if is_survival() and a["out_rank"] != b["out_rank"]:
+			return a["out_rank"] > b["out_rank"]
 		if a["score"] == b["score"]:
 			return a["player_id"] < b["player_id"]
 		return a["score"] > b["score"]
@@ -230,8 +304,13 @@ func get_standings() -> Array:
 
 
 ## Returns the sole leader's player_id, or -1 when nobody leads (tie or all zero).
+## Survival: the hunter with the most lives.
 func get_leader() -> int:
 	var standings: Array = get_standings()
+	if is_survival():
+		if standings.size() > 1 and standings[1]["lives"] == standings[0]["lives"]:
+			return -1
+		return standings[0]["player_id"]
 	if standings.is_empty() or standings[0]["score"] == 0:
 		return -1
 	if standings.size() > 1 and standings[1]["score"] == standings[0]["score"]:
@@ -278,11 +357,15 @@ func _advance_clock(delta: float) -> void:
 			end_match()
 
 
-func _after_score_change() -> void:
+func _update_leader() -> void:
 	var leader: int = get_leader()
 	if leader != _leader:
 		_leader = leader
 		leader_changed.emit(leader)
+
+
+func _after_score_change() -> void:
+	_update_leader()
 	if match_mode != Constants.MatchMode.SCORE:
 		return
 	var best: int = get_standings()[0]["score"]
@@ -304,8 +387,12 @@ func _set_state(new_state: Constants.GameState) -> void:
 
 func _reset_scores() -> void:
 	scores.clear()
+	lives.clear()
+	_eliminated.clear()
 	for i: int in range(_num_players):
 		scores[i] = 0
+		if is_survival():
+			lives[i] = Constants.START_LIVES
 
 
 func _is_valid_player(player_id: int) -> bool:

@@ -45,7 +45,20 @@ enum GameState {
 enum MatchMode {
 	TIME,   ## Most gems when the clock runs out.
 	SCORE,  ## First player to reach the gem target.
+	LIVES,  ## Survival: everyone starts with START_LIVES; hits from box items cost a life; last one standing wins.
 }
+
+## Survival mode: lives at the start, and the floor the golden gem refills to
+## (lives can stack above it with life gems).
+const START_LIVES: int = 3
+const GOLDEN_REFILL_LIVES: int = 3
+## Survival mode gem economy: fewer, rarer gems, a slower golden gem, and a
+## life gem now and then (at most LIFE_GEMS_MAX in the arena at once).
+const SURVIVAL_MAX_GEMS: int = 8
+const SURVIVAL_GEM_RESPAWN: float = 8.0
+const SURVIVAL_GOLDEN_RESPAWN: float = 90.0
+const LIFE_GEM_INTERVAL: float = 25.0
+const LIFE_GEMS_MAX: int = 1
 
 ## Selectable durations for TIME mode (seconds).
 const TIME_TARGETS: Array[int] = [90, 180, 300]
@@ -110,12 +123,6 @@ enum PowerUpType {
 	TRAP_BLACK_BOX,      ## Fake black gift box that blasts whoever opens it.
 }
 
-## Trap power-ups: dropped behind the player.
-const TRAP_TYPES: Array[PowerUpType] = [
-	PowerUpType.TRAP_CAKE, PowerUpType.TRAP_WATER_BALLOON, PowerUpType.TRAP_SPEAKER, PowerUpType.TRAP_BANANA,
-	PowerUpType.TRAP_BLACK_BOX,
-]
-
 ## Attack power-ups: aimed at rivals (the last-placed player gets them more often).
 const ATTACK_TYPES: Array[PowerUpType] = [
 	PowerUpType.ATTACK_SPRING_GLOVE, PowerUpType.ATTACK_MAGNET, PowerUpType.ATTACK_TICKLE_RAY,
@@ -149,6 +156,7 @@ enum GemType {
 	RARE,     ## Worth 3 points. Uncommon.
 	EPIC,     ## Worth 5 points. Rare.
 	GOLDEN,   ## Worth 10 points. Only one exists at a time.
+	LIFE,     ## Survival mode: gives one life instead of points.
 }
 
 

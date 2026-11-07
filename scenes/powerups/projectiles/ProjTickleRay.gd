@@ -13,5 +13,5 @@ func _init() -> void:
 
 func _on_hit_player(player: Player) -> void:
 	player.lose_gems(GEMS_KNOCKED)
-	if player.apply_debuff(Constants.DebuffType.LAUGHING, Constants.POWERUP_DURATION_TICKLE_RAY):
+	if player.status.apply_debuff(Constants.DebuffType.LAUGHING, Constants.POWERUP_DURATION_TICKLE_RAY):
 		AudioManager.play_sfx(AudioManager.SoundEffect.TICKLE_ZAP)

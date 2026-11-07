@@ -13,4 +13,4 @@ func _init() -> void:
 
 func _on_hit_player(player: Player) -> void:
 	player.lose_gems(GEMS_KNOCKED)
-	player.apply_debuff(Constants.DebuffType.FROZEN, Constants.DEBUFF_DURATION_SNOWBALL_FREEZE)
+	player.status.apply_debuff(Constants.DebuffType.FROZEN, Constants.DEBUFF_DURATION_SNOWBALL_FREEZE)

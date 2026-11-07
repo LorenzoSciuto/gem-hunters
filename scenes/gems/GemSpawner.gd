@@ -17,6 +17,9 @@
 ##
 ## Chaos Gem: exactly once per match, part-way through (see CHAOS_*), at a
 ## random free gem spot; GameManager announces it to every HUD.
+##
+## Survival mode: fewer and rarer gems, a slower golden gem, no Chaos Gem
+## (gems only break ties there), and a life gem every LIFE_GEM_INTERVAL.
 extends Node3D
 
 # ---------------------------------------------------------------------------
@@ -32,8 +35,9 @@ const GEM_SCENE: PackedScene = preload("res://scenes/gems/GemCollectible.tscn")
 const WEIGHT_VALUE_1: int = 70
 const WEIGHT_VALUE_3: int = 20
 const WEIGHT_VALUE_5: int = 10
-const WEIGHT_TOTAL: int = 100
+const WEIGHT_TOTAL: int = WEIGHT_VALUE_1 + WEIGHT_VALUE_3 + WEIGHT_VALUE_5
 
+const GOLDEN_GEM_VALUE: int = 10
 ## Seconds before the first golden gem, and between one being taken and the next.
 const GOLDEN_GEM_RESPAWN: float = 45.0
 
@@ -67,6 +71,8 @@ var _spawn_points: Array[Marker3D] = []
 var _active_gems: Array[WeakRef] = []
 var _golden_gem_active: bool = false
 var _golden_scheduled: bool = false
+var _golden_respawn: float = GOLDEN_GEM_RESPAWN
+var _life_gems: Array[WeakRef] = []
 var _spawn_timer: Timer
 
 # ---------------------------------------------------------------------------
@@ -74,6 +80,10 @@ var _spawn_timer: Timer
 # ---------------------------------------------------------------------------
 
 func _ready() -> void:
+	if GameManager.is_survival():
+		max_gems_in_world = Constants.SURVIVAL_MAX_GEMS
+		spawn_interval = Constants.SURVIVAL_GEM_RESPAWN
+		_golden_respawn = Constants.SURVIVAL_GOLDEN_RESPAWN
 	_collect_spawn_points()
 	_create_spawn_timer()
 	_initial_fill()
@@ -85,7 +95,10 @@ func _on_state_changed(state: int) -> void:
 	if state == Constants.GameState.PLAYING and not _golden_scheduled:
 		_golden_scheduled = true
 		_schedule_golden_gem()
-		_schedule_chaos_gem()
+		if GameManager.is_survival():
+			_run_life_gems()
+		else:
+			_schedule_chaos_gem()
 
 
 func _schedule_chaos_gem() -> void:
@@ -106,8 +119,28 @@ func _schedule_chaos_gem() -> void:
 	GameManager.chaos_gem_appeared.emit()
 
 
+## Survival: a life gem appears every LIFE_GEM_INTERVAL (one at a time).
+func _run_life_gems() -> void:
+	while is_inside_tree():
+		await get_tree().create_timer(Constants.LIFE_GEM_INTERVAL, false).timeout
+		if not is_inside_tree() or not GameManager.is_playing():
+			return
+		_life_gems = _life_gems.filter(func(w: WeakRef) -> bool: return w.get_ref() != null)
+		if _life_gems.size() >= Constants.LIFE_GEMS_MAX:
+			continue
+		var point: Marker3D = _find_valid_spawn_point()
+		if point == null:
+			continue
+		var gem: GemCollectible = GEM_SCENE.instantiate() as GemCollectible
+		gem.gem_type = Constants.GemType.LIFE
+		gem.value = 0
+		add_child(gem)
+		gem.global_position = point.global_position
+		_life_gems.append(weakref(gem))
+
+
 func _schedule_golden_gem() -> void:
-	await get_tree().create_timer(GOLDEN_GEM_RESPAWN, false).timeout
+	await get_tree().create_timer(_golden_respawn, false).timeout
 	if is_inside_tree():
 		_spawn_golden_gem()
 
@@ -171,9 +204,9 @@ func _try_spawn_gem() -> void:
 		return
 
 	var gem_value: int = _pick_gem_value()
-	var gem: Node3D = GEM_SCENE.instantiate()
-	gem.set("value", gem_value)
-	gem.set("gem_type", _value_to_gem_type(gem_value))
+	var gem: GemCollectible = GEM_SCENE.instantiate() as GemCollectible
+	gem.value = gem_value
+	gem.gem_type = _value_to_gem_type(gem_value)
 	add_child(gem)
 	gem.global_position = point.global_position
 
@@ -254,17 +287,13 @@ func _spawn_golden_gem() -> void:
 		return
 
 	_golden_gem_active = true
-	var golden_gem = GEM_SCENE.instantiate()
+	var golden_gem: GemCollectible = GEM_SCENE.instantiate() as GemCollectible
 	golden_gem.is_golden = true
-	golden_gem.value = 10
+	golden_gem.value = GOLDEN_GEM_VALUE
 	golden_gem.gem_type = Constants.GemType.GOLDEN
 	add_child(golden_gem)
 	golden_gem.global_position = golden_gem_marker.global_position
-
-
-	# Connect collected signal for respawn logic.
-	if golden_gem.has_signal("collected"):
-		golden_gem.collected.connect(_on_golden_gem_collected)
+	golden_gem.collected.connect(_on_golden_gem_collected)
 
 
 ## Called when the golden gem is picked up. Re-spawns after GOLDEN_GEM_RESPAWN seconds.

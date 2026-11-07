@@ -4,6 +4,7 @@
 ## With [member aimed] it instead throws the player along an arc that lands on
 ## [member launch_target] (the golden return pad outside the maze uses this).
 extends Area3D
+class_name Trampoline
 
 @export var bounce_force: float = 16.0
 @export var aimed: bool = false

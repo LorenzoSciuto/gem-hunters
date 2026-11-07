@@ -54,18 +54,18 @@ func _run_cycle() -> void:
 		back_particles.emitting = true
 		if hit_area:
 			hit_area.monitoring = true
-		await get_tree().create_timer(spray_duration).timeout
+		await get_tree().create_timer(spray_duration, false).timeout
 
 		_is_spraying = false
 		particles.emitting = false
 		back_particles.emitting = false
 		if hit_area:
 			hit_area.monitoring = false
-		await get_tree().create_timer(maxf(pause_duration - WARN_TIME, 0.0)).timeout
+		await get_tree().create_timer(maxf(pause_duration - WARN_TIME, 0.0), false).timeout
 		var shake: Tween = create_tween().set_loops(int(WARN_TIME / (WARN_SHAKE_STEP * 2.0)))
 		shake.tween_property(nozzle, "rotation:z", WARN_SHAKE, WARN_SHAKE_STEP)
 		shake.tween_property(nozzle, "rotation:z", -WARN_SHAKE, WARN_SHAKE_STEP)
-		await get_tree().create_timer(WARN_TIME).timeout
+		await get_tree().create_timer(WARN_TIME, false).timeout
 		shake.kill()
 		nozzle.rotation.z = 0.0
 
@@ -73,5 +73,5 @@ func _on_hit_area_body_entered(body: Node3D) -> void:
 	if not _is_spraying or not body is Player:
 		return
 	var player: Player = body as Player
-	if player.apply_debuff(Constants.DebuffType.ICE_SLIDE, ice_slide_duration):
+	if player.status.apply_debuff(Constants.DebuffType.ICE_SLIDE, ice_slide_duration):
 		player.lose_gems(1)
