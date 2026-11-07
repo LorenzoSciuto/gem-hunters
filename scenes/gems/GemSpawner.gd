@@ -9,9 +9,14 @@
 ##   evenly across the arena.
 ##
 ## Golden gem:
-##   Exactly one golden gem exists in the world at a time. After it is collected
-##   the spawner waits GOLDEN_GEM_RESPAWN seconds then re-spawns it at the
-##   arena center marker.
+##   At most one golden gem at a time, at the arena center: the first appears
+##   GOLDEN_GEM_RESPAWN seconds into the match, and each one taken is replaced
+##   after the same delay.
+##
+## Gems never spawn on top of props, gift boxes or traps (GEM_PROP_CLEARANCE).
+##
+## Chaos Gem: exactly once per match, part-way through (see CHAOS_*), at a
+## random free gem spot; GameManager announces it to every HUD.
 extends Node3D
 
 # ---------------------------------------------------------------------------
@@ -29,8 +34,15 @@ const WEIGHT_VALUE_3: int = 20
 const WEIGHT_VALUE_5: int = 10
 const WEIGHT_TOTAL: int = 100
 
-## Seconds before the golden gem reappears after being collected.
-const GOLDEN_GEM_RESPAWN: float = 30.0
+## Seconds before the first golden gem, and between one being taken and the next.
+const GOLDEN_GEM_RESPAWN: float = 45.0
+
+## Chaos Gem timing: in a timed match it appears between these fractions of the
+## clock; in a race to N gems, between these many seconds after the start.
+const CHAOS_TIME_FRACTION_MIN: float = 0.35
+const CHAOS_TIME_FRACTION_MAX: float = 0.6
+const CHAOS_SCORE_DELAY_MIN: float = 40.0
+const CHAOS_SCORE_DELAY_MAX: float = 70.0
 
 ## Fraction of max_gems_in_world placed at game start.
 const INITIAL_FILL_FRACTION: float = 0.5
@@ -54,6 +66,7 @@ const INITIAL_FILL_FRACTION: float = 0.5
 var _spawn_points: Array[Marker3D] = []
 var _active_gems: Array[WeakRef] = []
 var _golden_gem_active: bool = false
+var _golden_scheduled: bool = false
 var _spawn_timer: Timer
 
 # ---------------------------------------------------------------------------
@@ -64,7 +77,39 @@ func _ready() -> void:
 	_collect_spawn_points()
 	_create_spawn_timer()
 	_initial_fill()
-	_spawn_golden_gem()
+	GameManager.state_changed.connect(_on_state_changed)
+
+
+## The golden gem's clock starts with the match (not during character selection).
+func _on_state_changed(state: int) -> void:
+	if state == Constants.GameState.PLAYING and not _golden_scheduled:
+		_golden_scheduled = true
+		_schedule_golden_gem()
+		_schedule_chaos_gem()
+
+
+func _schedule_chaos_gem() -> void:
+	var delay: float = randf_range(CHAOS_SCORE_DELAY_MIN, CHAOS_SCORE_DELAY_MAX)
+	if GameManager.match_mode == Constants.MatchMode.TIME:
+		delay = GameManager.match_target * randf_range(CHAOS_TIME_FRACTION_MIN, CHAOS_TIME_FRACTION_MAX)
+	await get_tree().create_timer(delay, false).timeout
+	if not is_inside_tree() or not GameManager.is_playing():
+		return
+	var point: Marker3D = _find_valid_spawn_point()
+	if point == null:
+		point = _spawn_points.pick_random()
+	if point == null:
+		return
+	var chaos: ChaosGem = ChaosGem.new()
+	add_child(chaos)
+	chaos.global_position = Vector3(point.global_position.x, 0.0, point.global_position.z)
+	GameManager.chaos_gem_appeared.emit()
+
+
+func _schedule_golden_gem() -> void:
+	await get_tree().create_timer(GOLDEN_GEM_RESPAWN, false).timeout
+	if is_inside_tree():
+		_spawn_golden_gem()
 
 
 ## Gather all Marker3D candidate points (direct children and level gem spawn group).
@@ -145,12 +190,22 @@ func _find_valid_spawn_point() -> Marker3D:
 		if gem and gem is Node3D:
 			occupied_positions.append((gem as Node3D).global_position)
 
+	var props: Array[Vector3] = []
+	for group: String in [Constants.GROUP_PROPS, Constants.GROUP_SURPRISE_BOXES, Constants.GROUP_TRAPS]:
+		for node: Node in get_tree().get_nodes_in_group(group):
+			props.append((node as Node3D).global_position)
+
 	# Filter candidates.
 	var valid_points: Array[Marker3D] = []
 	for point: Marker3D in _spawn_points:
 		var too_close: bool = false
 		for pos: Vector3 in occupied_positions:
 			if point.global_position.distance_to(pos) < min_spawn_distance:
+				too_close = true
+				break
+		for pos: Vector3 in props:
+			var flat: Vector3 = point.global_position - pos
+			if Vector2(flat.x, flat.z).length() < Constants.GEM_PROP_CLEARANCE:
 				too_close = true
 				break
 		if not too_close:
@@ -215,8 +270,7 @@ func _spawn_golden_gem() -> void:
 ## Called when the golden gem is picked up. Re-spawns after GOLDEN_GEM_RESPAWN seconds.
 func _on_golden_gem_collected(_player_id: int, _gem_value: int) -> void:
 	_golden_gem_active = false
-	await get_tree().create_timer(GOLDEN_GEM_RESPAWN).timeout
-	_spawn_golden_gem()
+	_schedule_golden_gem()
 
 
 # ---------------------------------------------------------------------------

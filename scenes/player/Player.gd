@@ -39,6 +39,10 @@ signal view_changed(player_id: int, first_person: bool)
 ## Requests that this player's HUD shows a debuff overlay.
 signal screen_effect_requested(player_id: int, debuff_type: int, duration: float)
 
+## Something happened that this player's HUD should explain ([param message_key]
+## is a localization key; [param good] picks the toast colour).
+signal notice_requested(player_id: int, message_key: String, good: bool)
+
 ## A debuff ended (expired, or the player broke free of the ice).
 signal debuff_cleared(player_id: int, debuff_type: int)
 
@@ -70,12 +74,12 @@ const POUND_FALL_GRAVITY: float = 2.5
 const POUND_MIN_AIR_TIME: float = 0.25
 const POUND_RADIUS: float = 6.5
 const POUND_FORCE: float = 9.0
-const POUND_GEMS: int = 2
+const POUND_GEMS: int = 3
 
 ## Running into a rival tackles them: they fly back and you take their gems
 ## (more from the crowned leader). The victim gets a moment to run away.
-const TACKLE_GEMS: int = 1
-const TACKLE_LEADER_GEMS: int = 2
+const TACKLE_GEMS: int = 2
+const TACKLE_LEADER_GEMS: int = 3
 const TACKLE_FORCE: float = 9.0
 const TACKLE_LIFT: float = 4.0
 const TACKLE_COOLDOWN: float = 1.5
@@ -102,12 +106,12 @@ const STOMP_MIN_FALL_SPEED: float = 2.0
 ## Collision normal must point up at least this much (cosine) to count as a stomp.
 const STOMP_NORMAL_Y: float = 0.7
 const STOMP_BOUNCE: float = 9.5
-const STOMP_GEMS: int = 1
-const STOMP_STUN: float = 1.0
+const STOMP_GEMS: int = 2
+const STOMP_STUN: float = 1.5
 
 ## Any knockback takes control away briefly, so the hit actually carries the
 ## victim; during the stun they slide with this (lower) friction.
-const KNOCKBACK_STUN: float = 0.45
+const KNOCKBACK_STUN: float = 0.8
 const KNOCKBACK_FRICTION: float = 22.0
 
 ## Landing squash scales with fall speed up to this; harder landings kick up dust.
@@ -124,6 +128,10 @@ const GEM_CHEER_TIME: float = 0.35
 
 ## A launch ignores floor contact for this long (it starts on the pad).
 const LAUNCH_MIN_AIR: float = 0.2
+
+## Thunder item: every rival loses this many gems, giggles and is dazed.
+const THUNDER_GEMS: int = 3
+const THUNDER_STUN: float = 1.0
 
 ## Dizzy stars circling the head while stunned or confused.
 const DIZZY_STAR_COUNT: int = 5
@@ -619,8 +627,9 @@ func _fire_projectile(scene: PackedScene) -> void:
 func _thunder() -> void:
 	AudioManager.play_sfx(AudioManager.SoundEffect.TICKLE_ZAP)
 	for rival: Player in _rivals():
-		rival.lose_gems(1)
+		rival.lose_gems(THUNDER_GEMS)
 		rival.apply_debuff(Constants.DebuffType.LAUGHING, Constants.DEBUFF_DURATION_THUNDER_LAUGH)
+		rival.stun(THUNDER_STUN)
 
 
 func _rivals() -> Array[Player]:
@@ -664,6 +673,11 @@ func launch_to(target: Vector3, flight_time: float) -> void:
 	_launched = true
 	_launch_started = _now()
 	_pounding = false
+
+
+## Shows a short explanation on this player's HUD (pranks, special events).
+func notify(message_key: String, good: bool = false) -> void:
+	notice_requested.emit(player_id, message_key, good)
 
 
 ## Shows this player the arena map (radar item, map beacons).

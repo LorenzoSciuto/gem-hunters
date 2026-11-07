@@ -79,6 +79,8 @@ func _ready() -> void:
 	effect_overlay.modulate.a = 0.0
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.timer_updated.connect(_on_timer_updated)
+	GameManager.chaos_gem_appeared.connect(func() -> void: _show_banner(tr("MSG_CHAOS_APPEARED")))
+	GameManager.chaos_gem_taken.connect(_on_chaos_gem_taken)
 	InputManager.bindings_changed.connect(_refresh_slot_labels)
 	map_dots.draw.connect(_draw_map_dots)
 	_build_item_pad()
@@ -122,6 +124,8 @@ func _on_score_updated(pid: int, new_score: int) -> void:
 func _on_timer_updated(seconds: float) -> void:
 	var total: int = int(ceilf(seconds))
 	timer_label.text = "%d:%02d" % [total / 60, total % 60]
+	if GameManager.is_frenzy():
+		timer_label.text += tr("HUD_FRENZY_TAG")
 	var low: bool = GameManager.match_mode == Constants.MatchMode.TIME \
 		and seconds <= Constants.FRENZY_TIME_REMAINING
 	timer_label.modulate = LOW_TIME_COLOR if low else Color.WHITE
@@ -178,10 +182,13 @@ func _build_item_pad() -> void:
 	_super_timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_super_timer.visible = false
 	_slot_panels[SUPER_SLOT].add_child(_super_timer)
+	# Sibling over the slot (a child would be pushed off-centre by the panel's margins).
 	_super_ring = Control.new()
 	_super_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_super_ring.draw.connect(_draw_super_ring)
-	_slot_panels[SUPER_SLOT].add_child(_super_ring)
+	_super_ring.position = _slot_panels[SUPER_SLOT].position
+	_super_ring.size = _slot_panels[SUPER_SLOT].size
+	item_pad.add_child(_super_ring)
 	update_inventory(player_id, [])
 
 
@@ -256,6 +263,19 @@ func show_impact(attacker: bool, gems: int) -> void:
 	_show_banner(title, null, Tone.GOOD if attacker else Tone.BAD)
 
 
+func _on_chaos_gem_taken(finder_id: int, lost: Dictionary) -> void:
+	if finder_id == player_id:
+		_show_banner(tr("MSG_CHAOS_MINE"), null, Tone.GOOD)
+	else:
+		_show_banner(tr("MSG_CHAOS_THEIRS").format([finder_id + 1, lost.get(player_id, 0)]), null, Tone.BAD)
+
+
+## Player.notice_requested: explain what just happened to this hunter.
+func show_notice(pid: int, message_key: String, good: bool) -> void:
+	if pid == player_id:
+		_show_banner(tr(message_key), null, Tone.GOOD if good else Tone.BAD)
+
+
 ## Shown at "GO!": how to tackle.
 func show_tip() -> void:
 	_show_banner(tr("MSG_TACKLE_TIP"))
@@ -278,7 +298,11 @@ func _process(_delta: float) -> void:
 	_super_timer.visible = charging
 	_super_timer.text = str(ceili(left))
 	_slot_icons[SUPER_SLOT].modulate.a = SUPER_COOLDOWN_ALPHA if charging else 1.0
-	_super_ring.size = _slot_panels[SUPER_SLOT].size
+	var slot: PanelContainer = _slot_panels[SUPER_SLOT]
+	_super_ring.position = slot.position
+	_super_ring.size = slot.size
+	_super_ring.pivot_offset = slot.pivot_offset
+	_super_ring.scale = slot.scale  # Follows the slot's pulse / mouse-armed enlargement.
 	_super_ring.queue_redraw()
 	if mini_map.visible:
 		map_dots.queue_redraw()
