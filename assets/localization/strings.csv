@@ -51,7 +51,8 @@ UI_PLAYER_SHORT,P{0},G{0}
 UI_GEMS,gems,gemme
 UI_SELECT_HERO,Choose your hunter,Scegli il tuo hunter
 UI_READY,READY!,PRONTO!
-UI_PROMPT_PAD,Stick / D-Pad: browse   (A): ready,Leva / Croce: scorri   (A): pronto
+UI_PROMPT_PAD,Stick / D-Pad: browse   (A): ready   (B): back,Leva / Croce: scorri   (A): pronto   (B): indietro
+UI_PROMPT_PAD_LOCKED,(B): change hunter,(B): cambia hunter
 UI_SPEED,Speed,Velocità
 UI_JUMP,Jump,Salto
 UI_DEFENSE,Defense,Difesa
@@ -67,8 +68,24 @@ CHAR_TANKY_TRAIT,"Colossus: barely pushed, loses fewer gems","Colosso: quasi ina
 CHAR_TRICKY_NAME,Tricky,Tricky
 CHAR_TRICKY_BIO,Mischievous prankster! Trap genius.,Furbetto monello! Genio delle trappole.
 CHAR_TRICKY_TRAIT,Trickster: steals 2 gems at a time,Monello: ruba 2 gemme alla volta
+CHAR_SPARKLE_NAME,Sparkle,Sparkle
+CHAR_SPARKLE_BIO,A rainbow unicorn who never stops dancing!,Un unicorno arcobaleno che non smette mai di ballare!
+CHAR_SPARKLE_TRAIT,"Rainbow Runner: +20% speed, shakes off ice twice as fast","Corsa Arcobaleno: +20% velocità, si libera dal ghiaccio il doppio più in fretta"
+CHAR_BLOOM_NAME,Bloom,Bloom
+CHAR_BLOOM_BIO,A flower fairy with shimmering wings.,Una fatina dei fiori dalle ali scintillanti.
+CHAR_BLOOM_TRAIT,Fairy Wings: bigger jump & built-in double jump,Ali di Fata: salto più alto e doppio salto
+CHAR_MIMI_NAME,Mimi,Mimi
+CHAR_MIMI_BIO,A sweet kitty with sneaky paws.,Una gattina dolcissima dalle zampette furbette.
+CHAR_MIMI_TRAIT,Cat Burglar: steals 2 gems at a time,Ladra Gattina: ruba 2 gemme alla volta
+CHAR_COCO_NAME,Coco,Coco
+CHAR_COCO_BIO,A fluffy bunny you just can't push around!,Una coniglietta soffice che nessuno riesce a spostare!
+CHAR_COCO_TRAIT,"Fluffy Cloud: barely pushed, loses fewer gems","Nuvola Soffice: quasi inamovibile, perde meno gemme"
 UI_STANDINGS,Standings,Classifica
-UI_PROMPT_KB,{0} / {1}: browse   {2}: ready,{0} / {1}: scorri   {2}: pronto
+UI_PROMPT_KB,{0} / {1}: browse   {2}: ready   {3}: back,{0} / {1}: scorri   {2}: pronto   {3}: indietro
+UI_PROMPT_KB_LOCKED,{0}: change hunter,{0}: cambia hunter
+UI_BACK,Back,Indietro
+UI_CHANGE,Change,Cambia
+UI_CHANGE_HUNTERS,Change hunters,Cambia hunter
 UI_CONTROLS_HINT,"Move: WASD / Arrows / left stick   Look: mouse, IJKL / Numpad 8 4 5 6 / right stick   Pause: Esc / Start
 Mouse: wheel picks the item or superpower, left click fires it, right click jumps.
 Pick a button, then press the new key or pad button (Esc cancels). The right trigger also jumps.

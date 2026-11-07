@@ -3,6 +3,9 @@
 ## ends on the first wall or opponent it touches. Light aim assist: a rival
 ## within range and roughly ahead pulls the shot into a gentle curve; a shot
 ## fired well away from everyone flies straight.
+##
+## Interactions: a shot that touches a trap breaks it, two rival shots cancel
+## each other out, and Tanky's shield sends a shot back at its shooter.
 extends Area3D
 class_name Projectile
 
@@ -14,6 +17,9 @@ const HOMING_RANGE: float = 14.0
 const HOMING_CONE_DEG: float = 40.0
 ## Maximum turn toward the target (radians per second): a curve, not a lock-on.
 const HOMING_TURN_RATE: float = 2.5
+## Shots fly at chest height, over floor traps: any trap this close
+## horizontally is hit and breaks.
+const TRAP_HIT_RADIUS: float = 0.8
 
 var shooter_id: int = -1
 var _age: float = 0.0
@@ -21,11 +27,14 @@ var _age: float = 0.0
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	area_entered.connect(_on_area_entered)
 
 
 func _physics_process(delta: float) -> void:
 	_steer(delta)
 	global_position -= global_transform.basis.z * speed * delta
+	if _hit_trap():
+		return
 	_age += delta
 	if _age >= lifetime:
 		queue_free()
@@ -55,10 +64,40 @@ func _steer(delta: float) -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
-		if (body as Player).player_id == shooter_id:
+		var player: Player = body as Player
+		if player.player_id == shooter_id:
 			return
-		_on_hit_player(body as Player)
+		if player.reflects_projectiles():
+			_reflect(player)
+			return
+		_on_hit_player(player)
 	_finish()
+
+
+func _on_area_entered(area: Area3D) -> void:
+	var other: Projectile = area as Projectile
+	if other and other.shooter_id != shooter_id:
+		_finish()  # The other shot gets its own callback and pops too.
+
+
+func _hit_trap() -> bool:
+	for node: Node in get_tree().get_nodes_in_group(Constants.GROUP_TRAPS):
+		var trap: TrapBase = node as TrapBase
+		var offset: Vector3 = trap.global_position - global_position
+		if Vector2(offset.x, offset.z).length() <= TRAP_HIT_RADIUS:
+			trap.defuse()
+			_finish()
+			return true
+	return false
+
+
+## Turns the shot around; it now belongs to [param by] and can hit its old shooter.
+func _reflect(by: Player) -> void:
+	shooter_id = by.player_id
+	_age = 0.0
+	rotate_y(PI)
+	ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.bubble_pop_burst())
+	AudioManager.play_sfx(AudioManager.SoundEffect.BUBBLE_POP)
 
 
 ## Virtual — effect applied to the opponent that was hit.

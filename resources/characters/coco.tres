@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/CharacterData.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "coco"
+name_key = "CHAR_COCO_NAME"
+bio_key = "CHAR_COCO_BIO"
+trait_key = "CHAR_COCO_TRAIT"
+trait_type = 3
+color = Color(0.55, 0.92, 0.8, 1)
+speed_multiplier = 0.95
+jump_multiplier = 1.0
+knockback_resistance = 1.6
+gem_loss_multiplier = 0.65
+mesh_scale = Vector3(1.2, 0.95, 1.2)
+stat_speed = 2
+stat_jump = 3
+stat_defense = 5
+stat_tricks = 2

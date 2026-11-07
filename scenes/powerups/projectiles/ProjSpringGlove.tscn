@@ -19,7 +19,7 @@ initial_velocity_max = 3.0
 
 [node name="ProjSpringGlove" type="Area3D"]
 collision_layer = 16
-collision_mask = 3
+collision_mask = 19
 script = ExtResource("1_glove")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

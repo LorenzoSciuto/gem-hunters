@@ -132,8 +132,20 @@ visible = false
 layout_mode = 2
 theme_type_variation = &"BannerPanel"
 
-[node name="BannerLabel" type="Label" parent="BannerContainer/PowerupBanner"]
+[node name="Row" type="HBoxContainer" parent="BannerContainer/PowerupBanner"]
 layout_mode = 2
+alignment = 1
+
+[node name="BannerIcon" type="TextureRect" parent="BannerContainer/PowerupBanner/Row"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BannerLabel" type="Label" parent="BannerContainer/PowerupBanner/Row"]
+layout_mode = 2
+size_flags_vertical = 4
 theme_type_variation = &"BannerLabel"
 horizontal_alignment = 1
 

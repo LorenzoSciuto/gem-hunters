@@ -1,6 +1,7 @@
 ## GameOverScreen.gd
 ## Final standings over a backdrop of the arena just played.
-## Rematch keeps the same players, goal, arena and characters.
+## Rematch keeps the same players, goal, arena and characters; "change
+## hunters" keeps the setup but reopens character selection.
 extends Control
 
 const MATCH_SCENE: String = "res://scenes/main/Main.tscn"
@@ -12,6 +13,7 @@ const ROW_STAGGER: float = 0.15
 @onready var winner_label: Label = $Center/Panel/VBox/WinnerLabel
 @onready var standings_grid: GridContainer = $Center/Panel/VBox/Standings
 @onready var rematch_btn: Button = $Center/Panel/VBox/Buttons/RematchButton
+@onready var change_btn: Button = $Center/Panel/VBox/Buttons/ChangeButton
 @onready var menu_btn: Button = $Center/Panel/VBox/Buttons/MenuButton
 @onready var quit_btn: Button = $Center/Panel/VBox/Buttons/QuitButton
 
@@ -21,6 +23,9 @@ func _ready() -> void:
 	if GameManager.level_config:
 		backdrop.show_arena(GameManager.level_config)
 	rematch_btn.pressed.connect(func() -> void: get_tree().change_scene_to_file(MATCH_SCENE))
+	change_btn.pressed.connect(func() -> void:
+		GameManager.chosen_characters.clear()
+		get_tree().change_scene_to_file(MATCH_SCENE))
 	menu_btn.pressed.connect(_on_menu_pressed)
 	quit_btn.pressed.connect(get_tree().quit)
 	_display_results()
