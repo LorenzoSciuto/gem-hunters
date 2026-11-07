@@ -362,9 +362,9 @@ static func _soft_dot_texture() -> GradientTexture2D:
 	return _dot
 
 
-## Spawns a self-freeing one-shot particle burst at [param pos] under [param parent].
-static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMaterial,
-		amount: int = 24, lifetime: float = 0.8) -> void:
+## Camera-facing soft round sprite tinted by the particle colour: the draw
+## pass for every burst and for looping emitters (sprinkler water, ...).
+static func soft_quad() -> QuadMesh:
 	var draw_mat := StandardMaterial3D.new()
 	draw_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	draw_mat.vertex_color_use_as_albedo = true
@@ -374,9 +374,35 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 	draw_mat.albedo_texture = _soft_dot_texture()
 	var quad := QuadMesh.new()
 	quad.material = draw_mat
+	return quad
+
+
+## water_jet
+## Sprinkler stream: droplets shot forward in an arc that falls back to the ground.
+static func water_jet() -> ParticleProcessMaterial:
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0.0, 0.55, 1.0)
+	mat.spread = 8.0
+	mat.initial_velocity_min = 6.5
+	mat.initial_velocity_max = 8.0
+	mat.gravity = Vector3(0.0, -9.8, 0.0)
+	mat.scale_min = 0.2
+	mat.scale_max = 0.38
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color(0.6, 0.88, 1.0, 1.0), Color(0.15, 0.55, 1.0, 0.95), Color(0.15, 0.55, 1.0, 0.0)])
+	grad.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = grad
+	mat.color_ramp = ramp
+	return mat
+
+
+## Spawns a self-freeing one-shot particle burst at [param pos] under [param parent].
+static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMaterial,
+		amount: int = 24, lifetime: float = 0.8) -> void:
 	var particles := GPUParticles3D.new()
 	particles.process_material = process
-	particles.draw_pass_1 = quad
+	particles.draw_pass_1 = soft_quad()
 	particles.amount = amount
 	particles.lifetime = lifetime
 	particles.one_shot = true

@@ -89,6 +89,12 @@ const LANDMARK_OFFSET: float = 6.0
 const LANDMARK_SCALE: float = 1.8
 ## Lifts the center floor over the quadrant floors without z-fighting.
 const CENTER_FLOOR_LIFT: float = 0.02
+## The single golden return pad outside the perimeter: distance from the outer
+## wall, margin kept from the corners (landmarks), cap colour, landing point.
+const RETURN_PAD_OFFSET: float = 3.5
+const RETURN_PAD_CORNER_MARGIN: float = 8.0
+const RETURN_PAD_COLOR: Color = Color(1.0, 0.8, 0.2)
+const RETURN_LANDING: Vector3 = Vector3(0.0, 0.5, 0.0)
 ## Portal pair colors, cycled.
 const PORTAL_COLORS: Array[Color] = [Color(0.6, 0.35, 1.0), Color(0.2, 0.85, 1.0), Color(1.0, 0.45, 0.8)]
 
@@ -906,9 +912,34 @@ func _place_props() -> void:
 			var patch: Node3D = _spawn_at(ICE_PATCH_SCENE, c)
 			patch.set("duration", 0.0)
 			ice_left -= 1
+	_place_return_pad()
 	_place_portals(free_cells)
 	for c: Vector2i in _free(free_cells).slice(0, config.map_beacon_count):
 		_add_feature(MapBeacon.new(), c)
+
+
+## One golden trampoline just outside a random stretch of the outer wall: a
+## hunter who ends up outside must find it to bounce back to the plaza.
+func _place_return_pad() -> void:
+	var half: Vector2 = Vector2(_cols, _rows) * _cs * 0.5
+	var side: int = _rng.randi() % 4
+	var along_x: bool = side < 2
+	var span: float = (half.x if along_x else half.y) - RETURN_PAD_CORNER_MARGIN
+	var t: float = _rng.randf_range(-span, span)
+	var out: float = (half.y if along_x else half.x) + RETURN_PAD_OFFSET
+	var sign_: float = 1.0 if side % 2 == 0 else -1.0
+	var pad: Node3D = TRAMPOLINE_SCENE.instantiate() as Node3D
+	pad.set("aimed", true)
+	pad.set("launch_target", RETURN_LANDING)
+	add_child(pad)
+	pad.position = Vector3(t, 0.0, out * sign_) if along_x else Vector3(out * sign_, 0.0, t)
+	pad.call("set_cap_color", RETURN_PAD_COLOR)
+
+
+## True when [param pos] is outside the maze's outer walls.
+static func is_outside(pos: Vector3, level: LevelConfig) -> bool:
+	var half: Vector2 = Vector2(level.columns | 1, level.rows | 1) * level.cell_size * 0.5
+	return absf(pos.x) > half.x or absf(pos.z) > half.y
 
 
 ## Each pair joins a random cell to the free cell farthest from it.

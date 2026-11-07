@@ -122,6 +122,9 @@ const DUST_LIFETIME: float = 0.6
 ## Short happy reaction on every gem pickup.
 const GEM_CHEER_TIME: float = 0.35
 
+## A launch ignores floor contact for this long (it starts on the pad).
+const LAUNCH_MIN_AIR: float = 0.2
+
 ## Dizzy stars circling the head while stunned or confused.
 const DIZZY_STAR_COUNT: int = 5
 
@@ -196,6 +199,10 @@ var _steal_target: Player = null
 var _steal_timer: float = 0.0
 var _laugh_time: float = 0.0
 var _stunned_until: float = 0.0
+## Riding an aimed launch (return pad): no control until it lands. Ended by
+## touching the floor, not a timer, so a frame hitch can't drop it mid-air.
+var _launched: bool = false
+var _launch_started: float = 0.0
 var _frozen_since: float = 0.0
 var _was_frozen: bool = false
 var _trap_immune_until: float = 0.0
@@ -411,7 +418,8 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed(_action("toggle_view")):
 		toggle_view()
-	if controls_enabled and not has_debuff(Constants.DebuffType.FROZEN) and not is_stunned():
+	var launched: bool = _launched
+	if controls_enabled and not has_debuff(Constants.DebuffType.FROZEN) and not is_stunned() and not launched:
 		_handle_look(delta)
 		_handle_movement(delta)
 		_handle_actions()
@@ -421,8 +429,8 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed(_action("jump")):
 			_jump()  # Frozen: a jump press cracks the ice instead.
 		_decelerate(delta, Constants.FRICTION_GROUND)
-	elif is_stunned():
-		# Knocked back: keep the momentum in the air, slide it out on the ground
+	elif is_stunned() or launched:
+		# Knocked back or launched: keep the momentum in the air, slide it out on the ground
 		# (barely slowing on ice / after a banana).
 		if is_on_floor():
 			var on_ice: bool = has_debuff(Constants.DebuffType.ICE_SLIDE)
@@ -431,6 +439,8 @@ func _physics_process(delta: float) -> void:
 		_decelerate(delta, Constants.FRICTION_GROUND)
 	var pre_slide: Vector3 = velocity
 	move_and_slide()
+	if _launched and is_on_floor() and _now() - _launch_started > LAUNCH_MIN_AIR:
+		_launched = false
 	_process_stomp(pre_slide)
 	_process_landing(pre_slide, delta)
 	_animate_model(delta)
@@ -642,6 +652,18 @@ func teleport_to(pos: Vector3) -> void:
 	_portal_until = _now() + Constants.PORTAL_COOLDOWN
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.bubble_pop_burst())
 	AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
+
+
+## Throws the player along a ballistic arc that lands on [param target] after
+## [param flight_time] seconds; steering is off until then.
+func launch_to(target: Vector3, flight_time: float) -> void:
+	var offset: Vector3 = target - global_position
+	velocity = Vector3(offset.x / flight_time,
+		(offset.y + 0.5 * Constants.GRAVITY * flight_time * flight_time) / flight_time,
+		offset.z / flight_time)
+	_launched = true
+	_launch_started = _now()
+	_pounding = false
 
 
 ## Shows this player the arena map (radar item, map beacons).
