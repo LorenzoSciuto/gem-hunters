@@ -18,5 +18,5 @@ func _init() -> void:
 func _on_hit_player(player: Player) -> void:
 	player.lose_gems(GEMS_KNOCKED)
 	player.apply_knockback((-global_transform.basis.z + Vector3.UP * KNOCKBACK_LIFT) * KNOCKBACK_FORCE)
-	player.stun(GLOVE_STUN)
+	player.status.stun(GLOVE_STUN)
 	AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)

@@ -21,12 +21,10 @@ const BEAM_ALPHA: float = 0.35
 const HUE_SPEED: float = 0.25
 const GLOW_ENERGY: float = 2.5
 const LIGHT_RANGE: float = 7.0
-const POPUP_HEIGHT: float = 2.6
-const POPUP_LOSS_COLOR: Color = Color(1.0, 0.4, 0.35)
 
 var _model: Node3D = null
 var _gem_mat: StandardMaterial3D = null
-var _beam_mat: StandardMaterial3D = null
+var _beam: LightBeam = null
 var _light: OmniLight3D = null
 var _time: float = 0.0
 var _taken: bool = false
@@ -58,19 +56,8 @@ func _build_visuals() -> void:
 	_model.add_child(_cone(GEM_RADIUS * 0.5, GEM_RADIUS, CROWN_HEIGHT, CROWN_HEIGHT * 0.5))
 	_model.add_child(_cone(GEM_RADIUS, 0.01, PAVILION_HEIGHT, -PAVILION_HEIGHT * 0.5))
 
-	_beam_mat = StandardMaterial3D.new()
-	_beam_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_beam_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	var beam_mesh: CylinderMesh = CylinderMesh.new()
-	beam_mesh.top_radius = BEAM_RADIUS
-	beam_mesh.bottom_radius = BEAM_RADIUS
-	beam_mesh.height = BEAM_HEIGHT
-	beam_mesh.material = _beam_mat
-	var beam: MeshInstance3D = MeshInstance3D.new()
-	beam.mesh = beam_mesh
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	beam.position.y = BEAM_HEIGHT * 0.5
-	add_child(beam)
+	_beam = LightBeam.create(BEAM_HEIGHT, BEAM_RADIUS, Color(Color.WHITE, BEAM_ALPHA))
+	add_child(_beam)
 
 	_light = OmniLight3D.new()
 	_light.omni_range = LIGHT_RANGE
@@ -98,7 +85,7 @@ func _process(delta: float) -> void:
 	var color: Color = Color.from_hsv(fmod(_time * HUE_SPEED, 1.0), 0.75, 1.0)
 	_gem_mat.emission = color
 	_gem_mat.albedo_color = color
-	_beam_mat.albedo_color = Color(color, BEAM_ALPHA)
+	_beam.color = Color(color, BEAM_ALPHA)
 	_light.light_color = color
 
 
@@ -112,11 +99,11 @@ func _on_body_entered(body: Node3D) -> void:
 		var rival: Player = node as Player
 		if rival == finder or not lost.has(rival.player_id):
 			continue
-		rival.spin_from_hit()
+		rival.combat.spin_from_hit()
 		ParticleConfigs.spawn_burst(get_parent(), rival.global_position + Vector3.UP, ParticleConfigs.gem_lost_burst(), 40)
 		if lost[rival.player_id] > 0:
-			ParticleConfigs.spawn_popup_text(get_parent(), rival.global_position + Vector3.UP * POPUP_HEIGHT,
-				"-%d" % lost[rival.player_id], POPUP_LOSS_COLOR)
+			ParticleConfigs.spawn_popup_text(get_parent(), rival.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
+				"-%d" % lost[rival.player_id], ParticleConfigs.POPUP_LOSS_COLOR)
 	finder.model.play_cheer(1.5)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * FLOAT_HEIGHT,
 		ParticleConfigs.confetti_shower(), 80, 1.5)

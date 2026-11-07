@@ -10,11 +10,17 @@
 class_name ParticleConfigs
 extends RefCounted
 
-## Floating popup text (spawn_popup_text).
+## Floating popup text (spawn_popup_text): height over a hunter's feet and the
+## shared gain / loss colours.
+const POPUP_HEIGHT: float = 2.4
+const POPUP_GAIN_COLOR: Color = Color(0.5, 1.0, 0.55)
+const POPUP_LOSS_COLOR: Color = Color(1.0, 0.4, 0.35)
 const POPUP_FONT_SIZE: int = 160
 const POPUP_OUTLINE_SIZE: int = 22
 const POPUP_START_SCALE: float = 0.4
 const POPUP_POP_TIME: float = 0.18
+## Word popups ("+1 LIFE", "PRANK!") are smaller than number popups ("+2").
+const POPUP_WORD_SCALE: float = 0.5
 const POPUP_PIXEL_SIZE: float = 0.008
 const POPUP_RISE: float = 1.6
 const POPUP_DURATION: float = 1.1
@@ -22,17 +28,6 @@ const POPUP_DURATION: float = 1.1
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
-
-## Creates a gradient texture that wraps a single Color as a constant curve.
-## Used for simple solid-colour particle tinting.
-static func _solid_color_texture(color: Color) -> GradientTexture1D:
-	var grad := Gradient.new()
-	grad.colors = PackedColorArray([color, color])
-	grad.offsets = PackedFloat32Array([0.0, 1.0])
-	var tex := GradientTexture1D.new()
-	tex.gradient = grad
-	return tex
-
 
 ## Creates a gradient texture that fades from `color` to transparent.
 ## Gives particles a natural fade-out without touching ALPHA on the material.
@@ -414,7 +409,9 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 
 
 ## Big floating text (e.g. "+2") that rises and fades out, seen on every screen.
+## Text with letters (not just a number) is drawn smaller so it doesn't fill the view.
 static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Color) -> void:
+	var word: bool = text.to_upper() != text.to_lower()
 	var label: Label3D = Label3D.new()
 	label.text = text
 	label.font = Constants.DISPLAY_FONT
@@ -422,7 +419,7 @@ static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Co
 	label.outline_modulate = Color(0.1, 0.06, 0.15)
 	label.font_size = POPUP_FONT_SIZE
 	label.outline_size = POPUP_OUTLINE_SIZE
-	label.pixel_size = POPUP_PIXEL_SIZE
+	label.pixel_size = POPUP_PIXEL_SIZE * (POPUP_WORD_SCALE if word else 1.0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	parent.add_child(label)
 	label.global_position = pos

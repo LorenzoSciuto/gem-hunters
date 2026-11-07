@@ -123,8 +123,7 @@ focus_mode = 0
 text = "UI_BACK"
 
 [node name="ReadyBadge" type="Label" parent="Panel/VBox"]
-visible = false
-modulate = Color(0.45, 1, 0.55, 1)
+modulate = Color(0.45, 1, 0.55, 0)
 layout_mode = 2
 theme_type_variation = &"BannerLabel"
 text = "UI_READY"

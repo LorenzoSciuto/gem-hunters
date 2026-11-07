@@ -7,9 +7,9 @@ const WIPE_STUN: float = 2.0
 
 
 func _apply_trap_effect(player: Player) -> void:
-	if player.apply_debuff(Constants.DebuffType.SPLAT, effect_duration):
-		player.apply_debuff(Constants.DebuffType.LAUGHING, Constants.DEBUFF_DURATION_LAUGHING)
-		player.stun(WIPE_STUN)
+	if player.status.apply_debuff(Constants.DebuffType.SPLAT, effect_duration):
+		player.status.apply_debuff(Constants.DebuffType.LAUGHING, Constants.DEBUFF_DURATION_LAUGHING)
+		player.status.stun(WIPE_STUN)
 
 
 func _play_trap_sfx() -> void:
