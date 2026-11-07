@@ -351,6 +351,21 @@ func _show_banner(text: String, icon: Texture2D = null, tone: Tone = Tone.NEUTRA
 
 # ─── Debuff overlays ──────────────────────────────────────────────────────
 
+## Player.debuff_cleared: broke free of the ice early, so drop the frost now
+## (unless an ice slide still keeps it up).
+func clear_screen_effect(pid: int, debuff_type: int) -> void:
+	if pid != player_id or debuff_type != Constants.DebuffType.FROZEN or _player == null \
+			or _player.has_debuff(Constants.DebuffType.ICE_SLIDE) or effect_overlay.material == null:
+		return
+	if _effect_tween and _effect_tween.is_valid():
+		_effect_tween.kill()
+	var mat: ShaderMaterial = effect_overlay.material as ShaderMaterial
+	_effect_tween = create_tween()
+	_effect_tween.tween_method(func(v: float) -> void: mat.set_shader_parameter("intensity", v), 1.0, 0.0, OVERLAY_FADE)
+	_effect_tween.tween_callback(func() -> void:
+		effect_overlay.material = null
+		effect_overlay.modulate.a = 0.0)
+
 ## Player.screen_effect_requested: fade a full-screen overlay in and out.
 func show_screen_effect(pid: int, debuff_type: int, duration: float) -> void:
 	if pid != player_id:
@@ -368,6 +383,8 @@ func show_screen_effect(pid: int, debuff_type: int, duration: float) -> void:
 			mat.set_shader_parameter("tint_color", Color(1.0, 0.45, 0.75, 1.0))
 			shader_param = "progress"
 		Constants.DebuffType.FROZEN, Constants.DebuffType.ICE_SLIDE:
+			if debuff_type == Constants.DebuffType.FROZEN:
+				_show_banner(tr("MSG_BREAK_FREE").format([InputManager.prompt_text(player_id, "jump")]), null, Tone.BAD)
 			mat = ShaderMaterial.new()
 			mat.shader = SHADER_ICE
 			mat.set_shader_parameter("frost_color", Color(0.65, 0.9, 1.0, 0.85))

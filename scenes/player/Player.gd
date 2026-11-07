@@ -39,6 +39,9 @@ signal view_changed(player_id: int, first_person: bool)
 ## Requests that this player's HUD shows a debuff overlay.
 signal screen_effect_requested(player_id: int, debuff_type: int, duration: float)
 
+## A debuff ended (expired, or the player broke free of the ice).
+signal debuff_cleared(player_id: int, debuff_type: int)
+
 
 const MAX_JUMPS_SPRING: int = 2
 ## Traps are dropped this far behind the player so they don't trigger instantly.
@@ -83,6 +86,16 @@ const TACKLE_AIM: float = 0.5
 const MOUSE_SUPER_SLOT: int = 3
 const TACKLE_GRACE: float = 2.0
 
+## Frozen hunters mash jump to crack the ice: each press takes this much off
+## the freeze, which still lasts at least FREEZE_MIN_TIME (a trap must hold
+## its victim for a couple of seconds so rivals can come and rob them).
+const FREEZE_MASH_STEP: float = 0.15
+const FREEZE_MIN_TIME: float = 2.0
+const STRUGGLE_SQUASH: float = 0.2
+const STRUGGLE_PUFF_AMOUNT: int = 6
+## After a trap goes off, other traps let the victim pass for this long (no chain-trapping).
+const TRAP_GRACE: float = 2.0
+
 ## Jumping onto a rival's head: you bounce off, they get flattened and dazed,
 ## and one of their gems is yours.
 const STOMP_MIN_FALL_SPEED: float = 2.0
@@ -108,6 +121,9 @@ const LAND_DUST_AMOUNT: int = 14
 const DUST_LIFETIME: float = 0.6
 ## Short happy reaction on every gem pickup.
 const GEM_CHEER_TIME: float = 0.35
+
+## Dizzy stars circling the head while stunned or confused.
+const DIZZY_STAR_COUNT: int = 5
 
 ## Golden light pillar over the leader, visible over the walls from anywhere.
 const LEADER_BEAM_HEIGHT: float = 40.0
@@ -180,6 +196,9 @@ var _steal_target: Player = null
 var _steal_timer: float = 0.0
 var _laugh_time: float = 0.0
 var _stunned_until: float = 0.0
+var _frozen_since: float = 0.0
+var _was_frozen: bool = false
+var _trap_immune_until: float = 0.0
 var _was_on_floor: bool = true
 var _dust_timer: float = 0.0
 
@@ -194,6 +213,8 @@ func initialize(new_id: int, color: Color) -> void:
 	name_tag.layers = 1 << (Constants.NAME_TAG_LAYER_BASE + new_id)
 	var body_layer: int = Constants.MODEL_LAYER_BASE + new_id
 	model.set_render_layer(body_layer)
+	confusion_particles.draw_pass_1 = ParticleConfigs.star_mesh()
+	confusion_particles.amount = DIZZY_STAR_COUNT
 	for fx: VisualInstance3D in [bubble_mesh, ice_effect, confusion_particles]:
 		fx.layers = 1 << body_layer
 	var ring_mat: StandardMaterial3D = (player_ring.mesh.surface_get_material(0) as StandardMaterial3D).duplicate()
@@ -370,7 +391,11 @@ func _apply_look(look: Vector2) -> void:
 # ─── Frame update ─────────────────────────────────────────────────────────
 
 func _process(_delta: float) -> void:
-	ice_effect.visible = has_debuff(Constants.DebuffType.FROZEN)
+	var frozen: bool = has_debuff(Constants.DebuffType.FROZEN)
+	if _was_frozen and not frozen:
+		debuff_cleared.emit(player_id, Constants.DebuffType.FROZEN)
+	_was_frozen = frozen
+	ice_effect.visible = frozen
 	confusion_particles.emitting = has_debuff(Constants.DebuffType.INVERTED) or is_stunned()
 	bubble_mesh.visible = _has_bubble() or _is_shielded()
 
@@ -392,10 +417,16 @@ func _physics_process(delta: float) -> void:
 		_handle_actions()
 		_process_steal(delta)
 		_process_tackle()
+	elif controls_enabled and has_debuff(Constants.DebuffType.FROZEN):
+		if Input.is_action_just_pressed(_action("jump")):
+			_jump()  # Frozen: a jump press cracks the ice instead.
+		_decelerate(delta, Constants.FRICTION_GROUND)
 	elif is_stunned():
-		# Knocked back: keep the momentum in the air, slide it out on the ground.
+		# Knocked back: keep the momentum in the air, slide it out on the ground
+		# (barely slowing on ice / after a banana).
 		if is_on_floor():
-			_decelerate(delta, KNOCKBACK_FRICTION)
+			var on_ice: bool = has_debuff(Constants.DebuffType.ICE_SLIDE)
+			_decelerate(delta, Constants.FRICTION_ICE if on_ice else KNOCKBACK_FRICTION)
 	else:
 		_decelerate(delta, Constants.FRICTION_GROUND)
 	var pre_slide: Vector3 = velocity
@@ -457,7 +488,10 @@ func _handle_actions() -> void:
 
 
 func _jump() -> void:
-	if not controls_enabled or has_debuff(Constants.DebuffType.FROZEN):
+	if not controls_enabled:
+		return
+	if has_debuff(Constants.DebuffType.FROZEN):
+		_struggle()
 		return
 	if is_on_floor():
 		velocity.y = _jump_velocity
@@ -721,6 +755,7 @@ func lose_gems(amount: int, scatter: bool = true) -> int:
 func _spawn_loose_gems(count: int) -> void:
 	for i: int in count:
 		var gem: GemLoose = gem_loose_scene.instantiate() as GemLoose
+		gem.dropped_by = player_id
 		get_parent().add_child(gem)
 		gem.global_position = global_position + Vector3.UP * GEM_BURST_HEIGHT
 		var angle: float = randf() * TAU
@@ -769,9 +804,38 @@ func apply_debuff(type: Constants.DebuffType, duration: float) -> bool:
 	if type == Constants.DebuffType.LAUGHING:
 		_laugh_time = 0.0
 	if type == Constants.DebuffType.FROZEN:
+		if not _was_frozen:
+			_frozen_since = _now()
 		ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.freeze_puff())
 	screen_effect_requested.emit(player_id, type, duration)
 	return true
+
+
+## One mash while frozen: shave the freeze down toward its minimum.
+func _struggle() -> void:
+	var earliest: float = _frozen_since + FREEZE_MIN_TIME
+	var until: float = maxf(_debuff_until[Constants.DebuffType.FROZEN] - FREEZE_MASH_STEP, earliest)
+	_debuff_until[Constants.DebuffType.FROZEN] = until
+	model.play_squash(STRUGGLE_SQUASH)
+	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.freeze_puff(),
+		STRUGGLE_PUFF_AMOUNT, 0.4)
+	if until <= _now():
+		AudioManager.play_sfx(AudioManager.SoundEffect.BUBBLE_POP)
+
+
+## Bubble or shield up: the next hit is absorbed (traps check this before
+## taking gems, since taking them pops the bubble).
+func is_protected() -> bool:
+	return _has_bubble() or _is_shielded()
+
+
+## Traps skip a hunter who was just caught by another one.
+func can_be_trapped() -> bool:
+	return _trap_immune_until <= _now()
+
+
+func mark_trapped() -> void:
+	_trap_immune_until = _now() + TRAP_GRACE
 
 
 func _pop_bubble() -> void:

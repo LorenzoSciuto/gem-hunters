@@ -22,7 +22,7 @@ const GEM_BURST_HEIGHT: float = 0.4
 @export var owner_player_id: int = -1
 ## Gems taken from the victim on trigger.
 @export var gems_stolen: int = 3
-## Duration of the applied debuff in seconds.
+## Duration of the trap's main debuff in seconds (set per trap scene).
 @export var effect_duration: float = 3.5
 ## Traps catch their own owner too (after ARM_DELAY): watch where you drop them.
 @export var can_self_trigger: bool = true
@@ -51,23 +51,29 @@ func _try_trigger(player: Player) -> void:
 		return
 	if player.player_id == owner_player_id and (not _is_armed or not can_self_trigger):
 		return
+	if not player.can_be_trapped():
+		return  # Just caught by another trap; this one stays armed.
+	player.mark_trapped()
 	_trigger(player)
 
 
 func _trigger(player: Player) -> void:
 	_triggered = true
 	set_deferred("monitoring", false)
+	# Read before taking gems: that pops the bubble, which must also absorb the effect.
+	var protected: bool = player.is_protected()
 
 	var removed: int = player.lose_gems(gems_stolen, false)
 	if removed > 0:
 		var to_owner: int = ceili(removed / 2.0) if player.player_id != owner_player_id else 0
 		_reward_owner(to_owner)
-		scatter_loose_gems(removed - to_owner)
+		scatter_loose_gems(removed - to_owner, player.player_id)
 	else:
 		scatter_loose_gems(EMPTY_VICTIM_BONUS)
 
 	_play_trap_sfx()
-	_apply_trap_effect(player)
+	if not protected:
+		_apply_trap_effect(player)
 	_self_destruct()
 
 
@@ -81,9 +87,11 @@ func _reward_owner(amount: int) -> void:
 			return
 
 
-func scatter_loose_gems(count: int) -> void:
+## [param dropped_by]: the victim, who can't grab them back straight away.
+func scatter_loose_gems(count: int, dropped_by: int = -1) -> void:
 	for i: int in count:
 		var gem: GemLoose = (load(GEM_LOOSE_PATH) as PackedScene).instantiate() as GemLoose
+		gem.dropped_by = dropped_by
 		get_parent().add_child(gem)
 		gem.global_position = global_position + Vector3.UP * GEM_BURST_HEIGHT
 		var angle: float = randf() * TAU
