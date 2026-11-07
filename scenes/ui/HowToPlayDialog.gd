@@ -54,8 +54,12 @@ func _show_page(index: int) -> void:
 
 func _build_hunters() -> void:
 	page.add_child(_text(tr("HELP_HUNTERS_INTRO")))
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = 2
+	page.add_child(grid)
 	for hunter: CharacterData in HUNTERS:
 		var row: HBoxContainer = HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(_icon(ItemCatalog.SUPER_ICONS[hunter.trait_type], HUNTER_ICON_SIZE))
 		var info: VBoxContainer = VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -64,11 +68,12 @@ func _build_hunters() -> void:
 		info.add_child(name_label)
 		info.add_child(_text(tr(hunter.trait_key), &"SubtleLabel"))
 		var super_key: String = CharacterData.SUPER_KEYS[hunter.trait_type]
-		var super_label: Label = _text("%s: %s" % [tr(super_key), tr(super_key + "_DESC")])
+		# Name only: hunters share superpowers, the full description is on the selection card.
+		var super_label: Label = _text(tr(super_key))
 		super_label.modulate = SUPER_COLOR
 		info.add_child(super_label)
 		row.add_child(info)
-		page.add_child(row)
+		grid.add_child(row)
 
 
 func _build_items() -> void:

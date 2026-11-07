@@ -22,7 +22,7 @@ color = Color(1, 0.8, 0.2, 1)
 
 [node name="ProjTickleRay" type="Area3D"]
 collision_layer = 16
-collision_mask = 3
+collision_mask = 19
 script = ExtResource("1_tickle")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

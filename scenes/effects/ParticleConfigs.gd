@@ -12,7 +12,9 @@ extends RefCounted
 
 ## Floating popup text (spawn_popup_text).
 const POPUP_FONT_SIZE: int = 160
-const POPUP_OUTLINE_SIZE: int = 36
+const POPUP_OUTLINE_SIZE: int = 22
+const POPUP_START_SCALE: float = 0.4
+const POPUP_POP_TIME: float = 0.18
 const POPUP_PIXEL_SIZE: float = 0.008
 const POPUP_RISE: float = 1.6
 const POPUP_DURATION: float = 1.1
@@ -282,6 +284,35 @@ static func confetti_shower() -> ParticleProcessMaterial:
 	return mat
 
 
+## dust_puff
+## Soft ground dust kicked up by running feet and landings; [param color] tints it
+## (the arena floor colour reads best).
+static func dust_puff(color: Color = Color(1.0, 0.97, 0.92, 0.7)) -> ParticleProcessMaterial:
+	var mat := ParticleProcessMaterial.new()
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
+	mat.emission_ring_axis = Vector3.UP
+	mat.emission_ring_radius = 0.3
+	mat.emission_ring_inner_radius = 0.1
+	mat.emission_ring_height = 0.02
+	mat.direction = Vector3(0.0, 1.0, 0.0)
+	mat.spread = 75.0
+	mat.initial_velocity_min = 0.6
+	mat.initial_velocity_max = 1.6
+	mat.gravity = Vector3(0.0, 0.4, 0.0)
+	mat.damping_min = 2.0
+	mat.damping_max = 3.0
+	mat.scale_min = 0.25
+	mat.scale_max = 0.5
+	var grow := Curve.new()
+	grow.add_point(Vector2(0.0, 0.4))
+	grow.add_point(Vector2(1.0, 1.0))
+	var grow_tex := CurveTexture.new()
+	grow_tex.curve = grow
+	mat.scale_curve = grow_tex
+	mat.color_ramp = _fade_out_texture(color)
+	return mat
+
+
 static var _dot: GradientTexture2D = null
 
 
@@ -329,6 +360,7 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Color) -> void:
 	var label: Label3D = Label3D.new()
 	label.text = text
+	label.font = Constants.DISPLAY_FONT
 	label.modulate = color
 	label.outline_modulate = Color(0.1, 0.06, 0.15)
 	label.font_size = POPUP_FONT_SIZE
@@ -338,6 +370,8 @@ static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Co
 	parent.add_child(label)
 	label.global_position = pos
 	var tween: Tween = label.create_tween().set_parallel()
+	label.scale = Vector3.ONE * POPUP_START_SCALE
+	tween.tween_property(label, "scale", Vector3.ONE, POPUP_POP_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "global_position:y", pos.y + POPUP_RISE, POPUP_DURATION) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "modulate:a", 0.0, POPUP_DURATION).set_delay(POPUP_DURATION * 0.5)

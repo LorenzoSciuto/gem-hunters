@@ -6,7 +6,9 @@
 extends Area3D
 class_name TrapBase
 
-const GEM_LOOSE_SCENE: PackedScene = preload("res://scenes/gems/GemLoose.tscn")
+## Loaded on use, not preloaded: GemLoose references Player, which references
+## TrapBase, so a preload here is a load cycle ("Parse Error: Busy").
+const GEM_LOOSE_PATH: String = "res://scenes/gems/GemLoose.tscn"
 
 ## Grace period before the owner can be caught by their own trap.
 const ARM_DELAY: float = 1.0
@@ -32,6 +34,7 @@ var _is_armed: bool = false
 
 
 func _ready() -> void:
+	add_to_group(Constants.GROUP_TRAPS)
 	body_entered.connect(_on_body_entered)
 	get_tree().create_timer(ARM_DELAY).timeout.connect(func() -> void: _is_armed = true)
 	if anim_player and anim_player.has_animation("idle_wobble"):
@@ -80,7 +83,7 @@ func _reward_owner(amount: int) -> void:
 
 func scatter_loose_gems(count: int) -> void:
 	for i: int in count:
-		var gem: GemLoose = GEM_LOOSE_SCENE.instantiate() as GemLoose
+		var gem: GemLoose = (load(GEM_LOOSE_PATH) as PackedScene).instantiate() as GemLoose
 		get_parent().add_child(gem)
 		gem.global_position = global_position + Vector3.UP * GEM_BURST_HEIGHT
 		var angle: float = randf() * TAU
@@ -89,6 +92,18 @@ func scatter_loose_gems(count: int) -> void:
 			Constants.GEM_LOOSE_UP_FORCE,
 			sin(angle) * Constants.GEM_LOOSE_SPREAD_FORCE
 		))
+
+
+## Breaks the trap harmlessly (hit by a projectile, ground pound nearby).
+func defuse() -> void:
+	if _triggered:
+		return
+	_triggered = true
+	set_deferred("monitoring", false)
+	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * GEM_BURST_HEIGHT,
+		ParticleConfigs.bubble_pop_burst())
+	AudioManager.play_sfx(AudioManager.SoundEffect.BUBBLE_POP)
+	_self_destruct()
 
 
 ## Virtual — apply the trap's debuff.
@@ -103,6 +118,7 @@ func _play_trap_sfx() -> void:
 
 ## Hide meshes, fire particles, then free once effects have played out.
 func _self_destruct() -> void:
+	remove_from_group(Constants.GROUP_TRAPS)
 	for child: Node in get_children():
 		if child is GPUParticles3D:
 			(child as GPUParticles3D).restart()

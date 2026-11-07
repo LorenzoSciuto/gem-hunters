@@ -48,7 +48,7 @@ const MODEL_TURN_SPEED: float = 14.0
 ## Height at which loose gems burst out of a hit player.
 const GEM_BURST_HEIGHT: float = 1.0
 const WINNER_HOP_HEIGHT: float = 1.2
-const ANIM_LERP_SPEED: float = 12.0
+const WINNER_CHEER_TIME: float = 3.0
 ## Third-person camera sits slightly right of the head, over the shoulder.
 const SHOULDER_OFFSET: float = 0.6
 const MIN_KNOCKBACK_RESISTANCE: float = 0.1
@@ -82,6 +82,32 @@ const TACKLE_AIM: float = 0.5
 ## Mouse wheel: slots 0-2 are items, MOUSE_SUPER_SLOT is the superpower.
 const MOUSE_SUPER_SLOT: int = 3
 const TACKLE_GRACE: float = 2.0
+
+## Jumping onto a rival's head: you bounce off, they get flattened and dazed,
+## and one of their gems is yours.
+const STOMP_MIN_FALL_SPEED: float = 2.0
+## Collision normal must point up at least this much (cosine) to count as a stomp.
+const STOMP_NORMAL_Y: float = 0.7
+const STOMP_BOUNCE: float = 9.5
+const STOMP_GEMS: int = 1
+const STOMP_STUN: float = 1.0
+
+## Any knockback takes control away briefly, so the hit actually carries the
+## victim; during the stun they slide with this (lower) friction.
+const KNOCKBACK_STUN: float = 0.45
+const KNOCKBACK_FRICTION: float = 22.0
+
+## Landing squash scales with fall speed up to this; harder landings kick up dust.
+const LAND_SQUASH_SPEED: float = 14.0
+const LAND_SQUASH_MAX: float = 0.45
+const LAND_DUST_SPEED: float = 7.0
+## Running feet puff dust this often (s) above TACKLE_MIN_SPEED.
+const RUN_DUST_INTERVAL: float = 0.24
+const RUN_DUST_AMOUNT: int = 4
+const LAND_DUST_AMOUNT: int = 14
+const DUST_LIFETIME: float = 0.6
+## Short happy reaction on every gem pickup.
+const GEM_CHEER_TIME: float = 0.35
 
 ## Golden light pillar over the leader, visible over the walls from anywhere.
 const LEADER_BEAM_HEIGHT: float = 40.0
@@ -153,7 +179,9 @@ var _pound_started: float = 0.0
 var _steal_target: Player = null
 var _steal_timer: float = 0.0
 var _laugh_time: float = 0.0
-var _walk_time: float = 0.0
+var _stunned_until: float = 0.0
+var _was_on_floor: bool = true
+var _dust_timer: float = 0.0
 
 
 # ─── Setup ────────────────────────────────────────────────────────────────
@@ -161,6 +189,7 @@ var _walk_time: float = 0.0
 func initialize(new_id: int, color: Color) -> void:
 	player_id = new_id
 	name_tag.text = "P%d" % (new_id + 1)
+	name_tag.font = Constants.DISPLAY_FONT
 	name_tag.modulate = color
 	name_tag.layers = 1 << (Constants.NAME_TAG_LAYER_BASE + new_id)
 	var body_layer: int = Constants.MODEL_LAYER_BASE + new_id
@@ -248,6 +277,19 @@ func has_debuff(type: Constants.DebuffType) -> bool:
 	return _debuff_until.get(type, 0.0) > _now()
 
 
+## Dazed by a hit: no control for a moment, dizzy stars overhead.
+func is_stunned() -> bool:
+	return _stunned_until > _now()
+
+
+## Takes control away for [param duration] seconds (shield and bubble protect).
+func stun(duration: float) -> void:
+	if _is_shielded() or _has_bubble():
+		return
+	_stunned_until = maxf(_stunned_until, _now() + duration)
+	model.play_hurt()
+
+
 ## Frozen or confused players can be robbed by bumping into them.
 func is_vulnerable() -> bool:
 	return has_debuff(Constants.DebuffType.FROZEN) or has_debuff(Constants.DebuffType.INVERTED)
@@ -329,7 +371,7 @@ func _apply_look(look: Vector2) -> void:
 
 func _process(_delta: float) -> void:
 	ice_effect.visible = has_debuff(Constants.DebuffType.FROZEN)
-	confusion_particles.emitting = has_debuff(Constants.DebuffType.INVERTED)
+	confusion_particles.emitting = has_debuff(Constants.DebuffType.INVERTED) or is_stunned()
 	bubble_mesh.visible = _has_bubble() or _is_shielded()
 
 
@@ -344,15 +386,22 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed(_action("toggle_view")):
 		toggle_view()
-	if controls_enabled and not has_debuff(Constants.DebuffType.FROZEN):
+	if controls_enabled and not has_debuff(Constants.DebuffType.FROZEN) and not is_stunned():
 		_handle_look(delta)
 		_handle_movement(delta)
 		_handle_actions()
 		_process_steal(delta)
 		_process_tackle()
+	elif is_stunned():
+		# Knocked back: keep the momentum in the air, slide it out on the ground.
+		if is_on_floor():
+			_decelerate(delta, KNOCKBACK_FRICTION)
 	else:
 		_decelerate(delta, Constants.FRICTION_GROUND)
+	var pre_slide: Vector3 = velocity
 	move_and_slide()
+	_process_stomp(pre_slide)
+	_process_landing(pre_slide, delta)
 	_animate_model(delta)
 
 
@@ -419,27 +468,33 @@ func _jump() -> void:
 		AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
 
 
-## Squash-and-stretch waddle; the model turns toward where it is walking.
+## The model animates itself from speed and floor contact; here it only turns
+## toward where the body is moving.
 func _animate_model(delta: float) -> void:
 	var horiz: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
-	var target_scale: Vector3 = Vector3.ONE
-	var tilt: float = 0.0
-	if not is_on_floor():
-		target_scale = Vector3(0.92, 1.15, 0.92)
-	elif horiz.length() > 0.5:
-		_walk_time += delta * horiz.length() * 2.2
-		var bounce: float = sin(_walk_time)
-		tilt = sin(_walk_time * 0.5) * 0.08
-		target_scale = Vector3(1.0 - bounce * 0.04, 1.0 + bounce * 0.08, 1.0)
-	else:
-		var breathe: float = sin(_now() * 3.0) * 0.025
-		target_scale = Vector3(1.0 - breathe * 0.5, 1.0 + breathe, 1.0)
-	model.scale = model.scale.lerp(target_scale, delta * ANIM_LERP_SPEED)
-	model.rotation.z = lerpf(model.rotation.z, tilt, delta * ANIM_LERP_SPEED)
-	if horiz.length() > 0.5:
+	model.set_motion(horiz.length(), is_on_floor())
+	if horiz.length() > 0.5 and not is_stunned():
 		var local: Vector3 = global_transform.basis.inverse() * horiz
 		var yaw: float = atan2(local.x, local.z)
 		model.rotation.y = lerp_angle(model.rotation.y, yaw, delta * MODEL_TURN_SPEED)
+
+
+## Landing squash and dust, plus running dust puffs.
+func _process_landing(pre_slide: Vector3, delta: float) -> void:
+	var grounded: bool = is_on_floor()
+	if grounded and not _was_on_floor:
+		var fall: float = -pre_slide.y
+		model.play_squash(clampf(fall / LAND_SQUASH_SPEED, 0.0, 1.0) * LAND_SQUASH_MAX)
+		if fall > LAND_DUST_SPEED:
+			ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.dust_puff(),
+				LAND_DUST_AMOUNT, DUST_LIFETIME)
+	_was_on_floor = grounded
+	var running: bool = grounded and Vector2(velocity.x, velocity.z).length() > TACKLE_MIN_SPEED
+	_dust_timer = _dust_timer - delta if running else RUN_DUST_INTERVAL
+	if _dust_timer <= 0.0:
+		_dust_timer = RUN_DUST_INTERVAL
+		ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.dust_puff(),
+			RUN_DUST_AMOUNT, DUST_LIFETIME)
 
 
 # ─── Items ────────────────────────────────────────────────────────────────
@@ -592,10 +647,16 @@ func use_superpower() -> void:
 	superpower_used.emit(player_id, character_data.trait_type)
 
 
-## Bouncer lands: rivals nearby are blown away and drop gems.
+## Bouncer lands: rivals nearby are blown away and drop gems, traps nearby break.
 func _ground_pound_impact() -> void:
 	_pounding = false
 	ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.gem_lost_burst())
+	ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.dust_puff(), LAND_DUST_AMOUNT * 2, DUST_LIFETIME)
+	model.play_squash(LAND_SQUASH_MAX)
+	for node: Node in get_tree().get_nodes_in_group(Constants.GROUP_TRAPS):
+		var trap: TrapBase = node as TrapBase
+		if trap and trap.global_position.distance_to(global_position) <= POUND_RADIUS:
+			trap.defuse()
 	AudioManager.play_sfx(AudioManager.SoundEffect.BUBBLE_POP)
 	for rival: Player in _rivals():
 		var offset: Vector3 = rival.global_position - global_position
@@ -630,6 +691,7 @@ func collect_gem(value: int, boost: bool = true) -> int:
 		AudioManager.play_sfx(AudioManager.SoundEffect.GEM_COLLECT)
 		ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * GEM_BURST_HEIGHT,
 			ParticleConfigs.gem_collect_burst())
+		model.play_cheer(GEM_CHEER_TIME)
 	return gained
 
 
@@ -678,6 +740,7 @@ func apply_knockback(impulse: Vector3) -> void:
 		return
 	var resistance: float = character_data.knockback_resistance if character_data else 1.0
 	velocity += impulse / maxf(resistance, MIN_KNOCKBACK_RESISTANCE)
+	stun(KNOCKBACK_STUN)
 
 
 func play_winner_animation() -> void:
@@ -686,6 +749,7 @@ func play_winner_animation() -> void:
 	hop.tween_property(model, "position:y", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * 3.0,
 		ParticleConfigs.confetti_shower(), 80, 2.5)
+	model.play_cheer(WINNER_CHEER_TIME)
 
 
 # ─── Debuffs ──────────────────────────────────────────────────────────────
@@ -734,6 +798,39 @@ func _process_steal(delta: float) -> void:
 	if character_data and character_data.trait_type == CharacterData.TraitType.PRANKSTER:
 		amount = 2
 	collect_gem(_steal_target.lose_gems(amount, false), false)
+
+
+# ─── Stomp ────────────────────────────────────────────────────────────────
+
+## Landing on a rival's head (falling onto them, contact normal pointing up).
+func _process_stomp(pre_slide: Vector3) -> void:
+	if not controls_enabled or pre_slide.y > -STOMP_MIN_FALL_SPEED:
+		return
+	for n: int in get_slide_collision_count():
+		var hit: KinematicCollision3D = get_slide_collision(n)
+		var rival: Player = hit.get_collider() as Player
+		if rival and hit.get_normal().y >= STOMP_NORMAL_Y:
+			_stomp(rival)
+			return
+
+
+func _stomp(rival: Player) -> void:
+	velocity.y = STOMP_BOUNCE
+	_jump_count = 1
+	AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
+	if not rival.can_be_tackled():
+		return  # Still a bounce pad, just no second steal.
+	rival._tackle_immune_until = _now() + TACKLE_GRACE
+	rival.model.play_squash(1.0)
+	rival.stun(STOMP_STUN)
+	var stolen: int = rival.lose_gems(STOMP_GEMS, false)
+	collect_gem(stolen, false)
+	_hit_feedback(rival, stolen, true)
+
+
+## Tanky's shield bounces projectiles back at whoever fired them.
+func reflects_projectiles() -> bool:
+	return _is_shielded()
 
 
 # ─── Tackle ───────────────────────────────────────────────────────────────
@@ -788,6 +885,7 @@ func _hit_feedback(rival: Player, gems: int, stolen: bool) -> void:
 
 
 func spin_from_hit() -> void:
+	model.play_hurt()
 	var tween: Tween = create_tween()
 	tween.tween_property(model, "rotation:y", model.rotation.y + TAU, HIT_SPIN_TIME) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

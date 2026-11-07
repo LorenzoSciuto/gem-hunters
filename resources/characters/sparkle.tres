@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/CharacterData.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "sparkle"
+name_key = "CHAR_SPARKLE_NAME"
+bio_key = "CHAR_SPARKLE_BIO"
+trait_key = "CHAR_SPARKLE_TRAIT"
+trait_type = 1
+color = Color(1, 0.55, 0.8, 1)
+speed_multiplier = 1.2
+jump_multiplier = 1.05
+knockback_resistance = 0.9
+gem_loss_multiplier = 1.0
+mesh_scale = Vector3(0.9, 1.0, 0.9)
+stat_speed = 5
+stat_jump = 3
+stat_defense = 2
+stat_tricks = 3

@@ -46,12 +46,19 @@ const KEYBOARD_DEFAULTS: Array[Dictionary] = [
 		"item_1": KEY_KP_7, "item_2": KEY_KP_9, "item_3": KEY_KP_1, "super": KEY_KP_3, "toggle_view": KEY_KP_ADD,
 	},
 ]
+## Menu "back" key per keyboard scheme (character selection: unlock / leave).
+const KEYBOARD_BACK_KEYS: Array[Key] = [KEY_ESCAPE, KEY_BACKSPACE]
+const PAD_BACK_BUTTON: JoyButton = JOY_BUTTON_B
 ## Gamepad layout: face buttons fire, shoulders jump.
 const PAD_DEFAULTS: Dictionary = {
 	"jump": JOY_BUTTON_RIGHT_SHOULDER,
 	"item_1": JOY_BUTTON_X, "item_2": JOY_BUTTON_A, "item_3": JOY_BUTTON_B,
-	"super": JOY_BUTTON_Y, "toggle_view": JOY_BUTTON_RIGHT_STICK,
+	"super": JOY_BUTTON_Y, "toggle_view": JOY_BUTTON_LEFT_SHOULDER,
 }
+## Saved-file version. v1 put the camera view on R3, which players click by
+## accident while turning the camera; loading a v1 file moves it to the new default.
+const SAVE_VERSION: int = 2
+const LEGACY_VIEW_BUTTON: JoyButton = JOY_BUTTON_RIGHT_STICK
 ## The right trigger always doubles the jump button.
 const PAD_TRIGGERS: Dictionary = {"jump": JOY_AXIS_TRIGGER_RIGHT}
 const PAD_BUTTON_NAMES: Dictionary = {
@@ -123,6 +130,11 @@ func key_text(scheme: int, action: String) -> String:
 	return OS.get_keycode_string(DisplayServer.keyboard_get_keycode_from_physical(code))
 
 
+## Display text of the scheme's menu "back" key.
+func back_key_text(scheme: int) -> String:
+	return OS.get_keycode_string(KEYBOARD_BACK_KEYS[scheme])
+
+
 func pad_text(action: String) -> String:
 	return PAD_BUTTON_NAMES.get(_pad[action], "Pad %d" % _pad[action])
 
@@ -185,6 +197,7 @@ func _save_and_apply() -> void:
 			cfg.set_value("keyboard_%d" % scheme, action, _keyboard[scheme][action])
 	for action: String in BUTTON_ACTIONS:
 		cfg.set_value("gamepad", action, _pad[action])
+	cfg.set_value("meta", "version", SAVE_VERSION)
 	cfg.save(SAVE_PATH)
 	_apply()
 	bindings_changed.emit()
@@ -199,6 +212,8 @@ func _load() -> void:
 			_keyboard[scheme][action] = int(cfg.get_value("keyboard_%d" % scheme, action, _keyboard[scheme][action]))
 	for action: String in BUTTON_ACTIONS:
 		_pad[action] = int(cfg.get_value("gamepad", action, _pad[action]))
+	if int(cfg.get_value("meta", "version", 1)) < SAVE_VERSION and _pad["toggle_view"] == LEGACY_VIEW_BUTTON:
+		set_pad_binding("toggle_view", PAD_DEFAULTS["toggle_view"])  # Also re-saves as the current version.
 
 
 ## Rebuilds every p{N}_* action from the keyboard schemes and assigned pads.

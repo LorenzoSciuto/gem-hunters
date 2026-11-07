@@ -11,6 +11,9 @@ const PULSE_AMPLITUDE: float = 0.1
 ## Gems burst out of the player who lost them; without a delay they would be
 ## re-collected instantly by that same player.
 const PICKUP_DELAY: float = 0.8
+## Once pickable, a loose gem drifts toward the nearest hunter within this range.
+const MAGNET_RADIUS: float = 3.0
+const MAGNET_FORCE: float = 30.0
 
 const MAT_STANDARD: Material = preload("res://resources/materials/mat_gem_standard.tres")
 const MAT_RARE: Material = preload("res://resources/materials/mat_gem_rare.tres")
@@ -26,13 +29,16 @@ var _lifetime_remaining: float = LIFETIME
 var _collected: bool = false
 var _base_scale: Vector3 = Vector3.ONE
 var _pulse_time: float = 0.0
+var _pickable: bool = false
 
 func _ready() -> void:
 	_base_scale = scale
 	_apply_material()
 	pickup_range.body_entered.connect(_on_pickup_range_body_entered)
 	pickup_range.monitoring = false
-	get_tree().create_timer(PICKUP_DELAY).timeout.connect(func() -> void: pickup_range.monitoring = true)
+	get_tree().create_timer(PICKUP_DELAY).timeout.connect(func() -> void:
+		pickup_range.monitoring = true
+		_pickable = true)
 
 func launch(impulse: Vector3) -> void:
 	apply_impulse(impulse)
@@ -46,10 +52,25 @@ func _physics_process(delta: float) -> void:
 		_expire()
 		return
 
+	if _pickable:
+		_pull_toward_nearest_player()
+
 	if _lifetime_remaining <= PULSE_THRESHOLD:
 		_pulse_time += delta * PULSE_SPEED
 		var pulse_offset: float = sin(_pulse_time) * PULSE_AMPLITUDE
 		scale = _base_scale * (1.0 + pulse_offset)
+
+func _pull_toward_nearest_player() -> void:
+	var best: Vector3 = Vector3.ZERO
+	var best_dist: float = MAGNET_RADIUS
+	for node: Node in get_tree().get_nodes_in_group(Constants.GROUP_PLAYERS):
+		var offset: Vector3 = (node as Node3D).global_position + Vector3.UP * 0.5 - global_position
+		if offset.length() < best_dist:
+			best_dist = offset.length()
+			best = offset
+	if best != Vector3.ZERO:
+		apply_central_force(best.normalized() * MAGNET_FORCE * (1.0 - best_dist / MAGNET_RADIUS + 0.3))
+
 
 func _apply_material() -> void:
 	if not mesh_instance:

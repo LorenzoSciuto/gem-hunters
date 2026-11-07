@@ -1,20 +1,51 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/traps/TrapBanana.gd" id="1_banana"]
+
+[ext_resource type="Shader" path="res://shaders/stylized_lit.gdshader" id="lit_shader"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_banana"]
 height = 0.5
 radius = 0.65
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_peel"]
-diffuse_mode = 3
-albedo_color = Color(1, 0.86, 0.2, 1)
-roughness = 0.35
+[sub_resource type="ShaderMaterial" id="Mat_peel"]
+render_priority = 0
+shader = ExtResource("lit_shader")
+shader_parameter/albedo = Color(1, 0.85, 0.18, 1)
+shader_parameter/ground_shade = 0.0
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_peel"]
-material = SubResource("StandardMaterial3D_peel")
+[sub_resource type="ShaderMaterial" id="Mat_flesh"]
+render_priority = 0
+shader = ExtResource("lit_shader")
+shader_parameter/albedo = Color(1, 0.96, 0.78, 1)
+shader_parameter/ground_shade = 0.0
+
+[sub_resource type="ShaderMaterial" id="Mat_tip"]
+render_priority = 0
+shader = ExtResource("lit_shader")
+shader_parameter/albedo = Color(0.4, 0.26, 0.12, 1)
+shader_parameter/ground_shade = 0.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_peel"]
+material = SubResource("Mat_peel")
 radius = 0.1
-height = 0.7
+height = 0.5
+radial_segments = 12
+rings = 4
+
+[sub_resource type="CapsuleMesh" id="Mesh_flesh"]
+material = SubResource("Mat_flesh")
+radius = 0.1
+height = 0.38
+radial_segments = 14
+rings = 4
+
+[sub_resource type="CylinderMesh" id="Mesh_tip"]
+material = SubResource("Mat_tip")
+top_radius = 0.035
+bottom_radius = 0.05
+height = 0.07
+radial_segments = 8
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_banana"]
 direction = Vector3(0, 1, 0)
@@ -43,17 +74,29 @@ shape = SubResource("CylinderShape3D_banana")
 
 [node name="Model" type="Node3D" parent="."]
 
+[node name="Flesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+mesh = SubResource("Mesh_flesh")
+
+[node name="Tip" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, 0)
+mesh = SubResource("Mesh_tip")
+
+[node name="Peel0" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1.0607, 0.6725, -0.0874, 0.0000, -0.3090, -0.3804, -1.0607, 0.6725, -0.0874, 0.182, 0.120, 0.182)
+mesh = SubResource("Mesh_peel")
+
 [node name="Peel1" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.1, 0)
-mesh = SubResource("CapsuleMesh_peel")
+transform = Transform3D(-1.0607, 0.6725, -0.0874, 0.0000, -0.3090, -0.3804, -1.0607, -0.6725, 0.0874, 0.182, 0.120, -0.182)
+mesh = SubResource("Mesh_peel")
 
 [node name="Peel2" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(0.5, -0.866, 0, 0, 0, -1, 0.866, 0.5, 0, 0, 0.1, 0)
-mesh = SubResource("CapsuleMesh_peel")
+transform = Transform3D(-1.0607, -0.6725, 0.0874, 0.0000, -0.3090, -0.3804, 1.0607, -0.6725, 0.0874, -0.182, 0.120, -0.182)
+mesh = SubResource("Mesh_peel")
 
 [node name="Peel3" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(-0.5, -0.866, 0, 0, 0, 1, -0.866, 0.5, 0, 0, 0.1, 0)
-mesh = SubResource("CapsuleMesh_peel")
+transform = Transform3D(1.0607, -0.6725, 0.0874, 0.0000, -0.3090, -0.3804, 1.0607, 0.6725, -0.0874, -0.182, 0.120, 0.182)
+mesh = SubResource("Mesh_peel")
 
 [node name="BananaParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)

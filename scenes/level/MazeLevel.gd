@@ -23,6 +23,7 @@ const SPRINKLER_SCENE: PackedScene = preload("res://scenes/level/Sprinkler.tscn"
 const ICE_PATCH_SCENE: PackedScene = preload("res://scenes/effects/FX_IcePatch.tscn")
 const SHADER_FLOOR: Shader = preload("res://shaders/arena_floor.gdshader")
 const SHADER_STRIPE: Shader = preload("res://shaders/candy_stripe.gdshader")
+const SHADER_SKY: Shader = preload("res://shaders/stylized_sky.gdshader")
 
 ## Height of spawn markers above the floor.
 const MARKER_HEIGHT: float = 1.0
@@ -49,13 +50,29 @@ const TREE_SPACING: float = 2.0
 const POWERUP_SPAWN_COUNT: int = 14
 const SUN_SHADOW_DISTANCE: float = 80.0
 ## Post-processing shared by every arena: crisp contrast and a bit more colour.
-const SSAO_RADIUS: float = 1.2
-const SSAO_INTENSITY: float = 1.6
-const GRADE_CONTRAST: float = 1.08
-const GRADE_SATURATION: float = 1.15
+const SSAO_RADIUS: float = 1.0
+const SSAO_INTENSITY: float = 2.0
+const SSAO_LIGHT_AFFECT: float = 0.2
+const GRADE_CONTRAST: float = 1.06
+const GRADE_SATURATION: float = 1.12
 const TONEMAP_WHITE: float = 6.0
-const TONEMAP_EXPOSURE: float = 0.85
+const TONEMAP_EXPOSURE: float = 1.0
+const GLOW_INTENSITY: float = 0.6
+const GLOW_BLOOM: float = 0.05
+const GLOW_THRESHOLD: float = 0.95
+## Share of the ambient light taken from the sky (the rest is the arena tint).
+const AMBIENT_SKY_SHARE: float = 0.45
+const CLOUD_WHITENESS: float = 0.75
+## Minimum distance haze, even in arenas without fog.
+const HAZE_DENSITY: float = 0.0012
+const FOG_SKY_AFFECT: float = 0.15
+const FOG_AERIAL: float = 0.25
+const SUN_SHADOW_BLUR: float = 2.0
+const SUN_ANGULAR_SIZE: float = 1.5
 const RING_GAP_BASE: int = 2
+## Frosting cap on candy walls: thickness and how far it overhangs the wall.
+const WALL_CAP_HEIGHT: float = 0.22
+const WALL_CAP_OVERHANG: float = 0.14
 ## Zones: quadrants 0 (-X -Z), 1 (+X -Z), 2 (-X +Z), 3 (+X +Z), then the center plaza.
 ## Hues avoid the player colors (red, blue, green, yellow) so they never get mixed up.
 const ZONE_CENTER: int = 4
@@ -414,36 +431,45 @@ func _accent() -> Color:
 # ─── Environment & floor ──────────────────────────────────────────────────
 
 func _build_environment() -> void:
-	var sky_mat: ProceduralSkyMaterial = ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = config.sky_top_color
-	sky_mat.sky_horizon_color = config.sky_horizon_color
-	sky_mat.ground_horizon_color = config.sky_horizon_color
-	sky_mat.ground_bottom_color = config.outer_ground_color
+	var sky_mat: ShaderMaterial = ShaderMaterial.new()
+	sky_mat.shader = SHADER_SKY
+	sky_mat.set_shader_parameter("top_color", config.sky_top_color)
+	sky_mat.set_shader_parameter("horizon_color", config.sky_horizon_color)
+	sky_mat.set_shader_parameter("ground_color", config.outer_ground_color)
+	sky_mat.set_shader_parameter("cloud_color", config.sky_horizon_color.lerp(Color.WHITE, CLOUD_WHITENESS))
 	var sky: Sky = Sky.new()
 	sky.sky_material = sky_mat
 
 	var env: Environment = Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	# Ambient = the arena's tint blended with the sky, so shaded sides stay colourful.
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_color = config.ambient_color
+	env.ambient_light_sky_contribution = AMBIENT_SKY_SHARE
 	env.ambient_light_energy = config.ambient_energy
-	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = TONEMAP_WHITE
 	env.tonemap_exposure = TONEMAP_EXPOSURE
 	env.ssao_enabled = true
 	env.ssao_radius = SSAO_RADIUS
 	env.ssao_intensity = SSAO_INTENSITY
+	env.ssao_light_affect = SSAO_LIGHT_AFFECT
 	env.glow_enabled = true
-	env.glow_intensity = 0.3
-	env.glow_hdr_threshold = 1.2
+	env.glow_intensity = GLOW_INTENSITY
+	env.glow_bloom = GLOW_BLOOM
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	env.glow_hdr_threshold = GLOW_THRESHOLD
 	env.adjustment_enabled = true
 	env.adjustment_contrast = GRADE_CONTRAST
 	env.adjustment_saturation = GRADE_SATURATION
-	if config.fog_density > 0.0:
-		env.fog_enabled = true
-		env.fog_light_color = config.fog_color
-		env.fog_density = config.fog_density
+	# Distance haze in the horizon colour gives depth to the maze and scenery.
+	env.fog_enabled = true
+	env.fog_light_color = config.fog_color if config.fog_density > 0.0 else config.sky_horizon_color
+	env.fog_density = maxf(config.fog_density, HAZE_DENSITY)
+	env.fog_sky_affect = FOG_SKY_AFFECT
+	env.fog_aerial_perspective = FOG_AERIAL
 	var world_env: WorldEnvironment = WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)
@@ -452,9 +478,11 @@ func _build_environment() -> void:
 	sun.light_color = config.sun_color
 	sun.light_energy = config.sun_energy
 	sun.shadow_enabled = true
-	sun.shadow_blur = 1.5
+	sun.shadow_blur = SUN_SHADOW_BLUR
+	sun.light_angular_distance = SUN_ANGULAR_SIZE
 	sun.directional_shadow_max_distance = SUN_SHADOW_DISTANCE
-	sun.rotation_degrees = Vector3(-55.0, 35.0, 0.0)
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun.rotation_degrees = Vector3(-50.0, 35.0, 0.0)
 	add_child(sun)
 
 
@@ -602,6 +630,7 @@ func _add_wall(center: Vector3, length: float, along_x: bool) -> void:
 	match config.style:
 		LevelConfig.Style.CANDY:
 			_add_candy_wall(center, size)
+			_add("box", b, center + Vector3(0, h, 0), Vector3(full + WALL_CAP_OVERHANG, WALL_CAP_HEIGHT, t + WALL_CAP_OVERHANG), yaw)
 		LevelConfig.Style.FOREST:
 			_add("box", a.darkened(0.25), center, Vector3(full, 1.1, t * 1.2), yaw)
 			var count: int = maxi(1, int(full / TREE_SPACING))

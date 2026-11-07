@@ -4,16 +4,26 @@
 ##   Keyboard: the player's move left / right keys browse, jump locks in
 ##   (P0 also browses with the mouse wheel and locks with a click).
 ##   Gamepad: stick / D-pad to browse, A or Start to lock.
+##   Back (pad B, Esc for P0 / Backspace for P1, P0's right click, or the
+##   on-screen button): unlocks a locked choice, otherwise leaves to the menu.
 extends Control
 
 signal character_locked(player_id: int, data: CharacterData)
 signal character_previewed(player_id: int, data: CharacterData)
+## A locked player changed their mind and is browsing again.
+signal character_unlocked(player_id: int)
+## Back pressed while browsing: leave character selection.
+signal back_requested(player_id: int)
 
 const CHARACTERS: Array[CharacterData] = [
 	preload("res://resources/characters/dashy.tres"),
 	preload("res://resources/characters/bouncer.tres"),
 	preload("res://resources/characters/tanky.tres"),
 	preload("res://resources/characters/tricky.tres"),
+	preload("res://resources/characters/sparkle.tres"),
+	preload("res://resources/characters/bloom.tres"),
+	preload("res://resources/characters/mimi.tres"),
+	preload("res://resources/characters/coco.tres"),
 ]
 
 ## Stick deflection that counts as one browse step; it must return below the
@@ -37,6 +47,7 @@ const FIT_MARGIN: float = 0.95
 @onready var defense_bar: ProgressBar = $Panel/VBox/Stats/DefenseBar
 @onready var prompt_label: Label = $Panel/VBox/PromptLabel
 @onready var ready_badge: Label = $Panel/VBox/ReadyBadge
+@onready var back_btn: Button = $Panel/VBox/BackButton
 
 var player_id: int = 0
 var _index: int = 0
@@ -47,6 +58,7 @@ var _stick_latched: bool = false
 func _ready() -> void:
 	prev_btn.pressed.connect(_cycle.bind(-1))
 	next_btn.pressed.connect(_cycle.bind(1))
+	back_btn.pressed.connect(_back)
 	resized.connect(_fit_panel)
 	panel.resized.connect(_fit_panel)
 
@@ -58,12 +70,24 @@ func setup(pid: int, color: Color, preselected: CharacterData = null) -> void:
 	_index = CHARACTERS.find(preselected) if preselected else pid % CHARACTERS.size()
 	if _index < 0:
 		_index = 0
-	if InputManager.has_pad(pid) or not InputManager.has_keyboard(pid):
-		prompt_label.text = tr("UI_PROMPT_PAD")
-	else:
-		prompt_label.text = tr("UI_PROMPT_KB").format([InputManager.key_text(pid, "move_left"),
-			InputManager.key_text(pid, "move_right"), InputManager.key_text(pid, "jump")])
+	_update_prompt()
 	_update_display()
+
+
+func _uses_pad() -> bool:
+	return InputManager.has_pad(player_id) or not InputManager.has_keyboard(player_id)
+
+
+func _update_prompt() -> void:
+	if _uses_pad():
+		prompt_label.text = tr("UI_PROMPT_PAD_LOCKED" if _is_locked else "UI_PROMPT_PAD")
+	elif _is_locked:
+		prompt_label.text = tr("UI_PROMPT_KB_LOCKED").format([InputManager.back_key_text(player_id)])
+	else:
+		prompt_label.text = tr("UI_PROMPT_KB").format([InputManager.key_text(player_id, "move_left"),
+			InputManager.key_text(player_id, "move_right"), InputManager.key_text(player_id, "jump"),
+			InputManager.back_key_text(player_id)])
+	back_btn.text = "UI_CHANGE" if _is_locked else "UI_BACK"
 
 
 ## Centers the panel in the quadrant and shrinks it to fit small (4-player) ones.
@@ -76,6 +100,10 @@ func _fit_panel() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _is_back_event(event):
+		get_viewport().set_input_as_handled()  # Before _back(): leaving frees this scene.
+		_back()
+		return
 	if _is_locked:
 		return
 	var step: int = 0
@@ -113,6 +141,32 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+func _is_back_event(event: InputEvent) -> bool:
+	var joy: int = InputManager.player_joypad_map.get(player_id, -1)
+	if event is InputEventJoypadButton:
+		return event.pressed and event.device == joy and event.button_index == InputManager.PAD_BACK_BUTTON
+	if event is InputEventKey:
+		return event.pressed and not event.is_echo() and InputManager.has_keyboard(player_id) \
+			and (event as InputEventKey).keycode == InputManager.KEYBOARD_BACK_KEYS[player_id]
+	if event is InputEventMouseButton:
+		return player_id == 0 and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT
+	return false
+
+
+## Locked: reopen the choice. Browsing: ask to leave character selection.
+func _back() -> void:
+	if not _is_locked:
+		back_requested.emit(player_id)
+		return
+	_is_locked = false
+	ready_badge.visible = false
+	prev_btn.disabled = false
+	next_btn.disabled = false
+	_update_prompt()
+	AudioManager.play_sfx(AudioManager.SoundEffect.TIMER_TICK)
+	character_unlocked.emit(player_id)
+
+
 func _action(name: String) -> String:
 	return "p%d_%s" % [player_id, name]
 
@@ -146,8 +200,8 @@ func lock_in() -> void:
 	_is_locked = true
 	preview_rig.play_lock_animation()
 	ready_badge.visible = true
-	prompt_label.visible = false
 	prev_btn.disabled = true
 	next_btn.disabled = true
+	_update_prompt()
 	AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
 	character_locked.emit(player_id, CHARACTERS[_index])

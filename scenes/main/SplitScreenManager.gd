@@ -14,6 +14,7 @@ const OVERVIEW_CAMERA_SCENE: PackedScene = preload("res://scenes/camera/Overview
 const CHARACTER_SELECTOR_SCENE: PackedScene = preload("res://scenes/ui/CharacterSelector.tscn")
 const GEM_SPAWNER_SCENE: PackedScene = preload("res://scenes/gems/GemSpawner.tscn")
 const GAME_OVER_SCENE: String = "res://scenes/ui/GameOverScreen.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
 
 const SLOT_COUNT: int = 4
 ## Pause after everyone is ready so the READY badges are visible.
@@ -40,6 +41,9 @@ var _players: Array[Player] = []
 var _huds: Array[CanvasLayer] = []
 var _selectors: Array[Control] = []
 var _cameras: Array[CameraRig] = []
+## Bumped on every lock / unlock so a pending "everyone ready" start is dropped
+## when someone changes their mind during READY_DELAY.
+var _ready_token: int = 0
 
 
 func _ready() -> void:
@@ -145,19 +149,36 @@ func _setup_character_selectors() -> void:
 		selector.character_previewed.connect(func(pid: int, data: CharacterData) -> void:
 			_players[pid].apply_character_data(data))
 		selector.character_locked.connect(_on_character_locked)
+		selector.character_unlocked.connect(_on_character_unlocked)
+		selector.back_requested.connect(_on_selection_back)
 		_selectors.append(selector)
 
 
 func _on_character_locked(pid: int, data: CharacterData) -> void:
 	_players[pid].apply_character_data(data)
 	GameManager.chosen_characters[pid] = data
+	_ready_token += 1
 	if GameManager.chosen_characters.size() < _players.size():
 		return
+	var token: int = _ready_token
 	await get_tree().create_timer(READY_DELAY).timeout
+	if token != _ready_token:
+		return  # Someone unlocked (or relocked) meanwhile.
 	for selector: Control in _selectors:
 		selector.queue_free()
 	_selectors.clear()
 	_begin_countdown()
+
+
+func _on_character_unlocked(pid: int) -> void:
+	GameManager.chosen_characters.erase(pid)
+	_ready_token += 1
+
+
+func _on_selection_back(_pid: int) -> void:
+	GameManager.chosen_characters.clear()
+	GameManager.reset_to_lobby()
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
 ## Rematch: same characters, straight to the countdown.

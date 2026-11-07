@@ -16,6 +16,9 @@ const MIN_PLAYERS: int = 2
 
 ## Pastel/vivid player palette (Fall Guys / Splatoon style).
 ## Index corresponds to player_id (0–3).
+## Display face for numbers, titles and in-world text (Label3D can't use the theme).
+const DISPLAY_FONT: Font = preload("res://assets/fonts/LilitaOne.ttf")
+
 const PLAYER_COLORS: Array[Color] = [
 	Color(0.98, 0.42, 0.42, 1.0),  # P0 — Coral Red
 	Color(0.42, 0.72, 0.98, 1.0),  # P1 — Sky Blue
@@ -165,6 +168,9 @@ const GROUP_POWERUP_SPAWNS: String = "powerup_spawns"
 
 ## Godot group that all surprise boxes belong to.
 const GROUP_SURPRISE_BOXES: String = "surprise_boxes"
+
+## Godot group of every armed trap placed by a player.
+const GROUP_TRAPS: String = "traps"
 
 
 # ─── Physics collision layers (bit masks) ────────────────────────────────

@@ -8,14 +8,23 @@ extends CanvasLayer
 
 const SHADER_SPLAT: Shader = preload("res://shaders/splat_overlay.gdshader")
 const SHADER_ICE: Shader = preload("res://shaders/ice_overlay.gdshader")
-const ICON_EMPTY: Texture2D = preload("res://assets/ui/icons/slot_empty.png")
 ## Item slots and the superpower sit like the pad's face buttons:
 ## X left, A bottom, B right (items 1-3), Y top (superpower).
-const SLOT_SIZE: float = 80.0
-const SLOT_ICON_SIZE: float = 60.0
+const SLOT_SIZE: float = 86.0
+## Round slot inside its grid cell; the gap between cells keeps them apart.
+const SLOT_DIAMETER: float = 78.0
+const SLOT_ICON_SIZE: float = 56.0
+## Key prompt chip, tucked on the slot's lower-right edge.
+const KEY_CHIP_OFFSET: Vector2 = Vector2(46, 52)
+## Superpower recharge ring drawn over the super slot.
+const SUPER_RING_WIDTH: float = 6.0
+const SUPER_RING_COLOR: Color = Color(1.0, 0.82, 0.3)
+const SUPER_RING_TRACK: Color = Color(1.0, 1.0, 1.0, 0.15)
 const SLOT_GRID_POS: Array[Vector2] = [Vector2(0, 1), Vector2(1, 2), Vector2(2, 1), Vector2(1, 0)]
 const SLOT_ACTIONS: Array[String] = ["item_1", "item_2", "item_3", "super"]
 const SUPER_SLOT: int = 3
+## Camera-view hint ("LB  View") just above the item pad.
+const VIEW_HINT_POS: Vector2 = Vector2(0, -58)
 const SELECTED_SLOT_SCALE: float = 1.25
 const SUPER_COOLDOWN_ALPHA: float = 0.45
 const MAP_DOT_RADIUS: float = 9.0
@@ -24,7 +33,9 @@ const MAP_FADE: float = 0.3
 const PULSE_SCALE: float = 1.35
 const PULSE_DURATION: float = 0.15
 const BANNER_HOLD: float = 2.0
-const SLOT_EMPTY_ALPHA: float = 0.6
+## Banner styles by tone: neutral (items, superpowers), good (hits landed), bad (hits taken).
+enum Tone { NEUTRAL, GOOD, BAD }
+const BANNER_VARIATIONS: Array[StringName] = [&"BannerPanel", &"BannerPanelGood", &"BannerPanelBad"]
 const LOW_TIME_COLOR: Color = Color(1.0, 0.35, 0.35)
 const LEADER_COLOR: Color = Color(1.0, 0.85, 0.3)
 const RANK_COLOR: Color = Color(0.85, 0.85, 0.95)
@@ -44,7 +55,8 @@ const OVERLAY_FADE: float = 0.25
 @onready var map_camera: Camera3D = $MiniMap/View/SubViewport/Camera
 @onready var map_dots: Control = $MiniMap/Dots
 @onready var banner_panel: PanelContainer = $BannerContainer/PowerupBanner
-@onready var banner_label: Label = $BannerContainer/PowerupBanner/BannerLabel
+@onready var banner_label: Label = $BannerContainer/PowerupBanner/Row/BannerLabel
+@onready var banner_icon: TextureRect = $BannerContainer/PowerupBanner/Row/BannerIcon
 @onready var crosshair: Label = $Crosshair
 
 var player_id: int = 0
@@ -55,6 +67,9 @@ var _slot_panels: Array[PanelContainer] = []
 var _slot_icons: Array[TextureRect] = []
 var _slot_labels: Array[Label] = []
 var _super_timer: Label = null
+var _super_ring: Control = null
+var _super_cooldown: float = 1.0
+var _view_chip: Label = null
 var _super_ready_at: float = 0.0
 var _player: Player = null
 var _zone: int = -1
@@ -122,39 +137,70 @@ func _pulse(control: Control) -> void:
 # ─── Items & superpower ───────────────────────────────────────────────────
 
 func _build_item_pad() -> void:
+	var inset: float = (SLOT_SIZE - SLOT_DIAMETER) * 0.5
 	for slot: int in SLOT_GRID_POS.size():
 		var panel: PanelContainer = PanelContainer.new()
-		panel.theme_type_variation = &"HudPanel"
+		panel.theme_type_variation = &"SuperSlot" if slot == SUPER_SLOT else &"ItemSlot"
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		panel.position = SLOT_GRID_POS[slot] * SLOT_SIZE
-		panel.size = Vector2.ONE * SLOT_SIZE
+		panel.position = SLOT_GRID_POS[slot] * SLOT_SIZE + Vector2.ONE * inset
+		panel.size = Vector2.ONE * SLOT_DIAMETER
 		var icon: TextureRect = TextureRect.new()
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture = ICON_EMPTY
 		icon.custom_minimum_size = Vector2.ONE * SLOT_ICON_SIZE
 		panel.add_child(icon)
-		var label: Label = Label.new()
-		label.theme_type_variation = &"SubtleLabel"
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-		panel.add_child(label)
 		item_pad.add_child(panel)
+		var label: Label = Label.new()
+		label.theme_type_variation = &"KeyChip"
+		label.position = panel.position + KEY_CHIP_OFFSET
+		item_pad.add_child(label)
 		_slot_panels.append(panel)
 		_slot_icons.append(icon)
 		_slot_labels.append(label)
+	var hint: PanelContainer = PanelContainer.new()
+	hint.theme_type_variation = &"HudPanel"
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.position = VIEW_HINT_POS
+	var row: HBoxContainer = HBoxContainer.new()
+	_view_chip = Label.new()
+	_view_chip.theme_type_variation = &"KeyChip"
+	_view_chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(_view_chip)
+	var hint_text: Label = Label.new()
+	hint_text.theme_type_variation = &"SubtleLabel"
+	hint_text.text = "ACTION_VIEW"
+	row.add_child(hint_text)
+	hint.add_child(row)
+	item_pad.add_child(hint)
 	_super_timer = Label.new()
 	_super_timer.theme_type_variation = &"HudValueLabel"
 	_super_timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_super_timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_super_timer.visible = false
 	_slot_panels[SUPER_SLOT].add_child(_super_timer)
+	_super_ring = Control.new()
+	_super_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_super_ring.draw.connect(_draw_super_ring)
+	_slot_panels[SUPER_SLOT].add_child(_super_ring)
 	update_inventory(player_id, [])
+
+
+## Recharge progress as a ring that fills clockwise around the super slot.
+func _draw_super_ring() -> void:
+	var left: float = _super_ready_at - Time.get_ticks_msec() / 1000.0
+	if left <= 0.0:
+		return
+	var center: Vector2 = _super_ring.size * 0.5
+	var radius: float = SLOT_DIAMETER * 0.5 - SUPER_RING_WIDTH * 0.5
+	var done: float = 1.0 - left / maxf(_super_cooldown, 0.01)
+	_super_ring.draw_arc(center, radius, 0.0, TAU, 48, SUPER_RING_TRACK, SUPER_RING_WIDTH, true)
+	_super_ring.draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * done, 48, SUPER_RING_COLOR, SUPER_RING_WIDTH, true)
 
 
 func _refresh_slot_labels() -> void:
 	for slot: int in _slot_labels.size():
 		_slot_labels[slot].text = InputManager.prompt_text(player_id, SLOT_ACTIONS[slot])
+	_view_chip.text = InputManager.prompt_text(player_id, "toggle_view")
 
 
 ## Player.inventory_changed: redraw the three item slots.
@@ -163,8 +209,9 @@ func update_inventory(pid: int, slots: Array) -> void:
 		return
 	for slot: int in Constants.ITEM_SLOT_COUNT:
 		var type: int = slots[slot] if slot < slots.size() else Constants.PowerUpType.NONE
-		_slot_icons[slot].texture = ItemCatalog.ICONS.get(type, ICON_EMPTY)
-		_slot_panels[slot].modulate.a = SLOT_EMPTY_ALPHA if type == Constants.PowerUpType.NONE else 1.0
+		var empty: bool = type == Constants.PowerUpType.NONE
+		_slot_icons[slot].texture = null if empty else ItemCatalog.ICONS.get(type)
+		_slot_panels[slot].theme_type_variation = &"ItemSlot" if empty else &"ItemSlotFull"
 
 
 ## Player.item_received: announce the new item and what it does.
@@ -172,31 +219,33 @@ func show_item_received(pid: int, slot: int, type: int) -> void:
 	if pid != player_id:
 		return
 	_pulse(_slot_panels[slot])
-	_show_banner("%s  [%s]\n%s" % [tr(ItemCatalog.NAME_KEYS[type]), _slot_labels[slot].text, tr(ItemCatalog.NAME_KEYS[type] + "_DESC")])
+	_show_banner("%s  [%s]\n%s" % [tr(ItemCatalog.NAME_KEYS[type]), _slot_labels[slot].text,
+		tr(ItemCatalog.NAME_KEYS[type] + "_DESC")], ItemCatalog.ICONS.get(type))
 
 
 ## Player.powerup_activated: a utility item took effect.
 func show_activated(pid: int, type: int) -> void:
 	if pid == player_id:
-		_show_banner(tr(ItemCatalog.NAME_KEYS[type]))
+		_show_banner(tr(ItemCatalog.NAME_KEYS[type]), ItemCatalog.ICONS.get(type))
 
 
 ## Player.superpower_changed: set the icon and start the recharge countdown.
 func update_superpower(pid: int, trait_type: int, ready_in: float) -> void:
 	if pid != player_id:
 		return
-	_slot_icons[SUPER_SLOT].texture = ItemCatalog.SUPER_ICONS.get(trait_type, ICON_EMPTY)
+	_slot_icons[SUPER_SLOT].texture = ItemCatalog.SUPER_ICONS.get(trait_type)
 	_super_ready_at = Time.get_ticks_msec() / 1000.0 + ready_in
+	_super_cooldown = ready_in
 
 
 func show_superpower_used(pid: int, trait_type: int) -> void:
 	if pid == player_id:
-		_show_banner(tr(CharacterData.SUPER_KEYS[trait_type]))
+		_show_banner(tr(CharacterData.SUPER_KEYS[trait_type]), ItemCatalog.SUPER_ICONS.get(trait_type))
 
 
 func show_items_stripped(pid: int) -> void:
 	if pid == player_id:
-		_show_banner(tr("MSG_ITEMS_STRIPPED"))
+		_show_banner(tr("MSG_ITEMS_STRIPPED"), null, Tone.BAD)
 
 
 ## A hit this hunter gave ([param attacker]) or took, with the gems involved.
@@ -204,7 +253,7 @@ func show_impact(attacker: bool, gems: int) -> void:
 	var title: String = tr("MSG_HIT") if attacker else tr("MSG_HIT_TAKEN")
 	if gems > 0:
 		title += "  %s%d" % ["+" if attacker else "-", gems]
-	_show_banner(title)
+	_show_banner(title, null, Tone.GOOD if attacker else Tone.BAD)
 
 
 ## Shown at "GO!": how to tackle.
@@ -229,6 +278,8 @@ func _process(_delta: float) -> void:
 	_super_timer.visible = charging
 	_super_timer.text = str(ceili(left))
 	_slot_icons[SUPER_SLOT].modulate.a = SUPER_COOLDOWN_ALPHA if charging else 1.0
+	_super_ring.size = _slot_panels[SUPER_SLOT].size
+	_super_ring.queue_redraw()
 	if mini_map.visible:
 		map_dots.queue_redraw()
 	_update_zone()
@@ -277,10 +328,14 @@ func _draw_map_dots() -> void:
 		map_dots.draw_circle(at, radius, Constants.PLAYER_COLORS[player.player_id])
 
 
-func _show_banner(text: String) -> void:
+## Toast under the top bar: [param icon] (optional) beside the text, colour by [param tone].
+func _show_banner(text: String, icon: Texture2D = null, tone: Tone = Tone.NEUTRAL) -> void:
 	if _banner_tween and _banner_tween.is_valid():
 		_banner_tween.kill()
 	banner_label.text = text
+	banner_icon.texture = icon
+	banner_icon.visible = icon != null
+	banner_panel.theme_type_variation = BANNER_VARIATIONS[tone]
 	banner_panel.visible = true
 	banner_panel.modulate.a = 0.0
 	banner_panel.pivot_offset = banner_panel.size * 0.5

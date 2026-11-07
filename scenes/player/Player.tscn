@@ -106,7 +106,7 @@ billboard = 1
 no_depth_test = true
 text = "P1"
 font_size = 72
-outline_size = 18
+outline_size = 12
 
 [node name="CameraOrigin" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)

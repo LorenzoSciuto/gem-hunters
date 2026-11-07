@@ -50,6 +50,11 @@ layout_mode = 2
 theme_type_variation = &"BigButton"
 text = "UI_REMATCH"
 
+[node name="ChangeButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "UI_CHANGE_HUNTERS"
+
 [node name="MenuButton" type="Button" parent="Center/Panel/VBox/Buttons"]
 layout_mode = 2
 size_flags_vertical = 4
