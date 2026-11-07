@@ -13,7 +13,7 @@ func _ready() -> void:
 
 
 func _apply_trap_effect(player: Player) -> void:
-	if player.apply_debuff(Constants.DebuffType.FROZEN, Constants.DEBUFF_DURATION_SPEAKER_FREEZE):
+	if player.apply_debuff(Constants.DebuffType.FROZEN, effect_duration):
 		player.apply_debuff(Constants.DebuffType.INVERTED, Constants.DEBUFF_DURATION_INVERTED)
 	if anim.has_animation("scare_jump"):
 		anim.play("scare_jump")

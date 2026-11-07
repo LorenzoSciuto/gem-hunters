@@ -243,13 +243,10 @@ const CAMERA_LAUGHING_AMPLITUDE: float = 12.0
 
 # ─── Debuff & power-up durations (seconds) ────────────────────────────────
 
-const DEBUFF_DURATION_FROZEN: float = 2.0
 const DEBUFF_DURATION_INVERTED: float = 3.5
 const DEBUFF_DURATION_LAUGHING: float = 3.0
 const DEBUFF_DURATION_ICE_SLIDE: float = 3.5
-const DEBUFF_DURATION_SPLAT: float = 3.0
-const DEBUFF_DURATION_SPEAKER_FREEZE: float = 1.0
-const DEBUFF_DURATION_BALLOON_FREEZE: float = 1.2
+## Main trap durations live in each trap scene (TrapBase.effect_duration).
 
 const POWERUP_DURATION_SPRING_SHOES: float = 10.0
 const POWERUP_DURATION_BUBBLE: float = 12.0

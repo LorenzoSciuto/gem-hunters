@@ -101,33 +101,29 @@ static func gem_collect_burst() -> ParticleProcessMaterial:
 
 
 ## gem_lost_burst
-## Raining gem fragment pieces downward when a player drops their gems.
-## Amount: 24 | Lifetime: 0.9 s.
+## Bright sparkle pop where a hunter loses gems. Soft round sparks that rise
+## and vanish quickly: they must not look like gem pieces (the real loose gems
+## are whole and collectible).
+## Amount: 24 | Lifetime: 0.8 s.
 static func gem_lost_burst() -> ParticleProcessMaterial:
 	var mat := ParticleProcessMaterial.new()
-
-	# Point source; fragments scatter in all directions then fall
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	mat.emission_sphere_radius = 0.2
-
-	mat.direction          = Vector3(0.0, -1.0, 0.0)
-	mat.spread             = 80.0
-	mat.initial_velocity_min = 1.5
-	mat.initial_velocity_max = 3.5
-
-	# Strong gravity — fragments fall fast
-	mat.gravity = Vector3(0.0, -9.8, 0.0)
-
-	mat.scale_min = 0.06
-	mat.scale_max = 0.14
-
-	# Desaturated cyan → transparent (gem shards losing colour)
-	mat.color_ramp = _fade_out_texture(Color(0.4, 0.9, 1.0, 1.0))
-
-	# Spin fragments as they fall
-	mat.angular_velocity_min = -180.0
-	mat.angular_velocity_max =  180.0
-
+	mat.emission_sphere_radius = 0.3
+	mat.direction = Vector3(0.0, 1.0, 0.0)
+	mat.spread = 180.0
+	mat.initial_velocity_min = 2.0
+	mat.initial_velocity_max = 4.0
+	mat.gravity = Vector3(0.0, -1.5, 0.0)
+	mat.damping_min = 3.0
+	mat.damping_max = 5.0
+	mat.scale_min = 0.05
+	mat.scale_max = 0.12
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color(1, 1, 1, 1), Color(0.55, 0.95, 1.0, 0.9), Color(0.55, 0.95, 1.0, 0.0)])
+	grad.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = grad
+	mat.color_ramp = ramp
 	return mat
 
 
@@ -311,6 +307,41 @@ static func dust_puff(color: Color = Color(1.0, 0.97, 0.92, 0.7)) -> ParticlePro
 	mat.scale_curve = grow_tex
 	mat.color_ramp = _fade_out_texture(color)
 	return mat
+
+
+## Dizzy stars: flat five-pointed star facing the camera (stun / confusion).
+const STAR_POINTS: int = 5
+const STAR_OUTER: float = 0.16
+const STAR_INNER: float = 0.07
+const STAR_COLOR: Color = Color(1.0, 0.88, 0.25)
+
+static var _star: ArrayMesh = null
+
+
+## Five-pointed star mesh for particle draw passes, built once and shared.
+static func star_mesh() -> ArrayMesh:
+	if _star:
+		return _star
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners: int = STAR_POINTS * 2
+	for n: int in corners:
+		var a0: float = TAU * n / corners + PI * 0.5
+		var a1: float = TAU * (n + 1) / corners + PI * 0.5
+		var r0: float = STAR_OUTER if n % 2 == 0 else STAR_INNER
+		var r1: float = STAR_OUTER if (n + 1) % 2 == 0 else STAR_INNER
+		st.add_vertex(Vector3.ZERO)
+		st.add_vertex(Vector3(cos(a1) * r1, sin(a1) * r1, 0.0))
+		st.add_vertex(Vector3(cos(a0) * r0, sin(a0) * r0, 0.0))
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.billboard_keep_scale = true
+	mat.albedo_color = STAR_COLOR
+	_star = st.commit()
+	_star.surface_set_material(0, mat)
+	return _star
 
 
 static var _dot: GradientTexture2D = null

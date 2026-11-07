@@ -188,3 +188,4 @@ UI_POWERUP_BLACKBOX_DESC,Drop it: a fake gift box - whoever opens it loses all i
 MSG_ITEMS_STRIPPED,"BLACK BOX!
 Items and superpower lost","PACCO NERO!
 Oggetti e superpotere persi"
+MSG_BREAK_FREE,"Frozen! Mash {0} to break free!","Congelato! Premi {0} più volte per liberarti!"
