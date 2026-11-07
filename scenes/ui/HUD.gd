@@ -285,6 +285,11 @@ func _process(_delta: float) -> void:
 	_update_zone()
 
 
+## Zone index shown while the player is outside the outer walls.
+const ZONE_OUTSIDE: int = -2
+const OUTSIDE_COLOR: Color = Color(1.0, 0.8, 0.2)
+
+
 ## Names the zone this player is in, in its color, so rivals can read it at a glance.
 func _update_zone() -> void:
 	if _player == null:
@@ -293,11 +298,18 @@ func _update_zone() -> void:
 				_player = node as Player
 		return
 	var zone: int = MazeLevel.zone_of(_player.global_position, GameManager.level_config)
+	if MazeLevel.is_outside(_player.global_position, GameManager.level_config):
+		zone = ZONE_OUTSIDE
 	if zone == _zone:
 		return
 	_zone = zone
-	zone_label.text = tr(MazeLevel.ZONE_KEYS[zone])
-	zone_label.modulate = MazeLevel.ZONE_COLORS[zone].lightened(0.25)
+	if zone == ZONE_OUTSIDE:
+		zone_label.text = tr("ZONE_OUTSIDE")
+		zone_label.modulate = OUTSIDE_COLOR
+		_show_banner(tr("MSG_OUTSIDE"), null, Tone.BAD)
+	else:
+		zone_label.text = tr(MazeLevel.ZONE_KEYS[zone])
+		zone_label.modulate = MazeLevel.ZONE_COLORS[zone].lightened(0.25)
 	_pulse(zone_label)
 
 

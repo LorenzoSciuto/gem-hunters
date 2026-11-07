@@ -42,6 +42,7 @@ MSG_GO,GO!,VIA!
 MSG_FRENZY,FRENZY! Gems x2,FRENESIA! Gemme x2
 MSG_PAUSED,Paused,Pausa
 UI_RESUME,Resume,Riprendi
+UI_RESTART,Restart,Ricomincia
 UI_MAIN_MENU,Main Menu,Menu Principale
 UI_REMATCH,Rematch,Rivincita
 MSG_MATCH_END,Match Over!,Fine Partita!
@@ -175,12 +176,12 @@ HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the cente
 - Portals: step into a glowing ring to come out of its twin on the other side of the maze.
 - Map boards: walk up to a map board (look for the red pin) to see everyone on the map for a few seconds.
 - Moving gates: colored walls that open and close by themselves - new shortcuts appear!
-- Mushroom trampolines in dead ends launch you over the walls.","Ogni arena è divisa in 4 zone più la Piazza d'Oro al centro. Ogni zona ha il suo colore di pavimento e un monumento gigante (Guglia di Cristallo, Torre della Sfera, Piramide, Castello), e sul tuo schermo c'è il nome della zona: sbircia gli schermi degli altri per scoprire dove sono!
+- Mushroom trampolines in dead ends launch you over the walls. Watch out for sprinklers: when they spray, the water makes you slip and drop a gem. Fell outside the maze? Somewhere along the outer wall there is a single golden trampoline: find it to bounce back to the Golden Plaza.","Ogni arena è divisa in 4 zone più la Piazza d'Oro al centro. Ogni zona ha il suo colore di pavimento e un monumento gigante (Guglia di Cristallo, Torre della Sfera, Piramide, Castello), e sul tuo schermo c'è il nome della zona: sbircia gli schermi degli altri per scoprire dove sono!
 
 - Portali: entra in un anello luminoso per uscire dal suo gemello dall'altra parte del labirinto.
 - Bacheche mappa: avvicinati a una bacheca con la mappa (cerca lo spillo rosso) per vedere tutti sulla mappa per qualche secondo.
 - Cancelli mobili: muri colorati che si aprono e chiudono da soli - spuntano nuove scorciatoie!
-- I funghi trampolino nei vicoli ciechi ti lanciano oltre i muri."
+- I funghi trampolino nei vicoli ciechi ti lanciano oltre i muri. Attenti agli irrigatori: quando spruzzano, l'acqua ti fa scivolare e perdere una gemma. Sei finito fuori dal labirinto? Lungo il muro esterno c'è un solo trampolino d'oro: trovalo per rimbalzare nella Piazza d'Oro."
 MSG_HIT,POW!,POW!
 MSG_HIT_TAKEN,OUCH!,AHIA!
 UI_POWERUP_BLACKBOX,Black Box,Pacco Nero
@@ -188,4 +189,6 @@ UI_POWERUP_BLACKBOX_DESC,Drop it: a fake gift box - whoever opens it loses all i
 MSG_ITEMS_STRIPPED,"BLACK BOX!
 Items and superpower lost","PACCO NERO!
 Oggetti e superpotere persi"
-MSG_BREAK_FREE,"Frozen! Mash {0} to break free!","Congelato! Premi {0} più volte per liberarti!"
+MSG_BREAK_FREE,Frozen! Mash {0} to break free!,Congelato! Premi {0} più volte per liberarti!
+ZONE_OUTSIDE,Outside the maze,Fuori dal labirinto
+MSG_OUTSIDE,You're outside! Find the golden trampoline to bounce back in.,Sei fuori! Trova il trampolino d'oro per rientrare.

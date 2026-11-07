@@ -4,6 +4,7 @@
 extends CanvasLayer
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
+const MATCH_SCENE: String = "res://scenes/main/Main.tscn"
 const POP_SCALE: float = 1.6
 const POP_DURATION: float = 0.35
 const GO_HOLD: float = 0.6
@@ -13,12 +14,14 @@ const BANNER_PULSE: float = 1.08
 @onready var frenzy_banner: PanelContainer = $FrenzyBanner
 @onready var pause_menu: Control = $PauseMenu
 @onready var resume_button: Button = $PauseMenu/Panel/VBox/ResumeButton
+@onready var restart_button: Button = $PauseMenu/Panel/VBox/RestartButton
 @onready var menu_button: Button = $PauseMenu/Panel/VBox/MenuButton
 @onready var quit_button: Button = $PauseMenu/Panel/VBox/QuitButton
 
 
 func _ready() -> void:
 	resume_button.pressed.connect(toggle_pause)
+	restart_button.pressed.connect(_on_restart_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
 
@@ -69,6 +72,13 @@ func toggle_pause() -> void:
 	else:
 		GameManager.resume_match()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+## Same players, arena and hunters, straight back to the 3-2-1 countdown.
+func _on_restart_pressed() -> void:
+	get_tree().paused = false
+	GameManager.reset_to_lobby()
+	get_tree().change_scene_to_file(MATCH_SCENE)
 
 
 func _on_menu_pressed() -> void:
