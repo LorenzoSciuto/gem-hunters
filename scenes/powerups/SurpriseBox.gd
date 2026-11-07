@@ -16,11 +16,16 @@ extends Area3D
 
 ## Weight multiplier for attack power-ups handed to the player in last place.
 const TRAILING_ATTACK_WEIGHT_MULTIPLIER: int = 3
+## Weight multiplier for the radar (shows where everyone is) for anyone not leading.
+const CHASER_RADAR_WEIGHT_MULTIPLIER: int = 3
 ## Minimum distance between two active boxes after a relocation.
 const MIN_BOX_SPACING: float = 12.0
 ## Prank box: the opener is tossed up and their controls flip for a moment.
 const PRANK_LAUNCH_VELOCITY: float = 9.0
 const PRANK_CONFUSION: float = 2.0
+## "PRANK!" floats over the box so everyone sees why it burst.
+const PRANK_TEXT_HEIGHT: float = 2.2
+const PRANK_TEXT_COLOR: Color = Color(1.0, 0.45, 0.7)
 
 
 # ---------------------------------------------------------------------------
@@ -77,9 +82,14 @@ func _on_body_entered(body: Node3D) -> void:
 	_start_respawn()
 
 
+## A prank box: it bursts in the opener's face, tosses them up and flips their
+## controls for a moment. Announced in the world and on the opener's HUD.
 func _prank(player: Player) -> void:
 	player.velocity.y = PRANK_LAUNCH_VELOCITY
 	player.apply_debuff(Constants.DebuffType.INVERTED, PRANK_CONFUSION)
+	player.notify("MSG_PRANK_BOX")
+	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * PRANK_TEXT_HEIGHT,
+		tr("MSG_PRANK_POP"), PRANK_TEXT_COLOR)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.confetti_shower())
 	AudioManager.play_sfx(AudioManager.SoundEffect.FART_HORN)
 
@@ -90,7 +100,8 @@ func _give_powerup(player: Player) -> void:
 		push_warning("SurpriseBox: powerup_pool is empty — nothing to give.")
 		return
 
-	var data: PowerUpData = _pick_weighted(_is_trailing(player.player_id), player.last_box_item)
+	var chasing: bool = GameManager.get_leader() != player.player_id
+	var data: PowerUpData = _pick_weighted(_is_trailing(player.player_id), chasing, player.last_box_item)
 	if not data:
 		return
 
@@ -114,13 +125,15 @@ func _is_trailing(player_id: int) -> bool:
 
 ## Select a PowerUpData entry probabilistically based on pool_weight values.
 ## Returns null only if the pool is empty (already guarded in _give_powerup).
-func _pick_weighted(favor_attacks: bool, exclude: int) -> PowerUpData:
+func _pick_weighted(favor_attacks: bool, favor_radar: bool, exclude: int) -> PowerUpData:
 	var weights: Array[int] = []
 	var total_weight: int = 0
 	for data: PowerUpData in powerup_pool:
 		var w: int = 0 if data.type == exclude else data.pool_weight
 		if favor_attacks and data.type in Constants.ATTACK_TYPES:
 			w *= TRAILING_ATTACK_WEIGHT_MULTIPLIER
+		if favor_radar and data.type == Constants.PowerUpType.UTILITY_RADAR:
+			w *= CHASER_RADAR_WEIGHT_MULTIPLIER
 		weights.append(w)
 		total_weight += w
 

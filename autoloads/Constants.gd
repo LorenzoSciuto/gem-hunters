@@ -169,6 +169,12 @@ const GROUP_POWERUP_SPAWNS: String = "powerup_spawns"
 ## Godot group that all surprise boxes belong to.
 const GROUP_SURPRISE_BOXES: String = "surprise_boxes"
 
+## Godot group of the level's props (trampolines, sprinklers, portals, beacons,
+## ice patches): gems never spawn on top of them.
+const GROUP_PROPS: String = "props"
+## Gems keep at least this far from props, boxes and traps.
+const GEM_PROP_CLEARANCE: float = 2.2
+
 ## Godot group of every armed trap placed by a player.
 const GROUP_TRAPS: String = "traps"
 
@@ -193,13 +199,13 @@ const MODEL_LAYER_BASE: int = 14
 # ─── Gem & spawn tuning ───────────────────────────────────────────────────
 
 ## Seconds between gem spawn attempts.
-const GEM_RESPAWN_TIME: float = 2.5
+const GEM_RESPAWN_TIME: float = 4.0
 
 ## Seconds before a used surprise box reappears.
 const POWERUP_BOX_RESPAWN: float = 12.0
 
 ## Maximum number of loose collectible gems in the world.
-const MAX_GEMS_IN_WORLD: int = 35
+const MAX_GEMS_IN_WORLD: int = 20
 
 ## Minimum distance between two spawned gems (metres).
 const MIN_GEM_SPAWN_DISTANCE: float = 2.0
@@ -251,13 +257,13 @@ const DEBUFF_DURATION_ICE_SLIDE: float = 3.5
 const POWERUP_DURATION_SPRING_SHOES: float = 10.0
 const POWERUP_DURATION_BUBBLE: float = 12.0
 const POWERUP_DURATION_MAGNET: float = 4.0
-const POWERUP_DURATION_TICKLE_RAY: float = 3.0
+const POWERUP_DURATION_TICKLE_RAY: float = 4.0
 
 ## Speed multiplier granted by spring shoes.
 const SPRING_SHOES_SPEED_MULTIPLIER: float = 1.3
 
-const DEBUFF_DURATION_SNOWBALL_FREEZE: float = 1.8
-const DEBUFF_DURATION_THUNDER_LAUGH: float = 1.5
+const DEBUFF_DURATION_SNOWBALL_FREEZE: float = 3.0
+const DEBUFF_DURATION_THUNDER_LAUGH: float = 2.5
 const POWERUP_DURATION_RADAR: float = 6.0
 ## Gems granted by the jackpot (inclusive range).
 const JACKPOT_MIN_GEMS: int = 2

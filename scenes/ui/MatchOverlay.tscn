@@ -26,13 +26,16 @@ vertical_alignment = 1
 
 [node name="FrenzyBanner" type="PanelContainer" parent="."]
 visible = false
-anchors_preset = 5
+anchors_preset = 7
 anchor_left = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
+anchor_bottom = 1.0
 offset_left = -260.0
-offset_top = 110.0
+offset_top = -110.0
 offset_right = 260.0
-offset_bottom = 186.0
+offset_bottom = -34.0
+grow_vertical = 0
 pivot_offset = Vector2(260, 38)
 theme_type_variation = &"BannerPanel"
 

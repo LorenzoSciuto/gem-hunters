@@ -973,6 +973,7 @@ func _free(cells: Array[Vector2i]) -> Array[Vector2i]:
 
 
 func _add_feature(node: Node3D, c: Vector2i) -> void:
+	node.add_to_group(Constants.GROUP_PROPS)
 	add_child(node)
 	node.position = _cell_pos(c)
 	_used_cells[c] = true
@@ -980,6 +981,7 @@ func _add_feature(node: Node3D, c: Vector2i) -> void:
 
 func _spawn_at(scene: PackedScene, c: Vector2i) -> Node3D:
 	var node: Node3D = scene.instantiate() as Node3D
+	node.add_to_group(Constants.GROUP_PROPS)
 	add_child(node)
 	node.position = _cell_pos(c)
 	_used_cells[c] = true

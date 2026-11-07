@@ -36,6 +36,13 @@ signal frenzy_started
 ## Dictionaries sorted descending by score: [code]{ "player_id": int, "score": int }[/code]
 signal match_ended(results: Array)
 
+## The once-per-match Chaos Gem appeared somewhere in the arena.
+signal chaos_gem_appeared
+
+## [param player_id] took the Chaos Gem: every rival lost half their gems
+## ([param lost] maps rival player_id → gems lost).
+signal chaos_gem_taken(player_id: int, lost: Dictionary)
+
 
 # ─── Configuration (read by the match scene and the menus) ────────────────
 
@@ -192,6 +199,17 @@ func remove_gems(player_id: int, amount: int) -> int:
 	score_updated.emit(player_id, scores[player_id])
 	_after_score_change()
 	return removed
+
+
+## Chaos Gem: every player except [param finder_id] loses half their gems
+## (rounded down). Returns rival player_id → gems lost.
+func halve_rivals(finder_id: int) -> Dictionary:
+	var lost: Dictionary = {}
+	for pid: int in scores:
+		if pid != finder_id:
+			lost[pid] = remove_gems(pid, (scores[pid] as int) / 2)
+	chaos_gem_taken.emit(finder_id, lost)
+	return lost
 
 
 func get_score(player_id: int) -> int:
