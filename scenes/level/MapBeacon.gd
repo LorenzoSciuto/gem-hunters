@@ -118,4 +118,4 @@ func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color) -> MeshInst
 
 
 func _now() -> float:
-	return Time.get_ticks_msec() / 1000.0
+	return GameManager.game_time()

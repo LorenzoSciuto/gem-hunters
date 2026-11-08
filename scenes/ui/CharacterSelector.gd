@@ -53,6 +53,7 @@ var player_id: int = 0
 var _index: int = 0
 var _is_locked: bool = false
 var _stick_latched: bool = false
+var _card_size: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -90,9 +91,12 @@ func _update_prompt() -> void:
 	back_btn.text = "UI_CHANGE" if _is_locked else "UI_BACK"
 
 
-## Centers the panel in the quadrant and shrinks it to fit small (4-player) ones.
+## Centers the card in the quadrant and shrinks it to fit small (4-player) ones.
+## The card only ever grows (to the largest content seen), so locking in or
+## browsing to a shorter description never makes it jump smaller.
 func _fit_panel() -> void:
-	panel.size = Vector2.ZERO  # snap back to the content's minimum size
+	_card_size = _card_size.max(panel.get_combined_minimum_size())
+	panel.size = _card_size
 	var fit: Vector2 = size * FIT_MARGIN / panel.size.max(Vector2.ONE)
 	panel.pivot_offset = panel.size * 0.5
 	panel.scale = Vector2.ONE * minf(1.0, minf(fit.x, fit.y))
@@ -159,7 +163,7 @@ func _back() -> void:
 		back_requested.emit(player_id)
 		return
 	_is_locked = false
-	ready_badge.visible = false
+	_show_ready_badge(false)
 	prev_btn.disabled = false
 	next_btn.disabled = false
 	_update_prompt()
@@ -194,12 +198,18 @@ func _update_display() -> void:
 	character_previewed.emit(player_id, c)
 
 
+## The badge always keeps its space (only its opacity changes), so the card's
+## layout doesn't move when a player locks in.
+func _show_ready_badge(shown: bool) -> void:
+	ready_badge.modulate.a = 1.0 if shown else 0.0
+
+
 func lock_in() -> void:
 	if _is_locked:
 		return
 	_is_locked = true
 	preview_rig.play_lock_animation()
-	ready_badge.visible = true
+	_show_ready_badge(true)
 	prev_btn.disabled = true
 	next_btn.disabled = true
 	_update_prompt()

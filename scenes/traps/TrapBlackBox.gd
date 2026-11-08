@@ -22,7 +22,7 @@ func _process(delta: float) -> void:
 func _apply_trap_effect(player: Player) -> void:
 	var side: Vector3 = Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)).normalized()
 	player.apply_knockback(side * BLAST_SIDE + Vector3.UP * BLAST_UP)
-	player.strip_items()
+	player.items.strip()
 	model.visible = false
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.gem_lost_burst(), 40)
 

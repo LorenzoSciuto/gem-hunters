@@ -67,9 +67,10 @@ func _on_body_entered(body: Node3D) -> void:
 		var player: Player = body as Player
 		if player.player_id == shooter_id:
 			return
-		if player.reflects_projectiles():
+		if player.status.has_buff(PlayerStatus.Buff.SHIELD):
 			_reflect(player)
 			return
+		player.take_hit()
 		_on_hit_player(player)
 	_finish()
 

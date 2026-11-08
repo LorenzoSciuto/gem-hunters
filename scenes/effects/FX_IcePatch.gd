@@ -2,6 +2,7 @@
 ## Slippery puddle created by water balloons or garden sprinklers.
 ## Players entering this area get the ice slide debuff.
 extends Area3D
+class_name IcePatch
 
 ## Seconds before the patch melts. 0 = permanent (level hazard).
 @export var duration: float = 8.0
@@ -21,4 +22,4 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
-		(body as Player).apply_debuff(Constants.DebuffType.ICE_SLIDE, slide_duration)
+		(body as Player).status.apply_debuff(Constants.DebuffType.ICE_SLIDE, slide_duration)

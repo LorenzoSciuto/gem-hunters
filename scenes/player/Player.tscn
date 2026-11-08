@@ -1,6 +1,9 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/player/Player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scenes/player/PlayerStatus.gd" id="13_status"]
+[ext_resource type="Script" path="res://scenes/player/PlayerItems.gd" id="14_items"]
+[ext_resource type="Script" path="res://scenes/player/PlayerCombat.gd" id="15_combat"]
 [ext_resource type="PackedScene" path="res://scenes/player/CharacterModel.tscn" id="2_model"]
 [ext_resource type="PackedScene" path="res://scenes/gems/GemLoose.tscn" id="3_gem"]
 [ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjSpringGlove.tscn" id="4_glove"]
@@ -79,15 +82,6 @@ collision_mask = 3
 floor_snap_length = 0.3
 script = ExtResource("1_player")
 gem_loose_scene = ExtResource("3_gem")
-spring_glove_scene = ExtResource("4_glove")
-magnet_scene = ExtResource("5_magnet")
-tickle_ray_scene = ExtResource("6_tickle")
-trap_cake_scene = ExtResource("7_cake")
-trap_water_balloon_scene = ExtResource("8_balloon")
-trap_speaker_scene = ExtResource("9_speaker")
-snowball_scene = ExtResource("10_snowball")
-trap_banana_scene = ExtResource("11_banana")
-trap_black_box_scene = ExtResource("12_blackbox")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
@@ -148,3 +142,21 @@ shape = SubResource("SphereShape3D_interact")
 
 [node name="Muzzle" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -0.8)
+
+[node name="Status" type="Node" parent="."]
+script = ExtResource("13_status")
+
+[node name="Items" type="Node" parent="."]
+script = ExtResource("14_items")
+spring_glove_scene = ExtResource("4_glove")
+magnet_scene = ExtResource("5_magnet")
+tickle_ray_scene = ExtResource("6_tickle")
+snowball_scene = ExtResource("10_snowball")
+trap_cake_scene = ExtResource("7_cake")
+trap_water_balloon_scene = ExtResource("8_balloon")
+trap_speaker_scene = ExtResource("9_speaker")
+trap_banana_scene = ExtResource("11_banana")
+trap_black_box_scene = ExtResource("12_blackbox")
+
+[node name="Combat" type="Node" parent="."]
+script = ExtResource("15_combat")
