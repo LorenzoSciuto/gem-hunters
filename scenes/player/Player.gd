@@ -64,6 +64,7 @@ const WINNER_CONFETTI_LIFETIME: float = 2.5
 const OUT_CONFETTI_AMOUNT: int = 60
 const OUT_POP_AMOUNT: int = 40
 const OUT_BURST_LIFETIME: float = 1.2
+const LIFE_POPUP_HEIGHT_SCALE: float = 1.8
 
 @export var player_id: int = 0
 ## Assigned in Player.tscn (GemLoose references Player: a preload would be a load cycle).
@@ -358,7 +359,10 @@ func _dust(amount: int) -> void:
 
 ## Pickup from the world. Returns the gems actually gained (frenzy doubles them).
 func collect_gem(value: int, boost: bool = true) -> int:
+	var lives_before: int = GameManager.get_lives(player_id)
 	var gained: int = GameManager.add_gems(player_id, value, boost)
+	if GameManager.get_lives(player_id) > lives_before:
+		_life_popup("MSG_LIFE_GAINED_POP", ParticleConfigs.POPUP_GAIN_COLOR)
 	if gained > 0:
 		AudioManager.play_sfx(AudioManager.SoundEffect.GEM_COLLECT)
 		ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * GEM_BURST_HEIGHT,
@@ -409,15 +413,22 @@ func apply_knockback(impulse: Vector3) -> void:
 	status.stun(KNOCKBACK_STUN)
 
 
-## A box item (projectile, trap, thunder) hit this hunter: in survival mode it
-## costs a life, unless a bubble or shield absorbs the hit. Call it before the
-## item's own effect, since taking gems pops the bubble.
-func take_item_hit() -> void:
-	if not GameManager.is_survival() or status.is_protected():
+## Any attack (box item, tackle, stomp, ground pound, robbing) hit this hunter:
+## in survival mode it costs a life, unless a bubble or shield absorbs the hit or
+## a life was just lost (LIFE_LOSS_GRACE). Call it before the hit's own effect,
+## since knockback or taking gems pops the bubble.
+func take_hit() -> void:
+	if not GameManager.is_survival() or status.is_protected() or status.in_grace(PlayerStatus.Grace.LIFE):
 		return
+	status.grant_grace(PlayerStatus.Grace.LIFE, Constants.LIFE_LOSS_GRACE)
 	GameManager.lose_life(player_id)
-	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * 1.8,
-		tr("MSG_LIFE_LOST_POP"), ParticleConfigs.POPUP_LOSS_COLOR)
+	_life_popup("MSG_LIFE_LOST_POP", ParticleConfigs.POPUP_LOSS_COLOR)
+
+
+## Life popups float above the gem numbers so both stay readable.
+func _life_popup(key: String, color: Color) -> void:
+	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * LIFE_POPUP_HEIGHT_SCALE,
+		tr(key), color)
 
 
 # ─── Movement from outside ────────────────────────────────────────────────

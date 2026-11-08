@@ -45,19 +45,23 @@ enum GameState {
 enum MatchMode {
 	TIME,   ## Most gems when the clock runs out.
 	SCORE,  ## First player to reach the gem target.
-	LIVES,  ## Survival: everyone starts with START_LIVES; hits from box items cost a life; last one standing wins.
+	LIVES,  ## Survival: everyone starts with START_LIVES; every attack costs a life; last one standing wins.
 }
 
 ## Survival mode: lives at the start, and the floor the golden gem refills to
 ## (lives can stack above it with life gems).
 const START_LIVES: int = 3
 const GOLDEN_REFILL_LIVES: int = 3
+## Survival: after losing a life a hunter can't lose another for this long.
+const LIFE_LOSS_GRACE: float = 3.0
 ## Survival mode gem economy: fewer, rarer gems, a slower golden gem, and a
 ## life gem now and then (at most LIFE_GEMS_MAX in the arena at once).
+## Every GEMS_PER_LIFE gems a hunter holds are traded for a life.
+const GEMS_PER_LIFE: int = 10
 const SURVIVAL_MAX_GEMS: int = 8
 const SURVIVAL_GEM_RESPAWN: float = 8.0
 const SURVIVAL_GOLDEN_RESPAWN: float = 90.0
-const LIFE_GEM_INTERVAL: float = 25.0
+const LIFE_GEM_INTERVAL: float = 60.0
 const LIFE_GEMS_MAX: int = 1
 
 ## Selectable durations for TIME mode (seconds).

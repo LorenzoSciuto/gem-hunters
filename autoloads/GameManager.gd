@@ -205,9 +205,18 @@ func add_gems(player_id: int, amount: int, boost: bool = true) -> int:
 	if gained == 0:
 		return 0
 	scores[player_id] = (scores[player_id] as int) + gained
+	if is_survival():
+		_trade_gems_for_lives(player_id)
 	score_updated.emit(player_id, scores[player_id])
 	_after_score_change()
 	return gained
+
+
+## Survival: every GEMS_PER_LIFE gems held become a life.
+func _trade_gems_for_lives(player_id: int) -> void:
+	while is_alive(player_id) and (scores[player_id] as int) >= Constants.GEMS_PER_LIFE:
+		scores[player_id] = (scores[player_id] as int) - Constants.GEMS_PER_LIFE
+		add_life(player_id)
 
 
 ## Remove up to [param amount] gems. Returns the amount actually removed.
@@ -236,7 +245,7 @@ func is_alive(player_id: int) -> bool:
 	return not is_survival() or get_lives(player_id) > 0
 
 
-## Survival: a hit from a box item costs a life; at zero the player is out, and
+## Survival: any attack costs a life; at zero the player is out, and
 ## when one hunter is left standing the match ends. Returns the lives left.
 func lose_life(player_id: int) -> int:
 	if not is_survival() or not is_playing() or get_lives(player_id) <= 0:

@@ -70,7 +70,7 @@ func _on_body_entered(body: Node3D) -> void:
 		if player.status.has_buff(PlayerStatus.Buff.SHIELD):
 			_reflect(player)
 			return
-		player.take_item_hit()
+		player.take_hit()
 		_on_hit_player(player)
 	_finish()
 

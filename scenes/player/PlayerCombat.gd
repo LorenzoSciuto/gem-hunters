@@ -102,6 +102,7 @@ func _tackle(rival: Player) -> void:
 	player.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE * 0.5)
 	var away: Vector3 = rival.global_position - player.global_position
 	away.y = 0.0
+	rival.take_hit()
 	rival.apply_knockback(away.normalized() * TACKLE_FORCE + Vector3.UP * TACKLE_LIFT)
 	var amount: int = TACKLE_LEADER_GEMS if rival.player_id == GameManager.get_leader() else TACKLE_GEMS
 	_steal_and_show(rival, amount)
@@ -128,6 +129,7 @@ func _stomp(rival: Player) -> void:
 	if not rival.combat.can_be_tackled():
 		return  # Still a bounce pad, just no second steal.
 	rival.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE)
+	rival.take_hit()
 	rival.model.play_squash(1.0)
 	rival.status.stun(STOMP_STUN)
 	_steal_and_show(rival, STOMP_GEMS)
@@ -146,6 +148,7 @@ func _process_steal(delta: float) -> void:
 		return
 	_steal_timer -= Constants.GEM_STEAL_INTERVAL
 	var prankster: bool = player.character_data and player.character_data.trait_type == CharacterData.TraitType.PRANKSTER
+	_steal_target.take_hit()
 	player.collect_gem(_steal_target.lose_gems(PRANKSTER_STEAL_GEMS if prankster else STEAL_GEMS, false), false)
 
 
@@ -197,6 +200,7 @@ func _ground_pound_impact() -> void:
 		if offset.length() > POUND_RADIUS:
 			continue
 		var push: Vector3 = Vector3(offset.x, 0.0, offset.z).normalized() * POUND_FORCE
+		rival.take_hit()
 		rival.apply_knockback(push + Vector3.UP * POUND_FORCE * 0.5)
 		_hit_feedback(rival, rival.lose_gems(POUND_GEMS), false)
 

@@ -22,7 +22,7 @@ func _on_body_entered(body: Node3D) -> void:
 		hide()
 		set_physics_process(false)
 		set_deferred("monitoring", false)
-		(body as Player).take_item_hit()
+		(body as Player).take_hit()
 		_on_hit_player(body as Player)
 	elif not body is Player:
 		_finish()
