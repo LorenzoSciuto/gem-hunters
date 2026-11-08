@@ -1,8 +1,8 @@
 ## InputManager.gd
 ## Autoload that owns every per-player p{N}_* input action.
 ##
-## Two keyboard schemes (P0 = WASD + mouse, P1 = arrows + numpad) and one
-## gamepad layout shared by all pads. The button actions can be rebound from
+## One keyboard scheme (P0 = WASD + mouse; everyone else plays with a pad) and
+## one gamepad layout shared by all pads. The button actions can be rebound from
 ## the Controls menu; changes are saved to user://controls.cfg.
 ##
 ## Gamepads go to P1, P2, P3 in connection order, so a pad never changes player
@@ -16,6 +16,8 @@ signal gamepad_disconnected(device_id: int)
 signal bindings_changed
 
 const SAVE_PATH: String = "user://controls.cfg"
+## Saved-file section of the keyboard scheme (named from when P1 had one too).
+const KEYBOARD_SECTION: String = "keyboard_0"
 const ACTION_DEADZONE: float = 0.2
 ## InputEvent device id that matches every device.
 const ALL_DEVICES: int = -1
@@ -31,23 +33,17 @@ const BUTTON_ACTIONS: Array[String] = [
 ## Item slot actions, in slot order.
 const ITEM_ACTIONS: Array[String] = ["item_1", "item_2", "item_3"]
 
-## Keyboard schemes: physical keycode, or -mouse_button for mouse buttons.
-const KEYBOARD_DEFAULTS: Array[Dictionary] = [
-	{
-		"move_left": KEY_A, "move_right": KEY_D, "move_forward": KEY_W, "move_back": KEY_S,
-		"look_left": KEY_J, "look_right": KEY_L, "look_up": KEY_I, "look_down": KEY_K,
-		"jump": KEY_SPACE,
-		"item_1": KEY_Q, "item_2": KEY_E, "item_3": KEY_R, "super": KEY_F, "toggle_view": KEY_V,
-	},
-	{
-		"move_left": KEY_LEFT, "move_right": KEY_RIGHT, "move_forward": KEY_UP, "move_back": KEY_DOWN,
-		"look_left": KEY_KP_4, "look_right": KEY_KP_6, "look_up": KEY_KP_8, "look_down": KEY_KP_5,
-		"jump": KEY_KP_0,
-		"item_1": KEY_KP_7, "item_2": KEY_KP_9, "item_3": KEY_KP_1, "super": KEY_KP_3, "toggle_view": KEY_KP_ADD,
-	},
-]
-## Menu "back" key per keyboard scheme (character selection: unlock / leave).
-const KEYBOARD_BACK_KEYS: Array[Key] = [KEY_ESCAPE, KEY_BACKSPACE]
+## The keyboard player.
+const KEYBOARD_PLAYER: int = 0
+## Keyboard scheme: physical keycode, or -mouse_button for mouse buttons.
+const KEYBOARD_DEFAULTS: Dictionary = {
+	"move_left": KEY_A, "move_right": KEY_D, "move_forward": KEY_W, "move_back": KEY_S,
+	"look_left": KEY_J, "look_right": KEY_L, "look_up": KEY_I, "look_down": KEY_K,
+	"jump": KEY_SPACE,
+	"item_1": KEY_Q, "item_2": KEY_E, "item_3": KEY_R, "super": KEY_F, "toggle_view": KEY_V,
+}
+## Menu "back" key (character selection: unlock / leave).
+const KEYBOARD_BACK_KEY: Key = KEY_ESCAPE
 const PAD_BACK_BUTTON: JoyButton = JOY_BUTTON_B
 ## Gamepad layout: face buttons fire, shoulders jump.
 const PAD_DEFAULTS: Dictionary = {
@@ -70,14 +66,22 @@ const PAD_BUTTON_NAMES: Dictionary = {
 	JOY_BUTTON_DPAD_LEFT: "D-Left", JOY_BUTTON_DPAD_RIGHT: "D-Right",
 }
 
+## SDL mappings for pads missing from Godot's database (measured on real
+## hardware). Unknown pads report raw button numbers, so their layout is scrambled.
+const EXTRA_PAD_MAPPINGS: Array[String] = [
+	"03000000790000000600000010010000,DragonRise Generic USB Joystick,a:b2,b:b1,x:b3,y:b0,leftshoulder:b6,rightshoulder:b7,lefttrigger:b4,righttrigger:b5,back:b9,start:b8,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a3,righty:a4,dpup:h0.1,dpright:h0.2,dpdown:h0.4,dpleft:h0.8,platform:Linux,",
+]
+
 ## player_id → joypad device id (-1 = keyboard only).
 var player_joypad_map: Dictionary = {}
 
-var _keyboard: Array[Dictionary] = []
+var _keyboard: Dictionary = {}
 var _pad: Dictionary = {}
 
 
 func _ready() -> void:
+	for mapping: String in EXTRA_PAD_MAPPINGS:
+		Input.add_joy_mapping(mapping, true)
 	_add_menu_pad_buttons()
 	_reset_to_defaults()
 	_load()
@@ -115,24 +119,23 @@ func has_pad(player_id: int) -> bool:
 	return player_joypad_map.get(player_id, -1) >= 0
 
 
-## Only P0 and P1 have a keyboard scheme.
 func has_keyboard(player_id: int) -> bool:
-	return player_id < _keyboard.size()
+	return player_id == KEYBOARD_PLAYER
 
 
 # ─── Bindings ─────────────────────────────────────────────────────────────
 
-## Display text of a keyboard binding (scheme 0 or 1).
-func key_text(scheme: int, action: String) -> String:
-	var code: int = _keyboard[scheme][action]
+## Display text of a keyboard binding.
+func key_text(action: String) -> String:
+	var code: int = _keyboard[action]
 	if code < 0:
 		return "Mouse %d" % -code
 	return OS.get_keycode_string(DisplayServer.keyboard_get_keycode_from_physical(code))
 
 
-## Display text of the scheme's menu "back" key.
-func back_key_text(scheme: int) -> String:
-	return OS.get_keycode_string(KEYBOARD_BACK_KEYS[scheme])
+## Display text of the menu "back" key.
+func back_key_text() -> String:
+	return OS.get_keycode_string(KEYBOARD_BACK_KEY)
 
 
 func pad_text(action: String) -> String:
@@ -143,14 +146,13 @@ func pad_text(action: String) -> String:
 func prompt_text(player_id: int, action: String) -> String:
 	if has_pad(player_id) or not has_keyboard(player_id):
 		return pad_text(action)
-	return key_text(player_id, action)
+	return key_text(action)
 
 
 ## Rebinds a keyboard action to a key or mouse button. An action already using
-## that input in the same scheme takes over the old one, so nothing is lost.
-func set_key_binding(scheme: int, action: String, event: InputEvent) -> void:
-	var code: int = _event_code(event)
-	_swap_into(_keyboard[scheme], action, code)
+## that input takes over the old one, so nothing is lost.
+func set_key_binding(action: String, event: InputEvent) -> void:
+	_swap_into(_keyboard, action, _event_code(event))
 	_save_and_apply()
 
 
@@ -164,7 +166,7 @@ func reset_bindings() -> void:
 	_save_and_apply()
 
 
-## True if [param event] can be bound on a keyboard scheme.
+## True if [param event] can be bound on the keyboard scheme.
 static func is_keyboard_bindable(event: InputEvent) -> bool:
 	return (event is InputEventKey and (event as InputEventKey).physical_keycode != KEY_ESCAPE) \
 		or event is InputEventMouseButton
@@ -184,18 +186,14 @@ static func _swap_into(map: Dictionary, action: String, value: int) -> void:
 
 
 func _reset_to_defaults() -> void:
-	_keyboard.clear()
-	for scheme: Dictionary in KEYBOARD_DEFAULTS:
-		_keyboard.append(scheme.duplicate())
+	_keyboard = KEYBOARD_DEFAULTS.duplicate()
 	_pad = PAD_DEFAULTS.duplicate()
 
 
 func _save_and_apply() -> void:
 	var cfg: ConfigFile = ConfigFile.new()
-	for scheme: int in _keyboard.size():
-		for action: String in BUTTON_ACTIONS:
-			cfg.set_value("keyboard_%d" % scheme, action, _keyboard[scheme][action])
 	for action: String in BUTTON_ACTIONS:
+		cfg.set_value(KEYBOARD_SECTION, action, _keyboard[action])
 		cfg.set_value("gamepad", action, _pad[action])
 	cfg.set_value("meta", "version", SAVE_VERSION)
 	cfg.save(SAVE_PATH)
@@ -207,16 +205,14 @@ func _load() -> void:
 	var cfg: ConfigFile = ConfigFile.new()
 	if cfg.load(SAVE_PATH) != OK:
 		return
-	for scheme: int in _keyboard.size():
-		for action: String in BUTTON_ACTIONS:
-			_keyboard[scheme][action] = int(cfg.get_value("keyboard_%d" % scheme, action, _keyboard[scheme][action]))
 	for action: String in BUTTON_ACTIONS:
+		_keyboard[action] = int(cfg.get_value(KEYBOARD_SECTION, action, _keyboard[action]))
 		_pad[action] = int(cfg.get_value("gamepad", action, _pad[action]))
 	if int(cfg.get_value("meta", "version", 1)) < SAVE_VERSION and _pad["toggle_view"] == LEGACY_VIEW_BUTTON:
 		set_pad_binding("toggle_view", PAD_DEFAULTS["toggle_view"])  # Also re-saves as the current version.
 
 
-## Rebuilds every p{N}_* action from the keyboard schemes and assigned pads.
+## Rebuilds every p{N}_* action from the keyboard scheme and assigned pads.
 func _apply() -> void:
 	for pid: int in Constants.MAX_PLAYERS:
 		var joy: int = player_joypad_map.get(pid, -1)
@@ -225,8 +221,8 @@ func _apply() -> void:
 			if not InputMap.has_action(name):
 				InputMap.add_action(name, ACTION_DEADZONE)
 			InputMap.action_erase_events(name)
-			if pid < _keyboard.size():
-				InputMap.action_add_event(name, _keyboard_event(_keyboard[pid][action]))
+			if has_keyboard(pid):
+				InputMap.action_add_event(name, _keyboard_event(_keyboard[action]))
 			if joy >= 0:
 				_bind_pad_action(name, action, joy)
 

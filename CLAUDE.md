@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-"Gem Hunters: Tag & Trap" — a 2–4 player local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus) by Wennovate, for kids 9+. Players grab gems in a themed maze, open gift boxes for traps/attacks, and knock gems out of rivals. Three modes: **time** (most gems when the clock ends), **score** (first to N gems), **survival** (3 lives, every attack costs a life, every `GEMS_PER_LIFE` gems buy one, last one standing wins). The leader wears a crown; the final stretch of time/score matches is a "frenzy" where pickups count double.
+"Gem Hunters: Tag & Trap" — a 2–4 player local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus) by Wennovate, for kids 9+. Players grab gems in a themed maze, open gift boxes for traps/attacks, and knock gems out of rivals. Three modes: **time** (most gems when the clock ends), **score** (first to N gems), **survival** (3 lives, every attack costs a life, every `GEMS_PER_LIFE` gems buy one, at most `MAX_LIVES` (5), last one standing wins). The leader wears a crown; the final stretch of time/score matches is a "frenzy" where pickups count double.
 
 ## Commands
 
@@ -32,12 +32,12 @@ The Godot 4.3 binary is bundled at `.tools/Godot_v4.3-stable_linux.x86_64`. Ther
 
 ## Architecture
 
-**Scene flow:** `MainMenu.tscn` → `GameManager.configure(players, mode, target, level_config)` → `scenes/main/Main.tscn` → `GameOverScreen.tscn` (Rematch reuses `GameManager.chosen_characters`; "Change hunters" clears them and reopens selection). In character selection, Back (pad B, Esc / Backspace, P0 right click, on-screen button) unlocks a locked choice, otherwise returns to the main menu; an unlock during `READY_DELAY` cancels the pending start. The selection card only grows, so locking in never resizes it.
+**Scene flow:** `MainMenu.tscn` → `GameManager.configure(players, mode, target, level_config)` → `scenes/main/Main.tscn` → `GameOverScreen.tscn` (Rematch reuses `GameManager.chosen_characters`; "Change hunters" clears them and reopens selection). In character selection, Back (pad B, P0 Esc / right click, on-screen button) unlocks a locked choice, otherwise returns to the main menu; an unlock during `READY_DELAY` cancels the pending start. The selection card only grows, so locking in never resizes it.
 
 **Autoloads** (`autoloads/`):
 - `Constants` — every enum (`GameState`, `MatchMode`, `PowerUpType`, `DebuffType`, `GemType`), group names, layers, tuning, survival tuning, `LEVEL_CONFIGS`.
 - `GameManager` — **the only owner of scores and lives**. State machine LOBBY → COUNTDOWN (3-2-1) → PLAYING ⇄ PAUSED → GAME_OVER, clock, `game_time()`, win conditions, frenzy, leader. `add_gems` / `remove_gems` return the amount applied (`boost=false` for transfers so the frenzy never creates gems); survival: `lose_life` / `add_life` / `refill_lives`, `get_standings()` ranks survivors first. `halve_rivals()` for the Chaos Gem. Signals: `countdown_tick`, `timer_updated`, `score_updated`, `leader_changed`, `frenzy_started`, `match_ended`, `lives_changed`, `player_eliminated`, `chaos_gem_appeared`, `chaos_gem_taken`.
-- `InputManager` — creates every `p{N}_*` action at runtime: two keyboard schemes (P0 WASD+mouse, P1 arrows+numpad) and one pad layout (face buttons = items 1-3 + super on Y, RB/RT jump, LB camera view; saved files older than `SAVE_VERSION` are migrated; P0's mouse: wheel arms a slot, left click fires, right click jumps). Rebindable from `ControlsDialog`, saved to `user://controls.cfg`. Pads go to P1..P3 in connection order; a leftover pad goes to P0.
+- `InputManager` — creates every `p{N}_*` action at runtime: one keyboard scheme (P0 WASD+mouse; everyone else plays with a pad) and one pad layout (face buttons = items 1-3 + super on Y, RB/RT jump, LB camera view; saved files older than `SAVE_VERSION` are migrated; P0's mouse: wheel arms a slot, left click fires, right click jumps). Rebindable from `ControlsDialog`, saved to `user://controls.cfg`. Pads go to P1..P3 in connection order; a leftover pad goes to P0.
 - `AudioManager` (`play_sfx`), `LocalizationManager` (en/it).
 - `UiMotion` — every Button grows a fixed few pixels on hover/focus and squishes on press; plain `PanelContainer` cards pop in; `pulse(control)` is the shared "value changed" pop.
 
