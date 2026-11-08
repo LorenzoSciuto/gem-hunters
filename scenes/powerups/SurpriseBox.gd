@@ -24,9 +24,13 @@ const MIN_BOX_SPACING: float = 12.0
 ## Prank box: the opener is tossed up and their controls flip for a moment.
 const PRANK_LAUNCH_VELOCITY: float = 9.0
 const PRANK_CONFUSION: float = 2.0
-## "PRANK!" floats over the box so everyone sees why it burst.
-const PRANK_TEXT_HEIGHT: float = 2.2
+## "PRANK!" or the item name floats over the box so everyone sees what happened.
+const TEXT_HEIGHT: float = 2.2
 const PRANK_TEXT_COLOR: Color = Color(1.0, 0.45, 0.7)
+## Opening burst and the colour of the item name.
+const OPEN_CONFETTI: int = 50
+const OPEN_LIFETIME: float = 0.9
+const ITEM_TEXT_COLOR: Color = Color(1.0, 0.9, 0.4)
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +93,7 @@ func _prank(player: Player) -> void:
 	player.velocity.y = PRANK_LAUNCH_VELOCITY
 	player.status.apply_debuff(Constants.DebuffType.INVERTED, PRANK_CONFUSION)
 	player.notify("MSG_PRANK_BOX")
-	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * PRANK_TEXT_HEIGHT,
+	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
 		tr("MSG_PRANK_POP"), PRANK_TEXT_COLOR)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.confetti_shower())
 	AudioManager.play_sfx(AudioManager.SoundEffect.FART_HORN)
@@ -110,6 +114,9 @@ func _give_powerup(player: Player) -> void:
 
 	if pickup_particles:
 		pickup_particles.restart()
+	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.confetti_shower(), OPEN_CONFETTI, OPEN_LIFETIME)
+	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
+		tr(ItemCatalog.NAME_KEYS[data.type]), ITEM_TEXT_COLOR)
 	AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
 
 

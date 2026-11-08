@@ -1,15 +1,9 @@
 ## TrapSpeaker.gd
-## "Prank Speaker" trap: triggers on proximity, scares the victim stiff for a
-## moment and scrambles their controls.
+## "Prank Speaker" trap: whoever steps on it is scared stiff for a moment and
+## their controls are scrambled.
 extends TrapBase
 
-@onready var detection_area: Area3D = $DetectionArea
 @onready var anim: AnimationPlayer = $AnimationPlayer
-
-
-func _ready() -> void:
-	super._ready()
-	detection_area.body_entered.connect(_on_body_entered)
 
 
 func _apply_trap_effect(player: Player) -> void:

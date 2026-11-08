@@ -30,5 +30,4 @@ func _refresh_rows() -> void:
 
 
 func _on_timer_updated(seconds: float) -> void:
-	var total: int = int(ceilf(seconds))
-	timer_label.text = "%d:%02d" % [total / 60, total % 60]
+	timer_label.text = GameManager.clock_text(seconds)

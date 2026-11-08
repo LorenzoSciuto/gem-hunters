@@ -92,6 +92,7 @@ func _place_props() -> void:
 	var spawns_left: int = POWERUP_SPAWN_COUNT
 	var sprinklers_left: int = _config.sprinkler_count
 	var ice_left: int = _config.ice_patch_count
+	var sand_left: int = _config.quicksand_count
 	for c: Vector2i in free_cells:
 		if _used_cells.has(c):
 			continue
@@ -109,6 +110,9 @@ func _place_props() -> void:
 			var patch: IcePatch = _spawn_at(ICE_PATCH_SCENE, c) as IcePatch
 			patch.duration = 0.0  # A level hazard never melts.
 			ice_left -= 1
+		elif sand_left > 0:
+			_add_feature(Quicksand.new(), c)
+			sand_left -= 1
 	_place_return_pad()
 	_place_portals(free_cells)
 	for c: Vector2i in _free(free_cells).slice(0, _config.map_beacon_count):

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/traps/TrapWaterBalloon.gd" id="1_balloon"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_balloon"]
-radius = 0.55
+radius = 0.4
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_balloon"]
 transparency = 1

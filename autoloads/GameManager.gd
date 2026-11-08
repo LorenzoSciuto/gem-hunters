@@ -337,27 +337,36 @@ func get_state() -> Constants.GameState:
 
 # ─── Private helpers ──────────────────────────────────────────────────────
 
+## 3-2-1 in whole seconds, then the match clock every frame.
 func _tick(delta: float) -> void:
+	if _current_state == Constants.GameState.PLAYING:
+		_advance_clock(delta)
+		return
 	_tick_accumulator += delta
 	if _tick_accumulator < 1.0:
-		if _current_state == Constants.GameState.PLAYING:
-			_advance_clock(delta)
 		return
 	_tick_accumulator -= 1.0
-
-	if _current_state == Constants.GameState.COUNTDOWN:
-		_countdown_left -= 1
-		countdown_tick.emit(_countdown_left)
-		if _countdown_left <= 0:
-			_set_state(Constants.GameState.PLAYING)
-			timer_updated.emit(_clock)
-		return
-
-	_advance_clock(delta)
-	timer_updated.emit(_clock)
+	_countdown_left -= 1
+	countdown_tick.emit(_countdown_left)
+	if _countdown_left <= 0:
+		_set_state(Constants.GameState.PLAYING)
+		timer_updated.emit(_clock)
 
 
+## The clock as shown: counting down it rounds up (never 0:00 with time left),
+## counting up it rounds down (0:00, 0:01, 0:02... from the start).
+func clock_seconds(seconds: float) -> int:
+	return int(ceilf(seconds)) if match_mode == Constants.MatchMode.TIME else int(seconds)
+
+
+func clock_text(seconds: float) -> String:
+	var total: int = clock_seconds(seconds)
+	return "%d:%02d" % [total / 60, total % 60]
+
+
+## Advances the clock; timer_updated fires whenever the shown second changes.
 func _advance_clock(delta: float) -> void:
+	var shown: int = clock_seconds(_clock)
 	if match_mode == Constants.MatchMode.TIME:
 		_clock = maxf(_clock - delta, 0.0)
 		if not _frenzy and _clock <= Constants.FRENZY_TIME_REMAINING:
@@ -368,6 +377,8 @@ func _advance_clock(delta: float) -> void:
 		_clock += delta
 		if _clock >= Constants.SCORE_MODE_TIME_CAP:
 			end_match()
+	if clock_seconds(_clock) != shown:
+		timer_updated.emit(_clock)
 
 
 func _update_leader() -> void:

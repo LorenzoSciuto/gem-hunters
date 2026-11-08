@@ -29,7 +29,7 @@ cat <<'BANNER'
   PLAYERS 2-4  (gamepad)
     Move left stick | Look right stick | Jump RB / RT | Items X A B | Superpower Y
     View LB
-  Run into a rival to tackle them. Controls can be remapped from the menu.
+  Jump on a rival's head to steal gems. Controls can be remapped from the menu.
   ESC or START pauses the match.
 ==============================================================================
 BANNER
