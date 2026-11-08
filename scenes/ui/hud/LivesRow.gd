@@ -1,5 +1,5 @@
 ## LivesRow.gd
-## Survival mode: one heart per life (a "+N" after HEARTS_SHOWN), redrawn and
+## Survival mode: one heart per life (at most MAX_LIVES), redrawn and
 ## pulsed whenever this hunter's lives change.
 extends Control
 class_name LivesRow
@@ -9,19 +9,16 @@ const HEART_GAP: float = 6.0
 const HEART_COLOR: Color = Color(1.0, 0.32, 0.45)
 const HEART_OUTLINE: Color = Color(0.25, 0.04, 0.1)
 const HEART_OUTLINE_WIDTH: float = 2.0
-const HEARTS_SHOWN: int = 5
 const HEART_POINTS: int = 28
 ## The parametric heart curve spans about this many units across.
 const CURVE_SPAN: float = 34.0
-const EXTRA_TEXT_BASELINE: float = 0.85
-const EXTRA_TEXT_SIZE: float = 0.9
 
 var player_id: int = 0
 
 
 func setup(pid: int) -> void:
 	player_id = pid
-	custom_minimum_size = Vector2((HEART_SIZE + HEART_GAP) * (HEARTS_SHOWN + 1), HEART_SIZE)
+	custom_minimum_size = Vector2((HEART_SIZE + HEART_GAP) * Constants.MAX_LIVES, HEART_SIZE)
 	GameManager.lives_changed.connect(func(changed: int, _lives: int) -> void:
 		if changed == player_id:
 			queue_redraw()
@@ -29,13 +26,8 @@ func setup(pid: int) -> void:
 
 
 func _draw() -> void:
-	var count: int = GameManager.get_lives(player_id)
-	for n: int in mini(count, HEARTS_SHOWN):
+	for n: int in GameManager.get_lives(player_id):
 		_draw_heart(Vector2(n * (HEART_SIZE + HEART_GAP) + HEART_SIZE * 0.5, HEART_SIZE * 0.5))
-	if count > HEARTS_SHOWN:
-		draw_string(get_theme_font(&"font", &"Label"),
-			Vector2(HEARTS_SHOWN * (HEART_SIZE + HEART_GAP), HEART_SIZE * EXTRA_TEXT_BASELINE),
-			"+%d" % (count - HEARTS_SHOWN), HORIZONTAL_ALIGNMENT_LEFT, -1, int(HEART_SIZE * EXTRA_TEXT_SIZE), HEART_COLOR)
 
 
 ## Classic parametric heart curve, scaled to HEART_SIZE.

@@ -78,6 +78,8 @@ func _apply_visuals() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if _already_collected or not body is Player:
 		return
+	if gem_type == Constants.GemType.LIFE and GameManager.has_max_lives((body as Player).player_id):
+		return  # Full: it stays for a rival.
 	_already_collected = true
 	var player: Player = body as Player
 	if gem_type == Constants.GemType.LIFE:

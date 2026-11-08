@@ -212,9 +212,9 @@ func add_gems(player_id: int, amount: int, boost: bool = true) -> int:
 	return gained
 
 
-## Survival: every GEMS_PER_LIFE gems held become a life.
+## Survival: every GEMS_PER_LIFE gems held become a life, up to MAX_LIVES.
 func _trade_gems_for_lives(player_id: int) -> void:
-	while is_alive(player_id) and (scores[player_id] as int) >= Constants.GEMS_PER_LIFE:
+	while is_alive(player_id) and not has_max_lives(player_id) and (scores[player_id] as int) >= Constants.GEMS_PER_LIFE:
 		scores[player_id] = (scores[player_id] as int) - Constants.GEMS_PER_LIFE
 		add_life(player_id)
 
@@ -259,10 +259,14 @@ func lose_life(player_id: int) -> int:
 	return get_lives(player_id)
 
 
-## Survival: life gem (+[param amount], no cap).
+## Survival: +[param amount] lives, never above MAX_LIVES.
 func add_life(player_id: int, amount: int = 1) -> void:
-	if is_survival() and is_playing() and is_alive(player_id):
-		_set_lives(player_id, get_lives(player_id) + amount)
+	if is_survival() and is_playing() and is_alive(player_id) and not has_max_lives(player_id):
+		_set_lives(player_id, mini(get_lives(player_id) + amount, Constants.MAX_LIVES))
+
+
+func has_max_lives(player_id: int) -> bool:
+	return get_lives(player_id) >= Constants.MAX_LIVES
 
 
 ## Survival: golden gem — back up to at least [param minimum] lives.
