@@ -18,8 +18,8 @@
 ## Chaos Gem: exactly once per match, part-way through (see CHAOS_*), at a
 ## random free gem spot; GameManager announces it to every HUD.
 ##
-## Survival mode: fewer and rarer gems, a slower golden gem, no Chaos Gem
-## (gems only break ties there), and a life gem every LIFE_GEM_INTERVAL.
+## Survival mode: fewer and rarer gems (traded for lives, see GEMS_PER_LIFE),
+## a slower golden gem, no Chaos Gem, and a life gem every LIFE_GEM_INTERVAL.
 extends Node3D
 
 # ---------------------------------------------------------------------------

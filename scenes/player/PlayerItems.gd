@@ -166,7 +166,7 @@ func _fire_projectile(scene: PackedScene) -> void:
 func _thunder() -> void:
 	AudioManager.play_sfx(AudioManager.SoundEffect.TICKLE_ZAP)
 	for rival: Player in player.rivals():
-		rival.take_item_hit()  # Before the gem loss, which pops a bubble.
+		rival.take_hit()  # Before the gem loss, which pops a bubble.
 		rival.lose_gems(THUNDER_GEMS)
 		rival.status.apply_debuff(Constants.DebuffType.LAUGHING, Constants.DEBUFF_DURATION_THUNDER_LAUGH)
 		rival.status.stun(THUNDER_STUN)

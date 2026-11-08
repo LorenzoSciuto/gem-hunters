@@ -137,7 +137,7 @@ func _refresh_texts() -> void:
 	match _mode:
 		Constants.MatchMode.TIME: mode_desc.text = tr("UI_MODE_TIME_DESC")
 		Constants.MatchMode.SCORE: mode_desc.text = tr("UI_MODE_SCORE_DESC").format([_target])
-		_: mode_desc.text = tr("UI_MODE_LIVES_DESC").format([Constants.START_LIVES])
+		_: mode_desc.text = tr("UI_MODE_LIVES_DESC").format([Constants.START_LIVES, Constants.GEMS_PER_LIFE])
 
 	for i: int in _arena_buttons.size():
 		_arena_buttons[i].text = tr(_levels[i].name_key)

@@ -14,7 +14,7 @@ UI_MODE_SCORE,Gem Race,Corsa alle Gemme
 UI_MODE_TIME_DESC,Most gems when the clock hits zero wins!,Vince chi ha più gemme allo scadere del tempo!
 UI_MODE_SCORE_DESC,First to {0} gems wins!,Vince il primo che arriva a {0} gemme!
 UI_MODE_LIVES,Survival,Sopravvivenza
-UI_MODE_LIVES_DESC,Everyone starts with {0} lives: items from gift boxes cost a life. Last one standing wins!,Tutti partono con {0} vite: gli oggetti dei pacchi tolgono una vita. Vince chi sopravvive!
+UI_MODE_LIVES_DESC,"Everyone starts with {0} lives: every attack costs a life, every {1} gems buy one. Last one standing wins!","Tutti partono con {0} vite: ogni attacco toglie una vita, ogni {1} gemme ne comprano una. Vince chi sopravvive!"
 UI_TARGET_GEMS,{0} gems,{0} gemme
 UI_SELECT_ARENA,Arena,Arena
 UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
@@ -161,7 +161,7 @@ Gift boxes give you items (up to 3). Every hunter also has a superpower that rec
 
 In the final frenzy every gem counts double: never give up!
 
-Survival: everyone starts with 3 lives. Every hit from a gift-box item (shots, traps, thunder) costs a life; a bubble or shield saves it. Pink life gems give +1 life (you can have more than 3), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
+Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), tackles, stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (you can have more than 3), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
 
 - A Tempo: vince chi ha più gemme allo scadere del tempo.
 - Corsa alle Gemme: vince il primo hunter che raggiunge l'obiettivo.
@@ -174,7 +174,7 @@ I pacchi regalo danno oggetti (fino a 3). Ogni hunter ha anche un superpotere ch
 
 Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!
 
-Sopravvivenza: tutti partono con 3 vite. Ogni colpo di un oggetto dei pacchi (spari, trappole, fulmine) toglie una vita; bolla e scudo la salvano. Le gemme vita rosa danno +1 vita (puoi averne più di 3), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
+Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), spinte, schiacciate in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (puoi averne più di 3), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
 HELP_HUNTERS_INTRO,"Each hunter has a special trait and a superpower (Y on the pad, F on the keyboard, or pick it with the mouse wheel). The icon shows when it is ready again.","Ogni hunter ha una dote speciale e un superpotere (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse). L'icona mostra quando è di nuovo pronto."
 HELP_ITEMS_INTRO,"Open gift boxes to get items: you can carry 3 (X, A, B on the pad - Q, E, R on the keyboard - or wheel + left click). Watch out: some boxes are pranks, some hold two items! Careful: the traps you drop catch you too!","Apri i pacchi regalo per avere oggetti: ne puoi tenere 3 (X, A, B sul pad - Q, E, R sulla tastiera - o rotella + clic sinistro). Attenzione: alcuni pacchi sono scherzi, altri contengono due oggetti! Attento: le trappole che lasci prendono anche te!"
 HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the center. Each zone has its own floor color and a giant landmark (Crystal Spire, Orb Tower, Pyramid, Castle), and your screen shows the zone name: peek at the others' screens to find out where they are!

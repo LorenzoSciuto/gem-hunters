@@ -64,7 +64,7 @@ func _trigger(player: Player) -> void:
 	set_deferred("monitoring", false)
 	# Read before taking gems: that pops the bubble, which must also absorb the effect.
 	var protected: bool = player.status.is_protected()
-	player.take_item_hit()
+	player.take_hit()
 
 	var removed: int = player.lose_gems(gems_stolen, false)
 	if removed > 0:

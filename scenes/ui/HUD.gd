@@ -39,8 +39,9 @@ func setup(player: Player, color: Color) -> void:
 	player_id = player.player_id
 	badge.text = tr("UI_PLAYER_SHORT").format([player_id + 1])
 	badge.modulate = color
-	goal_bar.visible = GameManager.match_mode == Constants.MatchMode.SCORE
-	goal_bar.max_value = GameManager.match_target
+	# Survival: the bar fills toward the next life bought with gems.
+	goal_bar.visible = GameManager.match_mode == Constants.MatchMode.SCORE or GameManager.is_survival()
+	goal_bar.max_value = Constants.GEMS_PER_LIFE if GameManager.is_survival() else GameManager.match_target
 	_on_timer_updated(float(GameManager.match_target) if GameManager.match_mode == Constants.MatchMode.TIME else 0.0)
 	if GameManager.is_survival():
 		var lives: LivesRow = LivesRow.new()

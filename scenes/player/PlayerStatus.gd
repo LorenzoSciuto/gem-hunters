@@ -13,7 +13,7 @@ signal screen_effect_requested(player_id: int, debuff_type: int, duration: float
 signal debuff_cleared(player_id: int, debuff_type: int)
 
 enum Buff { BUBBLE, SHIELD, SHOES, TURBO }
-enum Grace { TACKLE, TRAP, PORTAL }
+enum Grace { TACKLE, TRAP, PORTAL, LIFE }
 
 const TURBO_MULTIPLIER: float = 1.8
 ## Speedsters shake off ice slides this much faster.
