@@ -164,8 +164,11 @@ func start_match() -> void:
 	countdown_tick.emit(_countdown_left)
 
 
-## Return to the lobby state (used when leaving a match scene).
+## Return to the lobby state (used when leaving a match scene). The clock
+## restarts here, not at start_match: character selection sets the superpower
+## recharge on game_time() before the countdown begins.
 func reset_to_lobby() -> void:
+	_play_time = 0.0
 	_set_state(Constants.GameState.LOBBY)
 
 
