@@ -39,12 +39,16 @@ enum Style {
 @export_range(0.0, 1.0) var loop_chance: float = 0.15
 ## Number of open plazas carved into the maze (ROOMS layout).
 @export var room_count: int = 0
+## CLASSIC/ROOMS: chance the maze keeps going straight, for long corridors.
+@export_range(0.0, 1.0) var corridor_bias: float = 0.0
 
 @export_group("Gameplay props")
 @export var surprise_box_count: int = 6
 @export var trampoline_count: int = 3
 @export var sprinkler_count: int = 0
 @export var ice_patch_count: int = 0
+## Quicksand pools that slow down whoever wades through.
+@export var quicksand_count: int = 0
 ## Teleport portal pairs, placed far apart.
 @export var portal_pairs: int = 2
 ## Map beacons: step on one to see where everyone is.

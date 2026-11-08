@@ -87,6 +87,22 @@ func set_wall(a: Vector2i, b: Vector2i, value: bool) -> void:
 		south[idx(a.x, mini(a.y, b.y))] = v
 
 
+## The wall between [param a] and [param b] is anchored at both ends: the wall
+## pieces continuing it in a straight line exist, or the line meets the outer wall.
+func _is_doorway(a: Vector2i, b: Vector2i) -> bool:
+	var along: Vector2i = Vector2i(0, 1) if a.y == b.y else Vector2i(1, 0)
+	for step: Vector2i in [along, -along]:
+		var na: Vector2i = a + step
+		var nb: Vector2i = b + step
+		if _in_bounds(na) and _in_bounds(nb) and not wall_between(na, nb):
+			return false
+	return true
+
+
+func _in_bounds(c: Vector2i) -> bool:
+	return c.x >= 0 and c.y >= 0 and c.x < cols and c.y < rows
+
+
 func neighbors(c: Vector2i) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for d: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
@@ -132,6 +148,10 @@ func _generate_classic(level: LevelConfig) -> void:
 			stack.pop_back()
 			continue
 		var next: Vector2i = options[rng.randi() % options.size()]
+		if stack.size() > 1 and rng.randf() < level.corridor_bias:
+			var straight: Vector2i = current + (current - stack[stack.size() - 2])
+			if straight in options:
+				next = straight
 		set_wall(current, next, false)
 		visited[next] = true
 		stack.append(next)
@@ -228,14 +248,21 @@ func _ensure_connected() -> void:
 		frontier.append(pick[1])
 
 
-## Any interior wall can become a gate: the maze is already connected without
-## them, so a closed gate only ever blocks a shortcut.
+## Gates fill doorways only: a wall piece with wall (or the outer wall) at both
+## ends, so a closed gate really shuts a passage instead of standing alone in
+## the open. The maze is already connected without them, so a closed gate only
+## ever blocks a shortcut. Fewer doorways than gate_count means fewer gates.
 func _pick_gates(level: LevelConfig) -> void:
 	var walls: Array = []
 	for edge: Array in interior_edges():
-		if wall_between(edge[0], edge[1]):
+		if wall_between(edge[0], edge[1]) and _is_doorway(edge[0], edge[1]):
 			walls.append(edge)
 	walls.shuffle()
-	gate_edges = walls.slice(0, mini(level.gate_count, walls.size()))
-	for edge: Array in gate_edges:
-		set_wall(edge[0], edge[1], false)
+	gate_edges = []
+	for edge: Array in walls:
+		if gate_edges.size() >= level.gate_count:
+			break
+		# Re-checked: an opened neighbour gate no longer anchors this one.
+		if _is_doorway(edge[0], edge[1]):
+			set_wall(edge[0], edge[1], false)
+			gate_edges.append(edge)

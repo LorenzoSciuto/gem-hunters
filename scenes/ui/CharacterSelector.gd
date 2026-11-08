@@ -41,7 +41,10 @@ const FIT_MARGIN: float = 0.95
 @onready var char_name: Label = $Panel/VBox/NameRow/CharName
 @onready var char_bio: Label = $Panel/VBox/CharBio
 @onready var char_trait: Label = $Panel/VBox/CharTrait
-@onready var char_super: Label = $Panel/VBox/CharSuper
+@onready var super_heading: Label = $Panel/VBox/SuperRow/SuperInfo/SuperHeading
+@onready var super_icon: TextureRect = $Panel/VBox/SuperRow/SuperIcon
+@onready var super_name: Label = $Panel/VBox/SuperRow/SuperInfo/SuperName
+@onready var super_desc: Label = $Panel/VBox/SuperRow/SuperInfo/SuperDesc
 @onready var speed_bar: ProgressBar = $Panel/VBox/Stats/SpeedBar
 @onready var jump_bar: ProgressBar = $Panel/VBox/Stats/JumpBar
 @onready var defense_bar: ProgressBar = $Panel/VBox/Stats/DefenseBar
@@ -80,6 +83,7 @@ func _uses_pad() -> bool:
 
 
 func _update_prompt() -> void:
+	super_heading.text = tr("UI_SUPER_PRESS").format([InputManager.prompt_text(player_id, "super")])
 	if _uses_pad():
 		prompt_label.text = tr("UI_PROMPT_PAD_LOCKED" if _is_locked else "UI_PROMPT_PAD")
 	elif _is_locked:
@@ -189,8 +193,10 @@ func _update_display() -> void:
 	char_name.modulate = c.color
 	char_bio.text = tr(c.bio_key)
 	char_trait.text = tr(c.trait_key)
-	var super_key: String = CharacterData.SUPER_KEYS.get(c.trait_type, "")
-	char_super.text = "%s: %s" % [tr(super_key), tr(super_key + "_DESC")] if super_key else ""
+	var super_key: String = CharacterData.SUPER_KEYS[c.superpower]
+	super_icon.texture = ItemCatalog.SUPER_ICONS[c.superpower]
+	super_name.text = tr(super_key)
+	super_desc.text = tr(super_key + "_DESC")
 	speed_bar.value = c.stat_speed
 	jump_bar.value = c.stat_jump
 	defense_bar.value = c.stat_defense
