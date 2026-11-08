@@ -224,9 +224,10 @@ func _on_view_changed(pid: int, first_person: bool) -> void:
 
 
 func _on_impact(attacker_id: int, victim_id: int, gems: int) -> void:
-	_cameras[attacker_id].shake(ATTACKER_SHAKE)
+	if attacker_id != PlayerCombat.NO_ATTACKER:
+		_cameras[attacker_id].shake(ATTACKER_SHAKE)
+		_huds[attacker_id].show_impact(true, gems)
 	_cameras[victim_id].shake(VICTIM_SHAKE)
-	_huds[attacker_id].show_impact(true, gems)
 	_huds[victim_id].show_impact(false, gems)
 
 
@@ -270,9 +271,15 @@ func _on_timer_updated(seconds: float) -> void:
 
 func _on_match_ended(_results: Array) -> void:
 	_set_controls(false)
+	# Every screen goes back to its own hunter: the winner cheers on theirs only.
 	var winner_id: int = GameManager.get_leader()
-	if winner_id >= 0:
-		_players[winner_id].play_winner_animation()
+	for player: Player in _players:
+		var pid: int = player.player_id
+		var view: Node3D = player.get_camera_target()
+		_cameras[pid].set_target(view)
+		if winner_id >= 0:
+			player.play_finale(pid == winner_id, view.global_position)
+		_huds[pid].show_result(winner_id, WINNER_DISPLAY_DURATION)
 	AudioManager.play_sfx(AudioManager.SoundEffect.MATCH_END)
 	await get_tree().create_timer(WINNER_DISPLAY_DURATION).timeout
 	get_tree().change_scene_to_file(GAME_OVER_SCENE)

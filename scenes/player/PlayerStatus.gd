@@ -16,8 +16,8 @@ enum Buff { BUBBLE, SHIELD, SHOES, TURBO }
 enum Grace { TACKLE, TRAP, PORTAL, LIFE }
 
 const TURBO_MULTIPLIER: float = 1.8
-## Speedsters shake off ice slides this much faster.
-const SPEEDSTER_ICE_RECOVERY: float = 0.5
+## Wading through quicksand: speed multiplier while sinking.
+const QUICKSAND_SPEED: float = 0.45
 ## Frozen hunters mash jump to crack the ice: each press takes this much off,
 ## but the freeze lasts at least FREEZE_MIN_TIME (rivals need time to rob them).
 const FREEZE_MASH_STEP: float = 0.15
@@ -36,6 +36,7 @@ var _debuff_until: Dictionary = {}
 var _buff_until: Dictionary = {}
 var _grace_until: Dictionary = {}
 var _stunned_until: float = 0.0
+var _sinking_until: float = 0.0
 var _frozen_since: float = 0.0
 var _was_frozen: bool = false
 
@@ -76,8 +77,11 @@ func has(type: Constants.DebuffType) -> bool:
 func apply_debuff(type: Constants.DebuffType, duration: float) -> bool:
 	if absorb_hit():
 		return false
-	if type == Constants.DebuffType.ICE_SLIDE and _trait() == CharacterData.TraitType.SPEEDSTER:
-		duration *= SPEEDSTER_ICE_RECOVERY
+	var data: CharacterData = player.character_data
+	if data:
+		duration *= data.debuff_duration_multiplier
+		if type == Constants.DebuffType.ICE_SLIDE:
+			duration *= data.ice_recovery_multiplier
 	_debuff_until[type] = maxf(_debuff_until.get(type, 0.0), _now() + duration)
 	if type == Constants.DebuffType.FROZEN:
 		if not _was_frozen:
@@ -149,10 +153,17 @@ func absorb_hit() -> bool:
 	return true
 
 
-## Spring shoes and turbo stack on the character's own speed.
+## Spring shoes and turbo stack on the character's own speed; quicksand slows it.
 func speed_multiplier() -> float:
 	var multiplier: float = Constants.SPRING_SHOES_SPEED_MULTIPLIER if has_buff(Buff.SHOES) else 1.0
-	return multiplier * (TURBO_MULTIPLIER if has_buff(Buff.TURBO) else 1.0)
+	multiplier *= TURBO_MULTIPLIER if has_buff(Buff.TURBO) else 1.0
+	return multiplier * (QUICKSAND_SPEED if _sinking_until > _now() else 1.0)
+
+
+## In quicksand for the next [param duration] seconds (refreshed while wading).
+## Not a debuff: bubbles and shields don't stop sand.
+func sink(duration: float) -> void:
+	_sinking_until = maxf(_sinking_until, _now() + duration)
 
 
 # ─── Grace periods ────────────────────────────────────────────────────────
@@ -165,6 +176,3 @@ func grant_grace(kind: Grace, duration: float) -> void:
 func in_grace(kind: Grace) -> bool:
 	return _grace_until.get(kind, 0.0) > _now()
 
-
-func _trait() -> int:
-	return player.character_data.trait_type if player.character_data else CharacterData.TraitType.NONE

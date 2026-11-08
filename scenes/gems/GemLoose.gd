@@ -18,8 +18,9 @@ const BLINK_RATE: float = 12.0
 const SPIN_SPEED: float = 2.5
 const BOB_SPEED: float = 4.0
 const BOB_HEIGHT: float = 0.08
-## Once pickable, a loose gem drifts toward the nearest hunter within this range.
-const MAGNET_RADIUS: float = 3.0
+## Once pickable, a loose gem drifts toward the nearest hunter within this range
+## (wider than the burst spread, so gems knocked out nearby come back once allowed).
+const MAGNET_RADIUS: float = 4.5
 const MAGNET_FORCE: float = 30.0
 ## The hunter who lost the gem can't pull it back or grab it for this long, so
 ## rivals get a real chance at it.
@@ -45,10 +46,7 @@ var _pickable: bool = false
 
 func _ready() -> void:
 	_apply_material()
-	pickup_range.body_entered.connect(_on_pickup_range_body_entered)
-	pickup_range.monitoring = false
 	get_tree().create_timer(PICKUP_DELAY, false).timeout.connect(func() -> void:
-		pickup_range.monitoring = true
 		_pickable = true
 		visual.visible = true)
 
@@ -77,6 +75,7 @@ func _physics_process(delta: float) -> void:
 		_expire()
 		return
 	if _pickable:
+		_try_pickup()
 		_pull_toward_nearest_player()
 
 
@@ -108,13 +107,17 @@ func _apply_material() -> void:
 		(part as MeshInstance3D).set_surface_override_material(0, mat)
 
 
+## Checked every frame, not on entering: a hunter already standing on the gem
+## when it becomes theirs to take (pickup or dropper delay over) still gets it.
 ## Scattered gems are a transfer between players, so the frenzy does not double them.
-func _on_pickup_range_body_entered(body: Node3D) -> void:
-	if _collected or not body is Player or not _can_take(body as Player):
-		return
-	_collected = true
-	(body as Player).collect_gem(value, false)
-	queue_free()
+func _try_pickup() -> void:
+	for body: Node3D in pickup_range.get_overlapping_bodies():
+		var player: Player = body as Player
+		if player and player.is_in_group(Constants.GROUP_PLAYERS) and _can_take(player):
+			_collected = true
+			player.collect_gem(value, false)
+			queue_free()
+			return
 
 
 func _expire() -> void:
