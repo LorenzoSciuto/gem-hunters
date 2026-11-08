@@ -10,6 +10,8 @@ traps, and knock gems out of each other. English and Italian UI.
 - **Goal:** *Time Attack* (most gems when the clock hits zero) or *Gem Race* (first to the target).
   Gems are worth 1, 3 or 5; the golden gem in the center is worth 10. In the final **frenzy** every
   gem counts double.
+- **Survival:** everyone starts with 3 lives and every attack costs one (3 s of safety after each
+  loss). Every 10 gems buy a life, and pink life gems give one too. Last hunter standing wins.
 - **Tackle:** run into a rival to knock them back and steal a gem — two from the leader, who wears
   a crown and a golden light beam visible from anywhere in the maze.
 - **Items:** gift boxes fill up to 3 slots (a full inventory can't open boxes). Some boxes are
@@ -43,7 +45,19 @@ the language and the last match setup (players, goal, arena) to `user://settings
 restored at startup. `user://` is `~/.local/share/gem-hunters/` on Linux
 (`%APPDATA%\gem-hunters` on Windows).
 
-## Running
+## Download
+
+Portable builds for Windows and Linux (x86_64) are on the
+[Releases](https://github.com/thegoodflow/gem-hunters/releases) page: no install needed.
+
+- **Windows:** unzip `GemHunters-windows-x86_64.zip` and run `GemHunters.exe`.
+- **Linux:** `tar -xzf GemHunters-linux-x86_64.tar.gz` and run `./GemHunters.x86_64`.
+
+Every pull request and master push builds both packages (Actions → *Build & release*); pushing a
+`v*` tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) publishes them as a release. Export
+presets live in `export_presets.cfg`.
+
+## Running from source
 
 Godot 4.3 is required. The editor binary is not in the repository (it is over GitHub's file
 size limit); download **Godot 4.3 stable** (standard, not .NET) from
