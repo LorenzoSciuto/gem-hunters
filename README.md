@@ -11,7 +11,7 @@ traps, and knock gems out of each other. English and Italian UI.
   Gems are worth 1, 3 or 5; the golden gem in the center is worth 10. In the final **frenzy** every
   gem counts double.
 - **Survival:** everyone starts with 3 lives and every attack costs one (3 s of safety after each
-  loss). Every 10 gems buy a life, and pink life gems give one too. Last hunter standing wins.
+  loss). Every 10 gems buy a life, and pink life gems give one too (5 lives at most). Last hunter standing wins.
 - **Tackle:** run into a rival to knock them back and steal a gem — two from the leader, who wears
   a crown and a golden light beam visible from anywhere in the maze.
 - **Items:** gift boxes fill up to 3 slots (a full inventory can't open boxes). Some boxes are
@@ -29,15 +29,17 @@ The in-game **How to play** screen explains all of this; **Controls** shows and 
 
 ## Controls
 
-| Action        | P1 keyboard + mouse          | P2 keyboard     | Gamepad          |
-|---------------|------------------------------|-----------------|------------------|
-| Move          | W A S D                      | Arrows          | Left stick       |
-| Look          | Mouse (or I J K L)           | Numpad 8 4 5 6  | Right stick      |
-| Jump          | Space / right click          | Numpad 0        | RB / RT          |
-| Items 1–3     | Q E R (wheel + left click)   | Numpad 7 9 1    | X A B            |
-| Superpower    | F (wheel + left click)       | Numpad 3        | Y                |
-| Camera view   | V                            | Numpad +        | R3               |
-| Pause         | Esc                          | Esc             | Start            |
+Player 1 plays with keyboard and mouse; players 2–4 need a gamepad.
+
+| Action        | P1 keyboard + mouse          | Gamepad          |
+|---------------|------------------------------|------------------|
+| Move          | W A S D                      | Left stick       |
+| Look          | Mouse (or I J K L)           | Right stick      |
+| Jump          | Space / right click          | RB / RT          |
+| Items 1–3     | Q E R (wheel + left click)   | X A B            |
+| Superpower    | F (wheel + left click)       | Y                |
+| Camera view   | V                            | LB               |
+| Pause         | Esc                          | Start            |
 
 Gamepads go to P2, P3, P4 in connection order; P1 gets a pad only when every other player has one.
 Menus work with the pad too (A confirm, B back). Rebinds are saved to `user://controls.cfg`;

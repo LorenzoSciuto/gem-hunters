@@ -26,12 +26,9 @@ cat <<'BANNER'
   PLAYER 1  (keyboard + mouse)
     Move WASD | Look mouse | Jump Space / right click | Items Q E R | Superpower F
     Mouse wheel picks item or superpower, left click fires it | View V
-  PLAYER 2  (keyboard)
-    Move arrows | Look Numpad 8 4 5 6 | Jump Numpad 0 | Items Numpad 7 9 1
-    Superpower Numpad 3 | View Numpad +
-  GAMEPADS
+  PLAYERS 2-4  (gamepad)
     Move left stick | Look right stick | Jump RB / RT | Items X A B | Superpower Y
-    View R3
+    View LB
   Run into a rival to tackle them. Controls can be remapped from the menu.
   ESC or START pauses the match.
 ==============================================================================
