@@ -101,13 +101,12 @@ UI_CHANGE,Change,Cambia
 UI_CHANGE_HUNTERS,Change hunters,Cambia hunter
 UI_CONTROLS_HINT,"Player 1 plays with keyboard and mouse, everyone else with a gamepad.
 Mouse: the wheel picks an item or the superpower, left click uses it, right click jumps; the right trigger also jumps.
-Click a button, then press the new key (Esc cancels).","Il giocatore 1 usa tastiera e mouse, tutti gli altri un gamepad.
+Click a button, then press the new key - or the new button on that column's gamepad: each pad has its own layout (Esc cancels).","Il giocatore 1 usa tastiera e mouse, tutti gli altri un gamepad.
 Mouse: la rotella sceglie un oggetto o il superpotere, il clic sinistro lo usa, il clic destro salta; anche il grilletto destro salta.
-Clicca un tasto, poi premi quello nuovo (Esc annulla)."
+Clicca un tasto, poi premi quello nuovo - o il nuovo pulsante sul gamepad di quella colonna: ogni pad ha i suoi tasti (Esc annulla)."
 UI_RESET_CONTROLS,Reset defaults,Ripristina
 UI_PRESS_KEY,Press...,Premi...
 UI_SCHEME_P1,P1 Keyboard,G1 Tastiera
-UI_SCHEME_PAD,Gamepad,Gamepad
 ACTION_JUMP,Jump,Salta
 ACTION_ITEM_1,Item 1,Oggetto 1
 ACTION_ITEM_2,Item 2,Oggetto 2
