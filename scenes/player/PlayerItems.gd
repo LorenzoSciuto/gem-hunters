@@ -13,9 +13,9 @@ signal item_received(player_id: int, slot: int, powerup_type: int)
 ## A utility item took effect.
 signal powerup_activated(player_id: int, powerup_type: int)
 ## The superpower was set up, used or reset; it is ready again in [param ready_in] seconds.
-signal superpower_changed(player_id: int, trait_type: int, ready_in: float)
+signal superpower_changed(player_id: int, superpower: int, ready_in: float)
 ## The superpower was fired.
-signal superpower_used(player_id: int, trait_type: int)
+signal superpower_used(player_id: int, superpower: int)
 ## A Black Box emptied the slots and reset the superpower.
 signal items_stripped(player_id: int)
 ## The mouse wheel armed another slot (0-2 items, SUPER_SLOT = superpower).
@@ -177,41 +177,42 @@ func _thunder() -> void:
 ## Announces the character's superpower, ready right away.
 func reset_superpower() -> void:
 	_super_ready_at = 0.0
-	superpower_changed.emit(player.player_id, player.character_data.trait_type, 0.0)
+	superpower_changed.emit(player.player_id, player.character_data.superpower, 0.0)
 
 
 func super_ready_in() -> float:
 	return maxf(_super_ready_at - _now(), 0.0)
 
 
-## Each character has one superpower, chosen by its trait; it then recharges.
+## Each character has one superpower; it then recharges.
 func use_superpower() -> void:
 	var data: CharacterData = player.character_data
 	if data == null or super_ready_in() > 0.0 or player.status.has(Constants.DebuffType.LAUGHING):
 		return
-	match data.trait_type:
-		CharacterData.TraitType.SPEEDSTER:
+	match data.superpower:
+		CharacterData.Superpower.TURBO:
 			player.status.grant(PlayerStatus.Buff.TURBO, TURBO_DURATION)
 			ParticleConfigs.spawn_burst(player.get_parent(), player.global_position, ParticleConfigs.spring_launch())
-		CharacterData.TraitType.BOUNCER:
+		CharacterData.Superpower.GROUND_POUND:
 			player.combat.start_ground_pound()
-		CharacterData.TraitType.TANK:
+		CharacterData.Superpower.SHIELD:
 			player.status.grant(PlayerStatus.Buff.SHIELD, SHIELD_DURATION)
-		CharacterData.TraitType.PRANKSTER:
+		CharacterData.Superpower.SWAP:
 			if not _swap_with_rival():
 				return
 		_:
 			return
 	AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
 	_restart_recharge()
-	superpower_used.emit(player.player_id, data.trait_type)
+	superpower_used.emit(player.player_id, data.superpower)
 
 
 func _restart_recharge() -> void:
 	if player.character_data == null:
 		return
-	_super_ready_at = _now() + Constants.SUPERPOWER_COOLDOWN
-	superpower_changed.emit(player.player_id, player.character_data.trait_type, Constants.SUPERPOWER_COOLDOWN)
+	var cooldown: float = Constants.SUPERPOWER_COOLDOWN * player.character_data.super_cooldown_multiplier
+	_super_ready_at = _now() + cooldown
+	superpower_changed.emit(player.player_id, player.character_data.superpower, cooldown)
 
 
 ## Tricky trades places with the leader (or a random rival if Tricky leads).

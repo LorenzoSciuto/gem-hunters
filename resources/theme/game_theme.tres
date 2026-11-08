@@ -179,6 +179,26 @@ shadow_color = Color(0.02, 0.0, 0.08, 0.5)
 shadow_size = 36
 shadow_offset = Vector2(0, 14)
 
+[sub_resource type="StyleBoxFlat" id="panel_dialog"]
+content_margin_left = 30.0
+content_margin_top = 22.0
+content_margin_right = 30.0
+content_margin_bottom = 22.0
+bg_color = Color(0.07, 0.05, 0.16, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+corner_detail = 12
+shadow_color = Color(0.02, 0.0, 0.08, 0.5)
+shadow_size = 36
+shadow_offset = Vector2(0, 14)
+
 [sub_resource type="StyleBoxFlat" id="panel_hud"]
 content_margin_left = 18.0
 content_margin_top = 10.0
@@ -436,6 +456,8 @@ BigButton/styles/pressed = SubResource("btn_big_pressed")
 BigButton/styles/hover_pressed = SubResource("btn_big_pressed")
 PanelContainer/styles/panel = SubResource("panel_card")
 Panel/styles/panel = SubResource("panel_card")
+DialogPanel/base_type = &"PanelContainer"
+DialogPanel/styles/panel = SubResource("panel_dialog")
 HudPanel/base_type = &"PanelContainer"
 HudPanel/styles/panel = SubResource("panel_hud")
 BannerPanel/base_type = &"PanelContainer"

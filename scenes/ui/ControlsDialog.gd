@@ -1,6 +1,7 @@
 ## ControlsDialog.gd
-## Main-menu controls table: one row per button action, one column per input
-## scheme (P1 keyboard, gamepads). Pick a cell, then press the new
+## Main-menu controls table: one column per input scheme (P1 keyboard, gamepads),
+## the fixed controls first (move, look, pause; not rebindable, shown dimmed),
+## then one row per button action. Pick a cell, then press the new
 ## key / mouse button / pad button; Escape cancels. Works with mouse, keyboard
 ## and gamepad navigation.
 extends Control
@@ -11,6 +12,12 @@ const ACTION_KEYS: Dictionary = {
 	"toggle_view": "ACTION_VIEW",
 }
 const HEADER_KEYS: Array[String] = ["", "UI_SCHEME_P1", "UI_SCHEME_PAD"]
+## Fixed controls: [action key, keyboard key, gamepad key].
+const FIXED_ROWS: Array = [
+	["ACTION_MOVE", "UI_KEYS_MOVE", "UI_PAD_MOVE"],
+	["ACTION_LOOK", "UI_KEYS_LOOK", "UI_PAD_LOOK"],
+	["ACTION_PAUSE", "UI_KEYS_PAUSE", "UI_PAD_PAUSE"],
+]
 const KEYBOARD_COLUMN: int = 0
 const PAD_COLUMN: int = 1
 const CELL_WIDTH: float = 190.0
@@ -26,12 +33,21 @@ var _cells: Dictionary = {}  # Button → [action, column]
 
 
 func _ready() -> void:
+	add_child(ModalFocus.new())
+	grid.columns = HEADER_KEYS.size()
 	for key: String in HEADER_KEYS:
 		var header: Label = Label.new()
 		header.theme_type_variation = &"HeadingLabel"
 		header.text = key
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		grid.add_child(header)
+	for row: Array in FIXED_ROWS:
+		for n: int in row.size():
+			var label: Label = Label.new()
+			label.text = row[n]
+			label.theme_type_variation = &"" if n == 0 else &"SubtleLabel"
+			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if n == 0 else HORIZONTAL_ALIGNMENT_CENTER
+			grid.add_child(label)
 	for action: String in InputManager.BUTTON_ACTIONS:
 		var name_label: Label = Label.new()
 		name_label.text = ACTION_KEYS[action]

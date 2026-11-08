@@ -20,17 +20,17 @@ UI_SELECT_ARENA,Arena,Arena
 UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
 UI_GAMEPADS_FOUND,Gamepads: {0},Gamepad: {0}
 LEVEL_CANDY_NAME,Candy Kingdom,Regno dei Dolci
-LEVEL_CANDY_DESC,Lollipop corridors and sugary plazas,Corridoi di lecca-lecca e piazze di zucchero
+LEVEL_CANDY_DESC,Sugary plazas full of bouncy trampolines,Piazze di zucchero piene di trampolini
 LEVEL_FOREST_NAME,Enchanted Forest,Foresta Incantata
-LEVEL_FOREST_DESC,"A big, misty maze of trees and mushrooms",Un grande labirinto nebbioso di alberi e funghi
+LEVEL_FOREST_DESC,"A thick, narrow maze of trees with magic portals",Un labirinto fitto e stretto di alberi con portali magici
 LEVEL_GARDEN_NAME,Secret Garden,Giardino Segreto
-LEVEL_GARDEN_DESC,Flower hedges and sneaky sprinklers,Siepi fiorite e irrigatori dispettosi
+LEVEL_GARDEN_DESC,Open flower hedges with many loops and sneaky sprinklers,Siepi fiorite piene di giri e irrigatori dispettosi
 LEVEL_ROMAN_NAME,Roman Colosseum,Colosseo Romano
-LEVEL_ROMAN_DESC,Marble rings around the golden arena,Anelli di marmo attorno all'arena d'oro
+LEVEL_ROMAN_DESC,Marble rings full of moving gates,Anelli di marmo pieni di cancelli mobili
 LEVEL_EGYPT_NAME,Desert Temple,Tempio del Deserto
-LEVEL_EGYPT_DESC,Tall sandstone walls beneath the pyramids,Alte mura di arenaria all'ombra delle piramidi
+LEVEL_EGYPT_DESC,Long sandstone corridors and slow quicksand,Lunghi corridoi di arenaria e sabbie mobili
 LEVEL_WINTER_NAME,Frozen Peaks,Vette Ghiacciate
-LEVEL_WINTER_DESC,Slippery ice patches and snowy plazas,Lastre di ghiaccio scivolose e piazze innevate
+LEVEL_WINTER_DESC,Open snowy fields covered in slippery ice,Campi innevati aperti coperti di ghiaccio scivoloso
 UI_POWERUP_CAKE,Cake Trap,Trappola Torta
 UI_POWERUP_BALLOON,Water Balloon,Palloncino d'Acqua
 UI_POWERUP_SPEAKER,Prank Speaker,Altoparlante Scherzoso
@@ -49,7 +49,15 @@ UI_MAIN_MENU,Main Menu,Menu Principale
 UI_REMATCH,Rematch,Rivincita
 MSG_MATCH_END,Match Over!,Fine Partita!
 MSG_WINNER,{0} wins!,Vince {0}!
+HELP_GEM_1,Blue gem: 1 gem,Gemma blu: 1 gemma
+HELP_GEM_3,Purple gem: 3 gems,Gemma viola: 3 gemme
+HELP_GEM_5,Orange gem: 5 gems (very rare),Gemma arancione: 5 gemme (rarissima)
+HELP_GEM_GOLDEN,"Golden gem in the plaza: 10 gems, seen through walls","Gemma d'oro nella piazza: 10 gemme, si vede attraverso i muri"
+HELP_GEM_LIFE,Pink life gem (Survival): +1 life,Gemma vita rosa (Sopravvivenza): +1 vita
+HELP_GEM_CHAOS,Chaos Gem (once per match): halves every rival's gems,Gemma del Caos (una per partita): dimezza le gemme di tutti i rivali
 MSG_DRAW,It's a draw!,Pareggio!
+MSG_YOU_WIN,YOU WIN!,HAI VINTO!
+MSG_YOU_LOSE,You lost...,Hai perso...
 UI_PLAYER_SHORT,P{0},G{0}
 UI_GEMS,gems,gemme
 UI_SELECT_HERO,Choose your hunter,Scegli il tuo hunter
@@ -59,30 +67,32 @@ UI_PROMPT_PAD_LOCKED,(B): change hunter,(B): cambia hunter
 UI_SPEED,Speed,Velocità
 UI_JUMP,Jump,Salto
 UI_DEFENSE,Defense,Difesa
+UI_TRAIT,Always on,Sempre attivo
+UI_SUPER_PRESS,Superpower - press {0},Superpotere - premi {0}
 CHAR_DASHY_NAME,Dashy,Dashy
 CHAR_DASHY_BIO,Fast as lightning! Loves zoomies.,Veloce come un fulmine! Ama sfrecciare.
-CHAR_DASHY_TRAIT,"Sprinter: +25% speed, shakes off ice twice as fast","Scattista: +25% velocità, si libera dal ghiaccio il doppio più in fretta"
+CHAR_DASHY_TRAIT,"Sprinter: the fastest hunter, shakes off ice twice as fast","Scattista: il più veloce di tutti, si libera dal ghiaccio il doppio più in fretta"
 CHAR_BOUNCER_NAME,Bouncer,Bouncer
 CHAR_BOUNCER_BIO,Always hopping! Walls are just suggestions.,Sempre a saltellare! I muri sono solo consigli.
-CHAR_BOUNCER_TRAIT,High Flyer: bigger jump & built-in double jump,Saltatore: salto più alto e doppio salto
+CHAR_BOUNCER_TRAIT,"High Flyer: the highest jump, plus a double jump","Saltatore: il salto più alto, più il doppio salto"
 CHAR_TANKY_NAME,Tanky,Tanky
 CHAR_TANKY_BIO,Heavyweight giant! An immovable rock.,Campione dei pesi massimi! Una roccia inamovibile.
 CHAR_TANKY_TRAIT,"Colossus: barely pushed, loses fewer gems","Colosso: quasi inamovibile, perde meno gemme"
 CHAR_TRICKY_NAME,Tricky,Tricky
 CHAR_TRICKY_BIO,Mischievous prankster! Trap genius.,Furbetto monello! Genio delle trappole.
-CHAR_TRICKY_TRAIT,Trickster: steals 2 gems at a time,Monello: ruba 2 gemme alla volta
+CHAR_TRICKY_TRAIT,Trickster: robs frozen or confused rivals 2 gems at a time,Monello: deruba chi è congelato o confuso 2 gemme alla volta
 CHAR_SPARKLE_NAME,Sparkle,Sparkle
 CHAR_SPARKLE_BIO,A rainbow unicorn who never stops dancing!,Un unicorno arcobaleno che non smette mai di ballare!
-CHAR_SPARKLE_TRAIT,"Rainbow Runner: +20% speed, shakes off ice twice as fast","Corsa Arcobaleno: +20% velocità, si libera dal ghiaccio il doppio più in fretta"
+CHAR_SPARKLE_TRAIT,Rainbow Charge: superpower ready 40% sooner,Carica Arcobaleno: superpotere pronto il 40% prima
 CHAR_BLOOM_NAME,Bloom,Bloom
 CHAR_BLOOM_BIO,A flower fairy with shimmering wings.,Una fatina dei fiori dalle ali scintillanti.
-CHAR_BLOOM_TRAIT,Fairy Wings: bigger jump & built-in double jump,Ali di Fata: salto più alto e doppio salto
+CHAR_BLOOM_TRAIT,Fairy Wings: triple jump,Ali di Fata: triplo salto
 CHAR_MIMI_NAME,Mimi,Mimi
 CHAR_MIMI_BIO,A sweet kitty with sneaky paws.,Una gattina dolcissima dalle zampette furbette.
-CHAR_MIMI_TRAIT,Cat Burglar: steals 2 gems at a time,Ladra Gattina: ruba 2 gemme alla volta
+CHAR_MIMI_TRAIT,Pounce: jumping on a head steals 1 extra gem,Balzo Felino: saltando in testa ruba 1 gemma in più
 CHAR_COCO_NAME,Coco,Coco
 CHAR_COCO_BIO,A fluffy bunny you just can't push around!,Una coniglietta soffice che nessuno riesce a spostare!
-CHAR_COCO_TRAIT,"Fluffy Cloud: barely pushed, loses fewer gems","Nuvola Soffice: quasi inamovibile, perde meno gemme"
+CHAR_COCO_TRAIT,Fluffy Cloud: traps and effects last half as long on her,Nuvola Soffice: trappole ed effetti su di lei durano la metà
 UI_STANDINGS,Standings,Classifica
 UI_PROMPT_KB,{0} / {1}: browse   {2}: ready   {3}: back,{0} / {1}: scorri   {2}: pronto   {3}: indietro
 UI_PROMPT_KB_LOCKED,{0}: change hunter,{0}: cambia hunter
@@ -90,14 +100,10 @@ UI_BACK,Back,Indietro
 UI_CHANGE,Change,Cambia
 UI_CHANGE_HUNTERS,Change hunters,Cambia hunter
 UI_CONTROLS_HINT,"Player 1 plays with keyboard and mouse, everyone else with a gamepad.
-Move: WASD / left stick   Look: mouse, IJKL / right stick   Pause: Esc / Start
-Mouse: wheel picks the item or superpower, left click fires it, right click jumps.
-Pick a button, then press the new key or pad button (Esc cancels). The right trigger also jumps.
-Run into a rival to tackle them and steal a gem - the crowned leader drops two!","Il giocatore 1 usa tastiera e mouse, tutti gli altri un gamepad.
-Muovi: WASD / leva sinistra   Guarda: mouse, IJKL / leva destra   Pausa: Esc / Start
-Mouse: la rotella sceglie l'oggetto o il superpotere, il clic sinistro lo usa, il clic destro salta.
-Scegli un tasto, poi premi il nuovo tasto o pulsante (Esc annulla). Anche il grilletto destro salta.
-Corri contro un rivale per placcarlo e rubargli una gemma - il leader con la corona ne perde due!"
+Mouse: the wheel picks an item or the superpower, left click uses it, right click jumps; the right trigger also jumps.
+Click a button, then press the new key (Esc cancels).","Il giocatore 1 usa tastiera e mouse, tutti gli altri un gamepad.
+Mouse: la rotella sceglie un oggetto o il superpotere, il clic sinistro lo usa, il clic destro salta; anche il grilletto destro salta.
+Clicca un tasto, poi premi quello nuovo (Esc annulla)."
 UI_RESET_CONTROLS,Reset defaults,Ripristina
 UI_PRESS_KEY,Press...,Premi...
 UI_SCHEME_P1,P1 Keyboard,G1 Tastiera
@@ -108,6 +114,15 @@ ACTION_ITEM_2,Item 2,Oggetto 2
 ACTION_ITEM_3,Item 3,Oggetto 3
 ACTION_SUPER,Superpower,Superpotere
 ACTION_VIEW,Camera view,Visuale
+ACTION_MOVE,Move,Muovi
+ACTION_LOOK,Look around,Guarda
+ACTION_PAUSE,Pause,Pausa
+UI_KEYS_MOVE,W A S D,W A S D
+UI_KEYS_LOOK,Mouse / I J K L,Mouse / I J K L
+UI_KEYS_PAUSE,Esc,Esc
+UI_PAD_MOVE,Left stick / D-pad,Leva sinistra / croce
+UI_PAD_LOOK,Right stick,Leva destra
+UI_PAD_PAUSE,Start,Start
 UI_POWERUP_BANANA,Banana Peel,Buccia di Banana
 UI_POWERUP_SNOWBALL,Snowball,Palla di Neve
 UI_POWERUP_THUNDER,Thunder,Fulmine
@@ -116,7 +131,7 @@ UI_POWERUP_WARP,Warp Ticket,Biglietto Warp
 UI_POWERUP_RADAR,Radar,Radar
 UI_POWERUP_CAKE_DESC,Drop it: whoever steps on it gets a face full of cake,Lasciala: chi la pesta si prende una torta in faccia
 UI_POWERUP_BALLOON_DESC,"Drop it: soaks and freezes, then leaves ice","Lascialo: bagna e congela, poi lascia ghiaccio"
-UI_POWERUP_SPEAKER_DESC,Drop it: a loud scare for whoever comes close,Lascialo: uno spavento per chi si avvicina
+UI_POWERUP_SPEAKER_DESC,Drop it: a loud scare for whoever steps on it,Lascialo: uno spavento per chi ci passa sopra
 UI_POWERUP_GLOVE_DESC,Fire it: punches a rival away,Sparalo: spedisce lontano un rivale
 UI_POWERUP_MAGNET_DESC,Fire it: pulls gems out of a rival,Sparala: strappa gemme a un rivale
 UI_POWERUP_TICKLE_DESC,Fire it: the rival giggles and can't use items,Sparalo: il rivale ride e non può usare oggetti
@@ -129,15 +144,15 @@ UI_POWERUP_JACKPOT_DESC,Use it: free gems!,Usalo: gemme gratis!
 UI_POWERUP_WARP_DESC,Use it: teleport somewhere in the maze,Usalo: teletrasporto nel labirinto
 UI_POWERUP_RADAR_DESC,Use it: see everyone on the map,Usalo: vedi tutti sulla mappa
 SUPER_TURBO,Turbo,Turbo
-SUPER_TURBO_DESC,a few seconds at top speed,qualche secondo a tutta velocità
+SUPER_TURBO_DESC,A few seconds at top speed,Qualche secondo a tutta velocità
 SUPER_POUND,Ground Pound,Schianto
-SUPER_POUND_DESC,leap up and slam down: nearby rivals fly and drop gems,salta e schiantati: i rivali vicini volano e perdono gemme
+SUPER_POUND_DESC,Leap up and slam down: nearby rivals fly and drop gems,Salta e schiantati: i rivali vicini volano e perdono gemme
 SUPER_SHIELD,Iron Shield,Scudo di Ferro
-SUPER_SHIELD_DESC,nothing can touch you for a while,per un po' niente ti può toccare
+SUPER_SHIELD_DESC,Nothing can touch you for a while,Per un po' niente ti può toccare
 SUPER_SWAP,Swap,Scambio
-SUPER_SWAP_DESC,trade places with the leader,scambia di posto con il leader
-MSG_TACKLE_TIP,"Run into rivals to steal gems!
-Catch the leader under the golden beam!","Corri addosso ai rivali per rubare gemme!
+SUPER_SWAP_DESC,Trade places with the leader,Scambia di posto con il leader
+MSG_TACKLE_TIP,"Jump on rivals' heads to steal gems!
+Catch the leader under the golden beam!","Salta in testa ai rivali per rubare gemme!
 Acchiappa il leader sotto il raggio d'oro!"
 ZONE_CRYSTAL,Crystal Spire,Guglia di Cristallo
 ZONE_ORB,Orb Tower,Torre della Sfera
@@ -154,29 +169,25 @@ HELP_GOAL,"You are a Gem Hunter! Run through the maze and grab as many gems as y
 - Time Attack: whoever has the most gems when the clock hits zero wins.
 - Gem Race: the first hunter to reach the target wins.
 
-Gems: small ones are worth 1, rare ones 3 and 5, and the big golden gem in the center is worth 10!
-
-Steal from the others: run into a hunter to tackle them and take a gem. The leader wears a crown and a golden beam of light: everyone can see where they are, and a tackle on the leader takes 2 gems!
+Steal from the others: jump on a hunter's head to take their gems - the winner cheers in green, the loser flashes red. Just bumping into each other wins nothing: both drop 3 gems on the ground. The leader wears a crown and a golden beam of light: everyone can see where they are!
 
 Gift boxes give you items (up to 3). Every hunter also has a superpower that recharges every 30 seconds.
 
 In the final frenzy every gem counts double: never give up!
 
-Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), tackles, stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (up to 5 lives), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
+Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (up to 5 lives), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
 
 - A Tempo: vince chi ha più gemme allo scadere del tempo.
 - Corsa alle Gemme: vince il primo hunter che raggiunge l'obiettivo.
 
-Gemme: le piccole valgono 1, le rare 3 e 5, e la grande gemma d'oro al centro vale 10!
-
-Ruba agli altri: corri addosso a un hunter per placcarlo e prendergli una gemma. Il leader ha la corona e un raggio di luce d'oro: tutti vedono dov'è, e placcare il leader vale 2 gemme!
+Ruba agli altri: salta in testa a un hunter per prendergli le gemme - chi vince esulta in verde, chi perde lampeggia di rosso. Scontrarsi e basta non fa vincere nessuno: entrambi perdete 3 gemme che restano a terra. Il leader ha la corona e un raggio di luce d'oro: tutti vedono dov'è!
 
 I pacchi regalo danno oggetti (fino a 3). Ogni hunter ha anche un superpotere che si ricarica ogni 30 secondi.
 
 Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!
 
-Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), spinte, schiacciate in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (fino a 5 vite), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
-HELP_HUNTERS_INTRO,"Each hunter has a special trait and a superpower (Y on the pad, F on the keyboard, or pick it with the mouse wheel). The icon shows when it is ready again.","Ogni hunter ha una dote speciale e un superpotere (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse). L'icona mostra quando è di nuovo pronto."
+Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), salti in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (fino a 5 vite), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
+HELP_HUNTERS_INTRO,"Each hunter has an always-on ability (in yellow: it works by itself, all the time) and a superpower you trigger (Y on the pad, F on the keyboard, or pick it with the mouse wheel), which then recharges: the icon shows when it is ready again.","Ogni hunter ha un'abilità sempre attiva (in giallo: funziona da sola, sempre) e un superpotere da attivare tu (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse), che poi si ricarica: l'icona mostra quando è di nuovo pronto."
 HELP_ITEMS_INTRO,"Open gift boxes to get items: you can carry 3 (X, A, B on the pad - Q, E, R on the keyboard - or wheel + left click). Watch out: some boxes are pranks, some hold two items! Careful: the traps you drop catch you too!","Apri i pacchi regalo per avere oggetti: ne puoi tenere 3 (X, A, B sul pad - Q, E, R sulla tastiera - o rotella + clic sinistro). Attenzione: alcuni pacchi sono scherzi, altri contengono due oggetti! Attento: le trappole che lasci prendono anche te!"
 HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the center. Each zone has its own floor color and a giant landmark (Crystal Spire, Orb Tower, Pyramid, Castle), and your screen shows the zone name: peek at the others' screens to find out where they are!
 

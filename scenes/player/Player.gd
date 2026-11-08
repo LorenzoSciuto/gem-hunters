@@ -17,7 +17,6 @@ signal view_changed(player_id: int, first_person: bool)
 ## is a localization key; [param good] picks the toast colour).
 signal notice_requested(player_id: int, message_key: String, good: bool)
 
-const MAX_JUMPS_SPRING: int = 2
 ## Body turns toward the movement direction at this rate (rad/s factor).
 const MODEL_TURN_SPEED: float = 14.0
 const MODEL_TURN_MIN_SPEED: float = 0.5
@@ -58,6 +57,7 @@ const WINNER_HOPS: int = 4
 const WINNER_HOP_HEIGHT: float = 1.2
 const WINNER_HOP_TIME: float = 0.25
 const WINNER_CHEER_TIME: float = 3.0
+const LOSER_SAD_TIME: float = 3.5
 const CONFETTI_HEIGHT: float = 3.0
 const WINNER_CONFETTI_AMOUNT: int = 80
 const WINNER_CONFETTI_LIFETIME: float = 2.5
@@ -308,18 +308,19 @@ func _jump() -> void:
 	if is_on_floor():
 		velocity.y = _jump_velocity
 		_jump_count = 1
-	elif _has_double_jump() and _jump_count < MAX_JUMPS_SPRING:
+	elif _jump_count <= _air_jumps():
 		velocity.y = Constants.SPRING_DOUBLE_JUMP_VELOCITY
-		_jump_count = MAX_JUMPS_SPRING
+		_jump_count += 1
 		AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
 
 
-func _has_double_jump() -> bool:
-	var bouncer: bool = character_data != null and character_data.trait_type == CharacterData.TraitType.BOUNCER
-	return bouncer or status.has_buff(PlayerStatus.Buff.SHOES)
+## Mid-air jumps: the character's own, or one from spring shoes.
+func _air_jumps() -> int:
+	var own: int = character_data.air_jumps if character_data else 0
+	return maxi(own, 1 if status.has_buff(PlayerStatus.Buff.SHOES) else 0)
 
 
-## Bounce up off something (a rival's head); a double jump is still available.
+## Bounce up off something (a rival's head); mid-air jumps are still available.
 func bounce(speed: float) -> void:
 	velocity.y = speed
 	_jump_count = 1
@@ -471,7 +472,19 @@ func reveal_map(duration: float) -> void:
 	map_reveal_requested.emit(player_id, duration)
 
 
-func play_winner_animation() -> void:
+## Match over: turn to face [param viewer] (this hunter's own camera), then
+## cheer if [param won], otherwise slump. Knocked-out hunters come back to sulk.
+func play_finale(won: bool, viewer: Vector3) -> void:
+	visible = true
+	var local: Vector3 = global_transform.basis.inverse() * (viewer - global_position)
+	model.rotation.y = atan2(local.x, local.z)
+	if won:
+		_play_winner_animation()
+	else:
+		model.play_sad(LOSER_SAD_TIME)
+
+
+func _play_winner_animation() -> void:
 	var hop: Tween = create_tween().set_loops(WINNER_HOPS).set_trans(Tween.TRANS_QUAD)
 	hop.tween_property(model, "position:y", WINNER_HOP_HEIGHT, WINNER_HOP_TIME).set_ease(Tween.EASE_OUT)
 	hop.tween_property(model, "position:y", 0.0, WINNER_HOP_TIME).set_ease(Tween.EASE_IN)
