@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/traps/TrapBlackBox.gd" id="1_blackbox"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_box"]
-size = Vector3(1.1, 1.3, 1.1)
+size = Vector3(0.85, 1.3, 0.85)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wrapping"]
 diffuse_mode = 3

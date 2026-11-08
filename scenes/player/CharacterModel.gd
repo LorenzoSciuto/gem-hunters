@@ -52,8 +52,19 @@ const HURT_TIME: float = 0.7
 const HURT_FLAIL_SPEED: float = 26.0
 const HURT_FLAIL_AMOUNT: float = 0.8
 const HURT_MOUTH_SCALE: float = 1.8
+## A hurt hunter flashes red for a moment: clearly the one who lost the clash.
+const HURT_FLASH_TIME: float = 0.4
+const HURT_FLASH_COLOR: Color = Color(1.0, 0.15, 0.1)
+const HURT_FLASH_MIX: float = 0.65
 const SQUASH_DECAY: float = 6.0
 const CHEER_JUMP_SPEED: float = 12.0
+## Sad (lost the match): arms hang, the body slumps forward, eyes half shut.
+const SAD_ARM_SPREAD: float = 0.04
+const SAD_ARM_PITCH: float = 0.35
+const SAD_LEAN: float = 0.4
+const SAD_SINK: float = 0.06
+const SAD_EYE_SCALE: float = 0.45
+const SAD_MOUTH_SCALE: float = 0.45
 
 @onready var rig: Node3D = $Rig
 @onready var body: Node3D = $Rig/Body
@@ -77,6 +88,9 @@ var _phase: float = 0.0
 var _time: float = 0.0
 var _next_blink: float = 0.0
 var _hurt_left: float = 0.0
+var _flash_left: float = 0.0
+var _sad_left: float = 0.0
+var _color: Color = Color(0.98, 0.85, 0.3)
 var _cheer_left: float = 0.0
 var _squash: float = 0.0
 
@@ -87,14 +101,15 @@ func _ready() -> void:
 	for foot: Node3D in feet:
 		_feet_rest.append(foot.position)
 	_next_blink = randf_range(BLINK_MIN_GAP, BLINK_MAX_GAP)
-	_paint(Color(0.98, 0.85, 0.3))
+	_paint(_color)
 
 
 ## Applies color, scale and accessory for [param data].
 func set_character(data: CharacterData) -> void:
 	if data == null:
 		return
-	_paint(data.color)
+	_color = data.color
+	_paint(_color)
 	_base_scale = data.mesh_scale
 	rig.scale = _base_scale
 	for accessory: Node in accessories.get_children():
@@ -130,9 +145,11 @@ func set_motion(horizontal_speed: float, on_floor: bool) -> void:
 	_grounded = on_floor
 
 
-## Wince: eyes squeeze shut, mouth opens, arms flail.
+## Wince: eyes squeeze shut, mouth opens, arms flail, the body flashes red.
 func play_hurt() -> void:
 	_hurt_left = HURT_TIME
+	_flash_left = HURT_FLASH_TIME
+	_paint(_color.lerp(HURT_FLASH_COLOR, HURT_FLASH_MIX))
 
 
 ## Pancake squash (landing, being stomped); [param amount] 0..1.
@@ -145,10 +162,20 @@ func play_cheer(duration: float) -> void:
 	_cheer_left = duration
 
 
+## Slumped and glum, for [param duration] seconds.
+func play_sad(duration: float) -> void:
+	_sad_left = duration
+
+
 func _process(delta: float) -> void:
 	_time += delta
 	_hurt_left = maxf(_hurt_left - delta, 0.0)
+	if _flash_left > 0.0:
+		_flash_left -= delta
+		if _flash_left <= 0.0:
+			_paint(_color)
 	_cheer_left = maxf(_cheer_left - delta, 0.0)
+	_sad_left = maxf(_sad_left - delta, 0.0)
 	_squash = move_toward(_squash, 0.0, SQUASH_DECAY * delta * maxf(_squash, 0.1))
 	var w: float = clampf(delta * POSE_LERP, 0.0, 1.0)
 
@@ -187,6 +214,9 @@ func _pose_arms(swing: float, w: float) -> void:
 			pitch = 0.0
 		elif _hurt_left > 0.0:
 			spread = ARM_AIR_SPREAD + sin(_time * HURT_FLAIL_SPEED + n * PI) * HURT_FLAIL_AMOUNT
+		elif _sad_left > 0.0:
+			spread = SAD_ARM_SPREAD
+			pitch = SAD_ARM_PITCH
 		elif not _grounded:
 			spread = ARM_AIR_SPREAD
 			pitch = 0.0
@@ -199,8 +229,11 @@ func _pose_body(k: float, w: float) -> void:
 	var bob: float = absf(sin(_phase)) * BOB_HEIGHT * k
 	if _cheer_left > 0.0:
 		bob = absf(sin(_time * CHEER_JUMP_SPEED)) * BOB_HEIGHT * 3.0
+	var sad: bool = _sad_left > 0.0
+	if sad:
+		bob = -SAD_SINK
 	body.position = body.position.lerp(_body_rest + Vector3.UP * bob, w)
-	body.rotation.x = lerp_angle(body.rotation.x, LEAN_MAX * k, w)
+	body.rotation.x = lerp_angle(body.rotation.x, SAD_LEAN if sad else LEAN_MAX * k, w)
 
 	var shape: Vector3 = Vector3.ONE
 	if not _grounded:
@@ -217,11 +250,17 @@ func _pose_face(w: float) -> void:
 	var eye_y: float = 1.0
 	if _hurt_left > 0.0 or _cheer_left > 0.0:
 		eye_y = EYE_SQUINT_SCALE
+	elif _sad_left > 0.0:
+		eye_y = SAD_EYE_SCALE
 	elif _next_blink <= 0.0:
 		eye_y = EYE_CLOSED_SCALE
 		if _next_blink < -BLINK_TIME:
 			_next_blink = randf_range(BLINK_MIN_GAP, BLINK_MAX_GAP)
 	for eye: Node3D in eyes:
 		eye.scale.y = lerpf(eye.scale.y, eye_y, clampf(w * 2.0, 0.0, 1.0))
-	var open: float = HURT_MOUTH_SCALE if _hurt_left > 0.0 or _cheer_left > 0.0 else 1.0
+	var open: float = 1.0
+	if _hurt_left > 0.0 or _cheer_left > 0.0:
+		open = HURT_MOUTH_SCALE
+	elif _sad_left > 0.0:
+		open = SAD_MOUTH_SCALE
 	mouth.scale = mouth.scale.lerp(_mouth_rest * Vector3(1.0, open, 1.0), w)

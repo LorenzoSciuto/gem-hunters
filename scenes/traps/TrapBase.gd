@@ -19,6 +19,10 @@ const DESTROY_DELAY: float = 1.2
 const GEM_BURST_HEIGHT: float = 0.4
 ## After a trap goes off, other traps let the victim pass for this long (no chain-trapping).
 const TRAP_GRACE: float = 2.0
+## "Sprung!" burst, the same for every trap so a trap hit reads at a glance.
+const SPRUNG_CONFETTI: int = 60
+const SPRUNG_DUST: int = 30
+const SPRUNG_LIFETIME: float = 1.0
 
 ## Player ID of the player who placed this trap.
 @export var owner_player_id: int = -1
@@ -75,9 +79,17 @@ func _trigger(player: Player) -> void:
 		scatter_loose_gems(EMPTY_VICTIM_BONUS)
 
 	_play_trap_sfx()
+	_sprung_burst()
 	if not protected:
+		player.combat.take_remote_hit(owner_player_id, removed)
 		_apply_trap_effect(player)
 	_self_destruct()
+
+
+func _sprung_burst() -> void:
+	var at: Vector3 = global_position + Vector3.UP * GEM_BURST_HEIGHT
+	ParticleConfigs.spawn_burst(get_parent(), at, ParticleConfigs.confetti_shower(), SPRUNG_CONFETTI, SPRUNG_LIFETIME)
+	ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.dust_puff(), SPRUNG_DUST, SPRUNG_LIFETIME)
 
 
 func _reward_owner(amount: int) -> void:

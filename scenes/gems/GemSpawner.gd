@@ -32,9 +32,9 @@ const GEM_SCENE: PackedScene = preload("res://scenes/gems/GemCollectible.tscn")
 # Constants
 # ---------------------------------------------------------------------------
 ## Probability weights for value tiers. Must sum to 100.
-const WEIGHT_VALUE_1: int = 70
+const WEIGHT_VALUE_1: int = 76
 const WEIGHT_VALUE_3: int = 20
-const WEIGHT_VALUE_5: int = 10
+const WEIGHT_VALUE_5: int = 4
 const WEIGHT_TOTAL: int = WEIGHT_VALUE_1 + WEIGHT_VALUE_3 + WEIGHT_VALUE_5
 
 const GOLDEN_GEM_VALUE: int = 10

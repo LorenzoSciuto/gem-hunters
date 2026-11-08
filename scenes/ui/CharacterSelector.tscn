@@ -54,6 +54,12 @@ theme_type_variation = &"SubtleLabel"
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="TraitHeading" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+text = "UI_TRAIT"
+horizontal_alignment = 1
+
 [node name="CharTrait" type="Label" parent="Panel/VBox"]
 modulate = Color(1, 0.86, 0.3, 1)
 custom_minimum_size = Vector2(380, 0)
@@ -61,11 +67,33 @@ layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="CharSuper" type="Label" parent="Panel/VBox"]
-modulate = Color(0.55, 0.85, 1, 1)
+[node name="SuperRow" type="HBoxContainer" parent="Panel/VBox"]
 custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
-horizontal_alignment = 1
+
+[node name="SuperIcon" type="TextureRect" parent="Panel/VBox/SuperRow"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SuperInfo" type="VBoxContainer" parent="Panel/VBox/SuperRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SuperHeading" type="Label" parent="Panel/VBox/SuperRow/SuperInfo"]
+layout_mode = 2
+theme_type_variation = &"SubtleLabel"
+
+[node name="SuperName" type="Label" parent="Panel/VBox/SuperRow/SuperInfo"]
+modulate = Color(0.55, 0.85, 1, 1)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+
+[node name="SuperDesc" type="Label" parent="Panel/VBox/SuperRow/SuperInfo"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
 autowrap_mode = 3
 
 [node name="Stats" type="GridContainer" parent="Panel/VBox"]
