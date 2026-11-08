@@ -7,8 +7,8 @@ const ICE_PATCH_SCENE: PackedScene = preload("res://scenes/effects/FX_IcePatch.t
 
 
 func _apply_trap_effect(player: Player) -> void:
-	if player.apply_debuff(Constants.DebuffType.FROZEN, effect_duration):
-		player.apply_debuff(Constants.DebuffType.ICE_SLIDE, Constants.DEBUFF_DURATION_ICE_SLIDE)
+	if player.status.apply_debuff(Constants.DebuffType.FROZEN, effect_duration):
+		player.status.apply_debuff(Constants.DebuffType.ICE_SLIDE, Constants.DEBUFF_DURATION_ICE_SLIDE)
 	var patch: Node3D = ICE_PATCH_SCENE.instantiate() as Node3D
 	get_parent().add_child(patch)
 	patch.global_position = global_position

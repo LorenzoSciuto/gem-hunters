@@ -2,14 +2,19 @@
 ## Motion layer for the whole UI, applied automatically to every node that
 ## enters the tree: buttons grow on hover / focus and squish when pressed, and
 ## cards (plain PanelContainers: menus, dialogs, selection, results) pop in
-## when they appear. Scenes need no code for it.
+## when they appear. Scenes need no code for it. pulse() is shared by the HUD.
 extends Node
 
-const HOVER_SCALE: float = 1.05
-const PRESS_SCALE: float = 0.94
+## Hover / press resize by a fixed number of pixels per side (not a percentage),
+## so wide buttons never grow into their neighbours (containers keep 14 px gaps).
+const HOVER_GROW_PX: float = 3.0
+const PRESS_SHRINK_PX: float = -3.0
 const HOVER_TIME: float = 0.12
 const CARD_START_SCALE: float = 0.94
 const CARD_TIME: float = 0.28
+## pulse(): a quick pop to draw the eye to a value that just changed.
+const PULSE_SCALE: float = 1.35
+const PULSE_TIME: float = 0.15
 
 
 func _ready() -> void:
@@ -24,12 +29,15 @@ func _on_node_added(node: Node) -> void:
 
 
 func _attach_button(button: Button) -> void:
-	button.mouse_entered.connect(_scale_to.bind(button, HOVER_SCALE))
-	button.focus_entered.connect(_scale_to.bind(button, HOVER_SCALE))
-	button.mouse_exited.connect(func() -> void: _scale_to(button, HOVER_SCALE if button.has_focus() else 1.0))
-	button.focus_exited.connect(_scale_to.bind(button, 1.0))
-	button.button_down.connect(_scale_to.bind(button, PRESS_SCALE))
-	button.button_up.connect(func() -> void: _scale_to(button, HOVER_SCALE if button.is_hovered() or button.has_focus() else 1.0))
+	var settle: Callable = func() -> void:
+		var active: bool = button.is_hovered() or button.has_focus()
+		_grow(button, HOVER_GROW_PX if active else 0.0)
+	button.mouse_entered.connect(_grow.bind(button, HOVER_GROW_PX))
+	button.focus_entered.connect(_grow.bind(button, HOVER_GROW_PX))
+	button.mouse_exited.connect(settle)
+	button.focus_exited.connect(settle)
+	button.button_down.connect(_grow.bind(button, PRESS_SHRINK_PX))
+	button.button_up.connect(settle)
 
 
 func _attach_card(card: PanelContainer) -> void:
@@ -41,11 +49,24 @@ func _attach_card(card: PanelContainer) -> void:
 			_pop_in(card), CONNECT_ONE_SHOT)
 
 
-## Containers ignore scale, so scaling around the centre never disturbs layout.
-func _scale_to(control: Control, target: float) -> void:
+## A quick pop around the centre (score changed, item received, zone entered...).
+func pulse(control: Control) -> void:
 	control.pivot_offset = control.size * 0.5
+	var tween: Tween = control.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(control, "scale", Vector2.ONE * PULSE_SCALE, PULSE_TIME * 0.5)
+	tween.tween_property(control, "scale", Vector2.ONE, PULSE_TIME * 0.5)
+
+
+## Grows [param control] by up to [param px] per side (negative shrinks), around
+## its centre; containers ignore scale, so layout is never disturbed. The
+## active button draws above its neighbours.
+func _grow(control: Control, px: float) -> void:
+	control.pivot_offset = control.size * 0.5
+	control.z_index = 1 if px > 0.0 else 0
+	# Uniform (text never stretches), sized on the longer side: no side moves more than px.
+	var target: Vector2 = Vector2.ONE * (1.0 + px * 2.0 / maxf(control.size.x, control.size.y))
 	var tween: Tween = control.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(control, "scale", Vector2.ONE * target, HOVER_TIME)
+	tween.tween_property(control, "scale", target, HOVER_TIME)
 
 
 func _pop_in(card: Control) -> void:

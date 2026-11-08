@@ -12,3 +12,8 @@ func set_data(rank: int, player_id: int, player_name: String, score: int) -> voi
 	name_label.text = player_name
 	name_label.modulate = Constants.PLAYER_COLORS[player_id]
 	score_label.text = "%d \u25c6" % score
+
+
+## Survival: lives (or "out") after the gems.
+func set_note(note: String) -> void:
+	score_label.text += "   " + note

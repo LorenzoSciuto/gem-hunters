@@ -45,7 +45,24 @@ enum GameState {
 enum MatchMode {
 	TIME,   ## Most gems when the clock runs out.
 	SCORE,  ## First player to reach the gem target.
+	LIVES,  ## Survival: everyone starts with START_LIVES; every attack costs a life; last one standing wins.
 }
+
+## Survival mode: lives at the start, and the floor the golden gem refills to
+## (lives can stack above it with life gems).
+const START_LIVES: int = 3
+const GOLDEN_REFILL_LIVES: int = 3
+## Survival: after losing a life a hunter can't lose another for this long.
+const LIFE_LOSS_GRACE: float = 3.0
+## Survival mode gem economy: fewer, rarer gems, a slower golden gem, and a
+## life gem now and then (at most LIFE_GEMS_MAX in the arena at once).
+## Every GEMS_PER_LIFE gems a hunter holds are traded for a life.
+const GEMS_PER_LIFE: int = 10
+const SURVIVAL_MAX_GEMS: int = 8
+const SURVIVAL_GEM_RESPAWN: float = 8.0
+const SURVIVAL_GOLDEN_RESPAWN: float = 90.0
+const LIFE_GEM_INTERVAL: float = 60.0
+const LIFE_GEMS_MAX: int = 1
 
 ## Selectable durations for TIME mode (seconds).
 const TIME_TARGETS: Array[int] = [90, 180, 300]
@@ -110,12 +127,6 @@ enum PowerUpType {
 	TRAP_BLACK_BOX,      ## Fake black gift box that blasts whoever opens it.
 }
 
-## Trap power-ups: dropped behind the player.
-const TRAP_TYPES: Array[PowerUpType] = [
-	PowerUpType.TRAP_CAKE, PowerUpType.TRAP_WATER_BALLOON, PowerUpType.TRAP_SPEAKER, PowerUpType.TRAP_BANANA,
-	PowerUpType.TRAP_BLACK_BOX,
-]
-
 ## Attack power-ups: aimed at rivals (the last-placed player gets them more often).
 const ATTACK_TYPES: Array[PowerUpType] = [
 	PowerUpType.ATTACK_SPRING_GLOVE, PowerUpType.ATTACK_MAGNET, PowerUpType.ATTACK_TICKLE_RAY,
@@ -149,6 +160,7 @@ enum GemType {
 	RARE,     ## Worth 3 points. Uncommon.
 	EPIC,     ## Worth 5 points. Rare.
 	GOLDEN,   ## Worth 10 points. Only one exists at a time.
+	LIFE,     ## Survival mode: gives one life instead of points.
 }
 
 
@@ -168,6 +180,12 @@ const GROUP_POWERUP_SPAWNS: String = "powerup_spawns"
 
 ## Godot group that all surprise boxes belong to.
 const GROUP_SURPRISE_BOXES: String = "surprise_boxes"
+
+## Godot group of the level's props (trampolines, sprinklers, portals, beacons,
+## ice patches): gems never spawn on top of them.
+const GROUP_PROPS: String = "props"
+## Gems keep at least this far from props, boxes and traps.
+const GEM_PROP_CLEARANCE: float = 2.2
 
 ## Godot group of every armed trap placed by a player.
 const GROUP_TRAPS: String = "traps"
@@ -193,13 +211,13 @@ const MODEL_LAYER_BASE: int = 14
 # ─── Gem & spawn tuning ───────────────────────────────────────────────────
 
 ## Seconds between gem spawn attempts.
-const GEM_RESPAWN_TIME: float = 2.5
+const GEM_RESPAWN_TIME: float = 4.0
 
 ## Seconds before a used surprise box reappears.
 const POWERUP_BOX_RESPAWN: float = 12.0
 
 ## Maximum number of loose collectible gems in the world.
-const MAX_GEMS_IN_WORLD: int = 35
+const MAX_GEMS_IN_WORLD: int = 20
 
 ## Minimum distance between two spawned gems (metres).
 const MIN_GEM_SPAWN_DISTANCE: float = 2.0
@@ -251,13 +269,13 @@ const DEBUFF_DURATION_ICE_SLIDE: float = 3.5
 const POWERUP_DURATION_SPRING_SHOES: float = 10.0
 const POWERUP_DURATION_BUBBLE: float = 12.0
 const POWERUP_DURATION_MAGNET: float = 4.0
-const POWERUP_DURATION_TICKLE_RAY: float = 3.0
+const POWERUP_DURATION_TICKLE_RAY: float = 4.0
 
 ## Speed multiplier granted by spring shoes.
 const SPRING_SHOES_SPEED_MULTIPLIER: float = 1.3
 
-const DEBUFF_DURATION_SNOWBALL_FREEZE: float = 1.8
-const DEBUFF_DURATION_THUNDER_LAUGH: float = 1.5
+const DEBUFF_DURATION_SNOWBALL_FREEZE: float = 3.0
+const DEBUFF_DURATION_THUNDER_LAUGH: float = 2.5
 const POWERUP_DURATION_RADAR: float = 6.0
 ## Gems granted by the jackpot (inclusive range).
 const JACKPOT_MIN_GEMS: int = 2
