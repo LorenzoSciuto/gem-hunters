@@ -46,7 +46,9 @@ Player 1 plays with keyboard and mouse; players 2–4 need a gamepad.
 | Pause         | Esc                          | Start            |
 
 Gamepads go to P2, P3, P4 in connection order; P1 gets a pad only when every other player has one.
-Menus work with the pad too (A confirm, B back). Rebinds are saved to `user://controls.cfg`;
+Menus work with the pad too (A confirm, B back). **Controls** has a column per connected gamepad:
+each pad model keeps its own buttons (handy when two different pads are plugged in). Rebinds are
+saved to `user://controls.cfg`;
 the language and the last match setup (players, goal, arena) to `user://settings.cfg`, both
 restored at startup. `user://` is `~/.local/share/gem-hunters/` on Linux
 (`%APPDATA%\gem-hunters` on Windows).
