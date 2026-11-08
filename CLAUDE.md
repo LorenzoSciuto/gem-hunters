@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-"Gem Hunters: Tag & Trap" — a 2–4 player local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus) by Wennovate, for kids 9+. Players grab gems in a themed maze, open gift boxes for traps/attacks, and knock gems out of rivals. Three modes: **time** (most gems when the clock ends), **score** (first to N gems), **survival** (3 lives, box-item hits cost a life, last one standing wins). The leader wears a crown; the final stretch of time/score matches is a "frenzy" where pickups count double.
+"Gem Hunters: Tag & Trap" — a 2–4 player local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus) by Wennovate, for kids 9+. Players grab gems in a themed maze, open gift boxes for traps/attacks, and knock gems out of rivals. Three modes: **time** (most gems when the clock ends), **score** (first to N gems), **survival** (3 lives, every attack costs a life, every `GEMS_PER_LIFE` gems buy one, last one standing wins). The leader wears a crown; the final stretch of time/score matches is a "frenzy" where pickups count double.
 
 ## Commands
 
-The Godot 4.3 binary is bundled at `.tools/Godot_v4.3-stable_linux.x86_64`. There is no test suite, linter or build step.
+The Godot 4.3 binary is bundled at `.tools/Godot_v4.3-stable_linux.x86_64`. There is no test suite or linter. Release builds: `export_presets.cfg` (Linux + Windows, portable single file with embedded pck) exported by `.github/workflows/release.yml` on every PR/master push; a `v*` tag publishes a GitHub Release.
 
 ```bash
 ./start.sh                       # launch (prints controls); extra args pass through to Godot
@@ -50,7 +50,7 @@ The Godot 4.3 binary is bundled at `.tools/Godot_v4.3-stable_linux.x86_64`. Ther
 - `MeshBatcher` (repeated meshes → MultiMeshes per mesh/colour) and `ArenaEnvironment` (sky, light, post-processing).
 New theme = new `.tres` (+ a `Style` branch in `MazeLevel` if it needs new meshes). Menus preview arenas through `ArenaBackdrop`.
 
-**Player** (`scenes/player/`): `Player` is the body — movement, look/input, jumps, landing dust, gems in/out (`collect_gem`, `lose_gems(n, scatter)`), knockback (stuns briefly), `take_item_hit()` (survival life loss), teleport/launch, leader crown + `LightBeam`, `eliminate()`. Its child components:
+**Player** (`scenes/player/`): `Player` is the body — movement, look/input, jumps, landing dust, gems in/out (`collect_gem`, `lose_gems(n, scatter)`), knockback (stuns briefly), `take_hit()` (survival life loss), teleport/launch, leader crown + `LightBeam`, `eliminate()`. Its child components:
 - `Status` (`PlayerStatus`) — debuffs (`apply_debuff`, `has`), stun, buffs (`grant(Buff.BUBBLE/SHIELD/SHOES/TURBO)`, `absorb_hit()`), grace periods (`Grace.TACKLE/TRAP/PORTAL`), frozen-struggle (mash jump, never below `FREEZE_MIN_TIME`); shows ice block / dizzy stars / bubble and emits the HUD's debuff signals.
 - `Items` (`PlayerItems`) — `ITEM_SLOT_COUNT` slots (`equip`, `use_item`), projectile/trap scenes as `@export`s (**not** preloads: those scenes reference `Player`, a preload is a load cycle), thunder, utilities, the character superpower (turbo / ground pound / shield / swap) and its recharge; emits the HUD's inventory signals.
 - `Combat` (`PlayerCombat`) — tackles, stomps, robbing frozen/confused rivals by contact, ground pound; every hit goes through `_hit_feedback()` (burst, spin, popup numbers, `impact` → camera shake + HUD toast).
