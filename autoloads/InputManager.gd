@@ -2,8 +2,10 @@
 ## Autoload that owns every per-player p{N}_* input action.
 ##
 ## One keyboard scheme (P0 = WASD + mouse; everyone else plays with a pad) and
-## one gamepad layout shared by all pads. The button actions can be rebound from
-## the Controls menu; changes are saved to user://controls.cfg.
+## one button layout per gamepad model (keyed by its GUID, so a pad finds its
+## layout again when plugged back in; a new model starts from the default
+## layout). The button actions can be rebound from the Controls menu; changes
+## are saved to user://controls.cfg.
 ##
 ## Gamepads go to P1, P2, P3 in connection order, so a pad never changes player
 ## when another one is plugged in. Only a pad left over once every other player
@@ -18,6 +20,11 @@ signal bindings_changed
 const SAVE_PATH: String = "user://controls.cfg"
 ## Saved-file section of the keyboard scheme (named from when P1 had one too).
 const KEYBOARD_SECTION: String = "keyboard_0"
+## Saved-file section of the default pad layout, and prefix of each model's own.
+const PAD_SECTION: String = "gamepad"
+const PAD_MODEL_PREFIX: String = "gamepad_"
+## A pad's name is cut to this many characters in the Controls table.
+const PAD_NAME_LENGTH: int = 18
 const ACTION_DEADZONE: float = 0.2
 ## InputEvent device id that matches every device.
 const ALL_DEVICES: int = -1
@@ -76,7 +83,10 @@ const EXTRA_PAD_MAPPINGS: Array[String] = [
 var player_joypad_map: Dictionary = {}
 
 var _keyboard: Dictionary = {}
+## Default layout for pad models without their own (and the HUD of a padless player).
 var _pad: Dictionary = {}
+## Pad GUID → its own layout.
+var _pad_models: Dictionary = {}
 
 
 func _ready() -> void:
@@ -138,14 +148,22 @@ func back_key_text() -> String:
 	return OS.get_keycode_string(KEYBOARD_BACK_KEY)
 
 
-func pad_text(action: String) -> String:
-	return PAD_BUTTON_NAMES.get(_pad[action], "Pad %d" % _pad[action])
+## Button for [param action] on pad [param device] (-1: the default layout).
+func pad_text(action: String, device: int = -1) -> String:
+	var button: int = _layout(device)[action]
+	return PAD_BUTTON_NAMES.get(button, "Pad %d" % button)
+
+
+## A connected pad's name, short enough for a table header.
+static func pad_name(device: int) -> String:
+	var name: String = " ".join(Input.get_joy_name(device).split(" ", false))  # Some pads pad their name with spaces.
+	return name if name.length() <= PAD_NAME_LENGTH else name.left(PAD_NAME_LENGTH - 1) + "."
 
 
 ## What to press for [param action], as shown to [param player_id] in the HUD.
 func prompt_text(player_id: int, action: String) -> String:
 	if has_pad(player_id) or not has_keyboard(player_id):
-		return pad_text(action)
+		return pad_text(action, player_joypad_map.get(player_id, -1))
 	return key_text(action)
 
 
@@ -156,9 +174,21 @@ func set_key_binding(action: String, event: InputEvent) -> void:
 	_save_and_apply()
 
 
-func set_pad_binding(action: String, button: JoyButton) -> void:
-	_swap_into(_pad, action, button)
+## Rebinds [param action] on pad [param device]'s model only.
+func set_pad_binding(device: int, action: String, button: JoyButton) -> void:
+	_swap_into(_layout(device, true), action, button)
 	_save_and_apply()
+
+
+## The layout pad [param device] uses: its model's own, else the default. With
+## [param own], the model gets its own copy first (so a rebind stays on it).
+func _layout(device: int, own: bool = false) -> Dictionary:
+	if device < 0:
+		return _pad
+	var guid: String = Input.get_joy_guid(device)
+	if own and not _pad_models.has(guid):
+		_pad_models[guid] = _pad.duplicate()
+	return _pad_models.get(guid, _pad)
 
 
 func reset_bindings() -> void:
@@ -188,13 +218,16 @@ static func _swap_into(map: Dictionary, action: String, value: int) -> void:
 func _reset_to_defaults() -> void:
 	_keyboard = KEYBOARD_DEFAULTS.duplicate()
 	_pad = PAD_DEFAULTS.duplicate()
+	_pad_models.clear()
 
 
 func _save_and_apply() -> void:
 	var cfg: ConfigFile = ConfigFile.new()
 	for action: String in BUTTON_ACTIONS:
 		cfg.set_value(KEYBOARD_SECTION, action, _keyboard[action])
-		cfg.set_value("gamepad", action, _pad[action])
+		cfg.set_value(PAD_SECTION, action, _pad[action])
+		for guid: String in _pad_models:
+			cfg.set_value(PAD_MODEL_PREFIX + guid, action, _pad_models[guid][action])
 	cfg.set_value("meta", "version", SAVE_VERSION)
 	cfg.save(SAVE_PATH)
 	_apply()
@@ -207,9 +240,16 @@ func _load() -> void:
 		return
 	for action: String in BUTTON_ACTIONS:
 		_keyboard[action] = int(cfg.get_value(KEYBOARD_SECTION, action, _keyboard[action]))
-		_pad[action] = int(cfg.get_value("gamepad", action, _pad[action]))
+		_pad[action] = int(cfg.get_value(PAD_SECTION, action, _pad[action]))
+	for section: String in cfg.get_sections():
+		if section.begins_with(PAD_MODEL_PREFIX):
+			var layout: Dictionary = _pad.duplicate()
+			for action: String in BUTTON_ACTIONS:
+				layout[action] = int(cfg.get_value(section, action, layout[action]))
+			_pad_models[section.trim_prefix(PAD_MODEL_PREFIX)] = layout
 	if int(cfg.get_value("meta", "version", 1)) < SAVE_VERSION and _pad["toggle_view"] == LEGACY_VIEW_BUTTON:
-		set_pad_binding("toggle_view", PAD_DEFAULTS["toggle_view"])  # Also re-saves as the current version.
+		_swap_into(_pad, "toggle_view", PAD_DEFAULTS["toggle_view"])
+		_save_and_apply()  # Re-saves as the current version.
 
 
 ## Rebuilds every p{N}_* action from the keyboard scheme and assigned pads.
@@ -250,7 +290,7 @@ func _bind_pad_action(name: String, action: String, joy: int) -> void:
 		"look_up": _add_motion(name, joy, JOY_AXIS_RIGHT_Y, -1.0)
 		"look_down": _add_motion(name, joy, JOY_AXIS_RIGHT_Y, 1.0)
 		_:
-			_add_button(name, joy, _pad[action])
+			_add_button(name, joy, _layout(joy)[action])
 			if PAD_TRIGGERS.has(action):
 				_add_motion(name, joy, PAD_TRIGGERS[action], 1.0)
 
