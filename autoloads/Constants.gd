@@ -49,8 +49,10 @@ enum MatchMode {
 }
 
 ## Survival mode: lives at the start, and the floor the golden gem refills to
-## (lives can stack above it with life gems).
+## (life gems and gems top it up to MAX_LIVES).
 const START_LIVES: int = 3
+## Survival: lives never go above this (life gems wait, gems stay unspent).
+const MAX_LIVES: int = 5
 const GOLDEN_REFILL_LIVES: int = 3
 ## Survival: after losing a life a hunter can't lose another for this long.
 const LIFE_LOSS_GRACE: float = 3.0

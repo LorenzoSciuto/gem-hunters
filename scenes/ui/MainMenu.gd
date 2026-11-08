@@ -152,8 +152,8 @@ func _refresh_texts() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_START and not controls_dialog.visible and not help_dialog.visible:
+			get_viewport().set_input_as_handled()  # Before starting: the scene change leaves the tree.
 			_on_start_pressed()
-			get_viewport().set_input_as_handled()
 	if event.is_action_pressed("ui_cancel") and controls_dialog.visible:
 		_show_controls(false)
 		get_viewport().set_input_as_handled()
