@@ -37,8 +37,12 @@ const DECORATION_WALL_GAP: float = 0.25
 const DECORATION_OUTLINE: float = 0.03
 ## Spacing between trees along FOREST walls.
 const TREE_SPACING: float = 2.0
-## Frosting cap on candy walls: thickness and how far it overhangs the wall.
-const WALL_CAP_HEIGHT: float = 0.22
+## Cap on top of the walls, per style (the collision box includes it, so feet
+## rest on the cap instead of sinking into it); candy frosting overhangs.
+const WALL_CAP_HEIGHTS: Dictionary = {
+	LevelConfig.Style.CANDY: 0.22, LevelConfig.Style.ROMAN: 0.25,
+	LevelConfig.Style.EGYPT: 0.35, LevelConfig.Style.WINTER: 0.35,
+}
 const WALL_CAP_OVERHANG: float = 0.14
 ## Zones: quadrants 0 (-X -Z), 1 (+X -Z), 2 (-X +Z), 3 (+X +Z), then the center plaza.
 ## Hues avoid the player colors (red, blue, green, yellow) so they never get mixed up.
@@ -235,6 +239,7 @@ func _build_walls() -> void:
 func _add_wall(center: Vector3, length: float, along_x: bool) -> void:
 	var t: float = config.wall_thickness
 	var h: float = config.wall_height
+	var cap: float = WALL_CAP_HEIGHTS.get(config.style, 0.0)
 	var full: float = length + t
 	var size: Vector3 = Vector3(full, h, t) if along_x else Vector3(t, h, full)
 
@@ -242,9 +247,9 @@ func _add_wall(center: Vector3, length: float, along_x: bool) -> void:
 	body.collision_layer = Constants.LAYER_WORLD
 	var shape: CollisionShape3D = CollisionShape3D.new()
 	var box: BoxShape3D = BoxShape3D.new()
-	box.size = size
+	box.size = size + Vector3(0.0, cap, 0.0)
 	shape.shape = box
-	shape.position = center + Vector3(0.0, h * 0.5, 0.0)
+	shape.position = center + Vector3(0.0, (h + cap) * 0.5, 0.0)
 	body.add_child(shape)
 	add_child(body)
 
@@ -255,7 +260,7 @@ func _add_wall(center: Vector3, length: float, along_x: bool) -> void:
 	match config.style:
 		LevelConfig.Style.CANDY:
 			_add_candy_wall(center, size)
-			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full + WALL_CAP_OVERHANG, WALL_CAP_HEIGHT, t + WALL_CAP_OVERHANG), yaw)
+			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full + WALL_CAP_OVERHANG, cap, t + WALL_CAP_OVERHANG), yaw)
 		LevelConfig.Style.FOREST:
 			_batch.add("box", a.darkened(0.25), center, Vector3(full, 1.1, t * 1.2), yaw)
 			var count: int = maxi(1, int(full / TREE_SPACING))
@@ -274,14 +279,14 @@ func _add_wall(center: Vector3, length: float, along_x: bool) -> void:
 					_batch.add("sphere", _accent(), p, Vector3(0.5, 0.35, 0.5))
 		LevelConfig.Style.ROMAN:
 			_batch.add("box", a, center, unit, yaw)
-			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full, 0.25, t * 1.15), yaw)
+			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full, cap, t * 1.15), yaw)
 		LevelConfig.Style.EGYPT:
 			_batch.add("box", a, center, unit, yaw)
 			_batch.add("box", b, center + Vector3(0, h * 0.62, 0), Vector3(full, 0.45, t * 1.08), yaw)
-			_batch.add("box", a.darkened(0.12), center + Vector3(0, h, 0), Vector3(full, 0.35, t * 1.2), yaw)
+			_batch.add("box", a.darkened(0.12), center + Vector3(0, h, 0), Vector3(full, cap, t * 1.2), yaw)
 		LevelConfig.Style.WINTER:
 			_batch.add("box", a, center, unit, yaw)
-			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full + 0.1, 0.35, t * 1.25), yaw)
+			_batch.add("box", b, center + Vector3(0, h, 0), Vector3(full + 0.1, cap, t * 1.25), yaw)
 
 
 ## Candy walls use the world-space stripe shader instead of flat toon colors.
