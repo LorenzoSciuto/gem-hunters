@@ -94,8 +94,7 @@ func _update_rank() -> void:
 
 
 func _on_timer_updated(seconds: float) -> void:
-	var total: int = int(ceilf(seconds))
-	timer_label.text = "%d:%02d" % [total / 60, total % 60]
+	timer_label.text = GameManager.clock_text(seconds)
 	if GameManager.is_frenzy():
 		timer_label.text += tr("HUD_FRENZY_TAG")
 	var low: bool = GameManager.match_mode == Constants.MatchMode.TIME and seconds <= Constants.FRENZY_TIME_REMAINING
@@ -140,12 +139,12 @@ func show_activated(_pid: int, type: int) -> void:
 	toast.show_message(tr(ItemCatalog.NAME_KEYS[type]), ItemCatalog.ICONS.get(type))
 
 
-func update_superpower(_pid: int, trait_type: int, ready_in: float) -> void:
-	item_pad.set_superpower(trait_type, ready_in)
+func update_superpower(_pid: int, superpower: int, ready_in: float) -> void:
+	item_pad.set_superpower(superpower, ready_in)
 
 
-func show_superpower_used(_pid: int, trait_type: int) -> void:
-	toast.show_message(tr(CharacterData.SUPER_KEYS[trait_type]), ItemCatalog.SUPER_ICONS.get(trait_type))
+func show_superpower_used(_pid: int, superpower: int) -> void:
+	toast.show_message(tr(CharacterData.SUPER_KEYS[superpower]), ItemCatalog.SUPER_ICONS.get(superpower))
 
 
 func show_items_stripped(_pid: int) -> void:
@@ -194,6 +193,16 @@ func show_tip() -> void:
 
 
 ## Survival: this hunter is out; the screen now follows a survivor.
+## Match over, on this hunter's own screen: won, lost or a draw ([param winner_id] -1).
+func show_result(winner_id: int, hold: float) -> void:
+	if winner_id < 0:
+		toast.show_message(tr("MSG_DRAW"), null, Toast.Tone.NEUTRAL, hold)
+	elif winner_id == player_id:
+		toast.show_message(tr("MSG_YOU_WIN"), null, Toast.Tone.GOOD, hold)
+	else:
+		toast.show_message(tr("MSG_YOU_LOSE"), null, Toast.Tone.BAD, hold)
+
+
 func show_eliminated() -> void:
 	toast.show_message(tr("MSG_ELIMINATED"), null, Toast.Tone.BAD, ELIMINATED_HOLD)
 

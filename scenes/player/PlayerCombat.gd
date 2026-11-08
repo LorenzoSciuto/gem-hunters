@@ -1,23 +1,25 @@
 ## PlayerCombat.gd
-## Hunter-vs-hunter contact: tackles (run into a rival), stomps (land on their
-## head), robbing frozen/confused rivals by bumping into them, and Bouncer's
-## ground pound. Every hit goes through [method _hit_feedback] so it reads on
-## all screens. Child node "Combat" of Player.
+## Hunter-vs-hunter contact: bumps (run into a rival: both drop gems), stomps
+## (land on their head: the clash is won), robbing frozen/confused rivals by
+## contact, and the ground pound. Every won hit goes through [method _hit_feedback]
+## so it reads on all screens. Child node "Combat" of Player.
 extends Node
 class_name PlayerCombat
 
-## A hunter hit another (tackle, stomp, ground pound): [param gems] changed hands or scattered.
+## A hunter was hit (bump, stomp, ground pound, trap): [param gems] changed hands or scattered.
 signal impact(attacker_id: int, victim_id: int, gems: int)
 
-## Tackle: needs this much horizontal speed, aimed at the rival (cosine). The
-## victim flies back and loses gems (more if crowned), then gets a grace period.
+## impact's attacker_id when nobody else dealt the hit.
+const NO_ATTACKER: int = -1
+
+## Bump: running into a rival (this much speed, aimed at it as a cosine) wins
+## nothing: both bounce apart and drop BUMP_GEMS on the ground (never a life),
+## then get a grace period. Landing on a head (stomp) is what wins a clash.
 const TACKLE_MIN_SPEED: float = 4.0
 const TACKLE_AIM: float = 0.5
-const TACKLE_GEMS: int = 2
-const TACKLE_LEADER_GEMS: int = 3
+const BUMP_GEMS: int = 3
 const TACKLE_FORCE: float = 9.0
 const TACKLE_LIFT: float = 4.0
-const TACKLE_COOLDOWN: float = 1.5
 const TACKLE_GRACE: float = 2.0
 
 ## Stomp: falling onto a rival (contact normal pointing up at least this much).
@@ -37,19 +39,19 @@ const POUND_GEMS: int = 3
 const POUND_DUST_AMOUNT: int = 28
 const POUND_SQUASH: float = 0.45
 
-## Robbing a frozen/confused rival by contact: gems per steal (Pranksters take more).
-const STEAL_GEMS: int = 1
-const PRANKSTER_STEAL_GEMS: int = 2
-
 const HIT_SPIN_TIME: float = 0.45
-const HIT_CONFETTI_AMOUNT: int = 40
-const HIT_CONFETTI_LIFETIME: float = 0.8
+## Who won a clash must read at a glance: the winner cheers in sparkles, the
+## loser flashes red and sheds gems.
+const WIN_SPARKLE_AMOUNT: int = 36
+const WIN_CHEER_TIME: float = 0.8
+const LOSS_BURST_AMOUNT: int = 30
+const HIT_BURST_LIFETIME: float = 0.8
 const DUST_LIFETIME: float = 0.6
+const BUMP_DUST_AMOUNT: int = 20
 
 @onready var player: Player = get_parent()
 @onready var _reach: Area3D = $"../InteractArea"
 
-var _tackle_ready_at: float = 0.0
 var _pounding: bool = false
 var _pound_started: float = 0.0
 var _steal_target: Player = null
@@ -63,10 +65,10 @@ func _now() -> float:
 ## Per physics frame while the hunter has control.
 func update(delta: float) -> void:
 	_process_steal(delta)
-	_process_tackle()
+	_process_bump()
 
 
-func can_be_tackled() -> bool:
+func can_be_hit() -> bool:
 	return not player.status.in_grace(PlayerStatus.Grace.TACKLE)
 
 
@@ -78,35 +80,39 @@ func spin_from_hit() -> void:
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-# ─── Tackle ───────────────────────────────────────────────────────────────
+# ─── Bump ─────────────────────────────────────────────────────────────────
 
-func _process_tackle() -> void:
+func _process_bump() -> void:
+	if not can_be_hit():
+		return
 	var run: Vector3 = Vector3(player.velocity.x, 0.0, player.velocity.z)
-	if run.length() < TACKLE_MIN_SPEED or _now() < _tackle_ready_at:
+	if run.length() < TACKLE_MIN_SPEED:
 		return
 	for body: Node3D in _reach.get_overlapping_bodies():
 		var rival: Player = body as Player
-		if rival == null or rival == player or not rival.combat.can_be_tackled():
+		if rival == null or rival == player or not rival.combat.can_be_hit():
 			continue
 		var to_rival: Vector3 = rival.global_position - player.global_position
 		to_rival.y = 0.0
 		if run.normalized().dot(to_rival.normalized()) >= TACKLE_AIM:
-			_tackle(rival)
+			_bump(rival, to_rival.normalized())
 			return
 
 
-func _tackle(rival: Player) -> void:
-	_tackle_ready_at = _now() + TACKLE_COOLDOWN
-	rival.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE)
-	# Head-on bumps: whoever tackles first wins, no instant tackle back.
-	player.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE * 0.5)
-	var away: Vector3 = rival.global_position - player.global_position
-	away.y = 0.0
-	rival.take_hit()
-	rival.apply_knockback(away.normalized() * TACKLE_FORCE + Vector3.UP * TACKLE_LIFT)
-	var amount: int = TACKLE_LEADER_GEMS if rival.player_id == GameManager.get_leader() else TACKLE_GEMS
-	_steal_and_show(rival, amount)
+## Nobody wins a bump: both fly apart and drop gems for anyone to grab.
+func _bump(rival: Player, toward_rival: Vector3) -> void:
 	AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
+	ParticleConfigs.spawn_burst(player.get_parent(), (player.global_position + rival.global_position) * 0.5 + Vector3.UP,
+		ParticleConfigs.dust_puff(), BUMP_DUST_AMOUNT, DUST_LIFETIME)
+	for pair: Array in [[rival, toward_rival], [player, -toward_rival]]:
+		var hunter: Player = pair[0]
+		hunter.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE)
+		# Gems first: a bubble pops or a shield holds here, before any push.
+		var protected: bool = hunter.status.is_protected()
+		var lost: int = hunter.lose_gems(BUMP_GEMS)
+		if not protected:
+			hunter.apply_knockback((pair[1] as Vector3) * TACKLE_FORCE + Vector3.UP * TACKLE_LIFT)
+			hunter.combat.take_remote_hit(NO_ATTACKER, lost)
 
 
 # ─── Stomp ────────────────────────────────────────────────────────────────
@@ -126,13 +132,13 @@ func check_stomp(pre_slide: Vector3) -> void:
 func _stomp(rival: Player) -> void:
 	player.bounce(STOMP_BOUNCE)
 	AudioManager.play_sfx(AudioManager.SoundEffect.SPRING_BOING)
-	if not rival.combat.can_be_tackled():
+	if not rival.combat.can_be_hit():
 		return  # Still a bounce pad, just no second steal.
 	rival.status.grant_grace(PlayerStatus.Grace.TACKLE, TACKLE_GRACE)
 	rival.take_hit()
 	rival.model.play_squash(1.0)
 	rival.status.stun(STOMP_STUN)
-	_steal_and_show(rival, STOMP_GEMS)
+	_steal_and_show(rival, STOMP_GEMS + (player.character_data.stomp_bonus_gems if player.character_data else 0))
 
 
 # ─── Contact steal ────────────────────────────────────────────────────────
@@ -147,9 +153,9 @@ func _process_steal(delta: float) -> void:
 	if _steal_timer < Constants.GEM_STEAL_INTERVAL:
 		return
 	_steal_timer -= Constants.GEM_STEAL_INTERVAL
-	var prankster: bool = player.character_data and player.character_data.trait_type == CharacterData.TraitType.PRANKSTER
+	var amount: int = player.character_data.contact_steal_gems if player.character_data else 1
 	_steal_target.take_hit()
-	player.collect_gem(_steal_target.lose_gems(PRANKSTER_STEAL_GEMS if prankster else STEAL_GEMS, false), false)
+	player.collect_gem(_steal_target.lose_gems(amount, false), false)
 
 
 func _find_steal_target() -> Player:
@@ -200,9 +206,12 @@ func _ground_pound_impact() -> void:
 		if offset.length() > POUND_RADIUS:
 			continue
 		var push: Vector3 = Vector3(offset.x, 0.0, offset.z).normalized() * POUND_FORCE
+		var protected: bool = rival.status.is_protected()
 		rival.take_hit()
-		rival.apply_knockback(push + Vector3.UP * POUND_FORCE * 0.5)
-		_hit_feedback(rival, rival.lose_gems(POUND_GEMS), false)
+		var lost: int = rival.lose_gems(POUND_GEMS)  # Before the push, which would pop a bubble.
+		if not protected:
+			rival.apply_knockback(push + Vector3.UP * POUND_FORCE * 0.5)
+			_hit_feedback(rival, lost, false)
 
 
 # ─── Feedback ─────────────────────────────────────────────────────────────
@@ -213,17 +222,32 @@ func _steal_and_show(rival: Player, amount: int) -> void:
 	_hit_feedback(rival, stolen, true)
 
 
-## Makes a hit readable on every screen: burst, spin, floating numbers, impact signal.
+## Makes a hit readable on every screen: the winner cheers with a green "+N" /
+## "POW!", the loser spins with a red "-N" / "OUCH!", then the impact signal.
 func _hit_feedback(rival: Player, gems: int, stolen: bool) -> void:
 	var world: Node = player.get_parent()
-	var mid: Vector3 = (player.global_position + rival.global_position) * 0.5 + Vector3.UP
-	ParticleConfigs.spawn_burst(world, mid, ParticleConfigs.confetti_shower(), HIT_CONFETTI_AMOUNT, HIT_CONFETTI_LIFETIME)
+	player.model.play_cheer(WIN_CHEER_TIME)
+	ParticleConfigs.spawn_burst(world, player.global_position + Vector3.UP, ParticleConfigs.gem_collect_burst(),
+		WIN_SPARKLE_AMOUNT, HIT_BURST_LIFETIME)
+	# Higher than the loser's text so the two never overlap.
+	ParticleConfigs.spawn_popup_text(world, player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * 1.5,
+		"+%d" % gems if stolen and gems > 0 else tr("MSG_HIT"), ParticleConfigs.POPUP_GAIN_COLOR)
 	rival.combat.spin_from_hit()
-	var victim_text: String = "-%d" % gems if gems > 0 else tr("MSG_HIT")
-	ParticleConfigs.spawn_popup_text(world, rival.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
-		victim_text, ParticleConfigs.POPUP_LOSS_COLOR)
-	if stolen and gems > 0:
-		# Higher than the victim's number so the two never overlap.
-		ParticleConfigs.spawn_popup_text(world, player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * 1.5,
-			"+%d" % gems, ParticleConfigs.POPUP_GAIN_COLOR)
+	rival.combat.show_loss(gems)
 	impact.emit(player.player_id, rival.player_id, gems)
+
+
+## A hit with no attacker in reach (a trap): spin, loss number and screen shake,
+## for [param attacker_id] too unless it is this hunter (its own trap) or -1.
+func take_remote_hit(attacker_id: int, gems: int) -> void:
+	spin_from_hit()
+	show_loss(gems)
+	impact.emit(attacker_id if attacker_id != player.player_id else NO_ATTACKER, player.player_id, gems)
+
+
+## Red "-N" (or "OUCH!") over this hunter, with gems bursting out.
+func show_loss(gems: int) -> void:
+	ParticleConfigs.spawn_burst(player.get_parent(), player.global_position + Vector3.UP, ParticleConfigs.gem_lost_burst(),
+		LOSS_BURST_AMOUNT, HIT_BURST_LIFETIME)
+	ParticleConfigs.spawn_popup_text(player.get_parent(), player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
+		"-%d" % gems if gems > 0 else tr("MSG_HIT_TAKEN"), ParticleConfigs.POPUP_LOSS_COLOR)

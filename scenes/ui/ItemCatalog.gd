@@ -4,10 +4,10 @@
 class_name ItemCatalog
 
 const SUPER_ICONS: Dictionary = {
-	CharacterData.TraitType.SPEEDSTER: preload("res://assets/ui/icons/super_turbo.png"),
-	CharacterData.TraitType.BOUNCER: preload("res://assets/ui/icons/super_pound.png"),
-	CharacterData.TraitType.TANK: preload("res://assets/ui/icons/super_shield.png"),
-	CharacterData.TraitType.PRANKSTER: preload("res://assets/ui/icons/super_swap.png"),
+	CharacterData.Superpower.TURBO: preload("res://assets/ui/icons/super_turbo.png"),
+	CharacterData.Superpower.GROUND_POUND: preload("res://assets/ui/icons/super_pound.png"),
+	CharacterData.Superpower.SHIELD: preload("res://assets/ui/icons/super_shield.png"),
+	CharacterData.Superpower.SWAP: preload("res://assets/ui/icons/super_swap.png"),
 }
 const ICONS: Dictionary = {
 	Constants.PowerUpType.TRAP_CAKE: preload("res://assets/ui/icons/powerup_cake.png"),

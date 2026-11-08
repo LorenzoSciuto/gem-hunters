@@ -118,8 +118,8 @@ func flash(slot: int) -> void:
 	UiMotion.pulse(_slots[slot])
 
 
-func set_superpower(trait_type: int, ready_in: float) -> void:
-	_icons[SUPER_SLOT].texture = ItemCatalog.SUPER_ICONS.get(trait_type)
+func set_superpower(superpower: int, ready_in: float) -> void:
+	_icons[SUPER_SLOT].texture = ItemCatalog.SUPER_ICONS.get(superpower)
 	_super_ready_at = GameManager.game_time() + ready_in
 	_super_cooldown = ready_in
 

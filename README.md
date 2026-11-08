@@ -10,16 +10,20 @@ traps, and knock gems out of each other. English and Italian UI.
 - **Goal:** *Time Attack* (most gems when the clock hits zero) or *Gem Race* (first to the target).
   Gems are worth 1, 3 or 5; the golden gem in the center is worth 10. In the final **frenzy** every
   gem counts double.
-- **Survival:** everyone starts with 3 lives and every attack costs one (3 s of safety after each
-  loss). Every 10 gems buy a life, and pink life gems give one too (5 lives at most). Last hunter standing wins.
-- **Tackle:** run into a rival to knock them back and steal a gem — two from the leader, who wears
-  a crown and a golden light beam visible from anywhere in the maze.
+- **Survival:** everyone starts with 3 lives; stomps, items and superpowers cost one (3 s of
+  safety after each loss), bumps only cost gems. Every 10 gems buy a life, and pink life gems give one too (5 lives at most). Last hunter standing wins.
+- **Stomp:** jump on a rival's head to steal their gems. Just bumping into each other wins
+  nothing: both bounce apart and drop 3 gems on the ground. The leader wears a crown and a golden
+  light beam visible from anywhere in the maze.
 - **Items:** gift boxes fill up to 3 slots (a full inventory can't open boxes). Some boxes are
   pranks, some hold two items. 15 items: traps (cake, water balloon, speaker, banana peel,
   black box), attacks with light aim assist (spring glove, magnet, tickle ray, snowball, thunder)
   and utilities (spring shoes, bubble, jackpot, warp, radar). Traps catch their owner too.
-- **Hunters:** each has a trait and a superpower that recharges every 30 s —
-  Dashy *Turbo*, Bouncer *Ground Pound*, Tanky *Iron Shield*, Tricky *Swap* (with the leader).
+- **Hunters:** 8 hunters, each with its own always-on ability and one of four superpowers you
+  trigger (recharging every 30 s): *Turbo* (Dashy: fastest; Sparkle: superpower ready sooner), *Ground Pound* (Bouncer:
+  highest jump + double jump; Bloom: triple jump), *Iron Shield* (Tanky: barely pushed, loses fewer
+  gems; Coco: effects last half as long), *Swap* with the leader (Tricky: robs 2 gems at a time;
+  Mimi: stomps steal 1 extra gem).
 - **Arenas:** Candy Kingdom, Enchanted Forest, Secret Garden, Roman Colosseum, Desert Temple,
   Frozen Peaks. Each is split into four colored zones with a giant landmark plus the Golden Plaza,
   and every screen names its zone so you can peek at where rivals are. Portals, map boards,
