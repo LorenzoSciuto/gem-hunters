@@ -4,7 +4,7 @@
 ##   Keyboard: the player's move left / right keys browse, jump locks in
 ##   (P0 also browses with the mouse wheel and locks with a click).
 ##   Gamepad: stick / D-pad to browse, A or Start to lock.
-##   Back (pad B, Esc for P0 / Backspace for P1, P0's right click, or the
+##   Back (pad B, Esc or right click for P0, or the
 ##   on-screen button): unlocks a locked choice, otherwise leaves to the menu.
 extends Control
 
@@ -83,11 +83,11 @@ func _update_prompt() -> void:
 	if _uses_pad():
 		prompt_label.text = tr("UI_PROMPT_PAD_LOCKED" if _is_locked else "UI_PROMPT_PAD")
 	elif _is_locked:
-		prompt_label.text = tr("UI_PROMPT_KB_LOCKED").format([InputManager.back_key_text(player_id)])
+		prompt_label.text = tr("UI_PROMPT_KB_LOCKED").format([InputManager.back_key_text()])
 	else:
-		prompt_label.text = tr("UI_PROMPT_KB").format([InputManager.key_text(player_id, "move_left"),
-			InputManager.key_text(player_id, "move_right"), InputManager.key_text(player_id, "jump"),
-			InputManager.back_key_text(player_id)])
+		prompt_label.text = tr("UI_PROMPT_KB").format([InputManager.key_text("move_left"),
+			InputManager.key_text("move_right"), InputManager.key_text("jump"),
+			InputManager.back_key_text()])
 	back_btn.text = "UI_CHANGE" if _is_locked else "UI_BACK"
 
 
@@ -151,7 +151,7 @@ func _is_back_event(event: InputEvent) -> bool:
 		return event.pressed and event.device == joy and event.button_index == InputManager.PAD_BACK_BUTTON
 	if event is InputEventKey:
 		return event.pressed and not event.is_echo() and InputManager.has_keyboard(player_id) \
-			and (event as InputEventKey).keycode == InputManager.KEYBOARD_BACK_KEYS[player_id]
+			and (event as InputEventKey).keycode == InputManager.KEYBOARD_BACK_KEY
 	if event is InputEventMouseButton:
 		return player_id == 0 and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT
 	return false
