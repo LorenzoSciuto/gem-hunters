@@ -22,6 +22,7 @@ func _on_body_entered(body: Node3D) -> void:
 		hide()
 		set_physics_process(false)
 		set_deferred("monitoring", false)
+		(body as Player).take_hit()
 		_on_hit_player(body as Player)
 	elif not body is Player:
 		_finish()
@@ -32,7 +33,7 @@ func _pull_gems(target: Player) -> void:
 	var shooter: Player = _find_shooter()
 	var pulls: int = int(Constants.POWERUP_DURATION_MAGNET * PULL_RATE)
 	for i: int in pulls:
-		await get_tree().create_timer(1.0 / PULL_RATE).timeout
+		await get_tree().create_timer(1.0 / PULL_RATE, false).timeout
 		if not is_instance_valid(target) or not is_instance_valid(shooter):
 			break
 		shooter.collect_gem(target.lose_gems(1, false), false)

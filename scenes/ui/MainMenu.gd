@@ -1,5 +1,5 @@
 ## MainMenu.gd
-## Lobby: choose player count, match goal (time or gem target) and arena, then play.
+## Lobby: choose player count, match goal (time, gem target or survival) and arena, then play.
 ## Works with mouse, keyboard and gamepad (standard ui_* focus navigation).
 extends Control
 
@@ -46,7 +46,7 @@ func _ready() -> void:
 	_level = GameManager.level_config if GameManager.level_config else _levels[0]
 
 	_player_buttons = _make_toggles(players_row, range(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS + 1), _select_players)
-	_mode_buttons = _make_toggles(mode_row, [Constants.MatchMode.TIME, Constants.MatchMode.SCORE], _select_mode)
+	_mode_buttons = _make_toggles(mode_row, [Constants.MatchMode.TIME, Constants.MatchMode.SCORE, Constants.MatchMode.LIVES], _select_mode)
 	_arena_buttons = _make_toggles(arena_grid, range(_levels.size()), func(i: int) -> void: _select_arena(_levels[i]))
 
 	start_btn.pressed.connect(_on_start_pressed)
@@ -87,17 +87,26 @@ func _select_players(count: int) -> void:
 	_players = count
 
 
-## Switching mode rebuilds the target buttons (seconds or gems).
+## Switching mode rebuilds the target buttons (seconds or gems); survival has
+## no target (everyone starts with Constants.START_LIVES).
 func _select_mode(mode: Constants.MatchMode, keep_target: int = -1) -> void:
 	_mode = mode
-	var targets: Array[int] = Constants.TIME_TARGETS if mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
-	_target = keep_target if keep_target in targets else targets[1]
+	var targets: Array[int] = _targets_for(mode)
+	_target = keep_target if keep_target in targets else (targets[1] if not targets.is_empty() else Constants.START_LIVES)
+	target_row.visible = not targets.is_empty()
 	for b: Button in _target_buttons:
 		b.queue_free()
 	_target_buttons = _make_toggles(target_row, targets, func(t: int) -> void:
 		_target = t
 		_refresh_texts())
 	_refresh_texts()
+
+
+func _targets_for(mode: Constants.MatchMode) -> Array[int]:
+	match mode:
+		Constants.MatchMode.TIME: return Constants.TIME_TARGETS
+		Constants.MatchMode.SCORE: return Constants.SCORE_TARGETS
+	return []
 
 
 ## Every pick regenerates the backdrop, so re-pressing previews a fresh maze.
@@ -115,17 +124,20 @@ func _refresh_texts() -> void:
 
 	_mode_buttons[0].text = tr("UI_MODE_TIME")
 	_mode_buttons[1].text = tr("UI_MODE_SCORE")
+	_mode_buttons[2].text = tr("UI_MODE_LIVES")
 	for i: int in _mode_buttons.size():
 		_mode_buttons[i].set_pressed_no_signal(i == _mode)
 
-	var targets: Array[int] = Constants.TIME_TARGETS if _mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
+	var targets: Array[int] = _targets_for(_mode)
 	for i: int in _target_buttons.size():
 		var t: int = targets[i]
 		_target_buttons[i].text = "%d:%02d" % [t / 60, t % 60] if _mode == Constants.MatchMode.TIME \
 			else tr("UI_TARGET_GEMS").format([t])
 		_target_buttons[i].set_pressed_no_signal(t == _target)
-	mode_desc.text = tr("UI_MODE_TIME_DESC") if _mode == Constants.MatchMode.TIME \
-		else tr("UI_MODE_SCORE_DESC").format([_target])
+	match _mode:
+		Constants.MatchMode.TIME: mode_desc.text = tr("UI_MODE_TIME_DESC")
+		Constants.MatchMode.SCORE: mode_desc.text = tr("UI_MODE_SCORE_DESC").format([_target])
+		_: mode_desc.text = tr("UI_MODE_LIVES_DESC").format([Constants.START_LIVES, Constants.GEMS_PER_LIFE])
 
 	for i: int in _arena_buttons.size():
 		_arena_buttons[i].text = tr(_levels[i].name_key)

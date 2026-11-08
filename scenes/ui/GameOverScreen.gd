@@ -72,6 +72,9 @@ func _display_results() -> void:
 		var score_label: Label = Label.new()
 		score_label.theme_type_variation = &"HeadingLabel"
 		score_label.text = "%d ◆" % score
+		if GameManager.is_survival():
+			var lives: int = standings[i]["lives"]
+			score_label.text += "   " + (tr("UI_LIVES_N").format([lives]) if lives > 0 else tr("UI_KNOCKED_OUT"))
 		cells.append(score_label)
 
 		for c: Control in cells:

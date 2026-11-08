@@ -13,6 +13,8 @@ UI_MODE_TIME,Time Attack,A Tempo
 UI_MODE_SCORE,Gem Race,Corsa alle Gemme
 UI_MODE_TIME_DESC,Most gems when the clock hits zero wins!,Vince chi ha più gemme allo scadere del tempo!
 UI_MODE_SCORE_DESC,First to {0} gems wins!,Vince il primo che arriva a {0} gemme!
+UI_MODE_LIVES,Survival,Sopravvivenza
+UI_MODE_LIVES_DESC,"Everyone starts with {0} lives: every attack costs a life, every {1} gems buy one. Last one standing wins!","Tutti partono con {0} vite: ogni attacco toglie una vita, ogni {1} gemme ne comprano una. Vince chi sopravvive!"
 UI_TARGET_GEMS,{0} gems,{0} gemme
 UI_SELECT_ARENA,Arena,Arena
 UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
@@ -42,6 +44,7 @@ MSG_GO,GO!,VIA!
 MSG_FRENZY,FRENZY! Gems x2,FRENESIA! Gemme x2
 MSG_PAUSED,Paused,Pausa
 UI_RESUME,Resume,Riprendi
+UI_RESTART,Restart,Ricomincia
 UI_MAIN_MENU,Main Menu,Menu Principale
 UI_REMATCH,Rematch,Rivincita
 MSG_MATCH_END,Match Over!,Fine Partita!
@@ -156,7 +159,9 @@ Steal from the others: run into a hunter to tackle them and take a gem. The lead
 
 Gift boxes give you items (up to 3). Every hunter also has a superpower that recharges every 30 seconds.
 
-In the final frenzy every gem counts double: never give up!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
+In the final frenzy every gem counts double: never give up!
+
+Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), tackles, stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (you can have more than 3), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
 
 - A Tempo: vince chi ha più gemme allo scadere del tempo.
 - Corsa alle Gemme: vince il primo hunter che raggiunge l'obiettivo.
@@ -167,7 +172,9 @@ Ruba agli altri: corri addosso a un hunter per placcarlo e prendergli una gemma.
 
 I pacchi regalo danno oggetti (fino a 3). Ogni hunter ha anche un superpotere che si ricarica ogni 30 secondi.
 
-Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!"
+Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!
+
+Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), spinte, schiacciate in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (puoi averne più di 3), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
 HELP_HUNTERS_INTRO,"Each hunter has a special trait and a superpower (Y on the pad, F on the keyboard, or pick it with the mouse wheel). The icon shows when it is ready again.","Ogni hunter ha una dote speciale e un superpotere (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse). L'icona mostra quando è di nuovo pronto."
 HELP_ITEMS_INTRO,"Open gift boxes to get items: you can carry 3 (X, A, B on the pad - Q, E, R on the keyboard - or wheel + left click). Watch out: some boxes are pranks, some hold two items! Careful: the traps you drop catch you too!","Apri i pacchi regalo per avere oggetti: ne puoi tenere 3 (X, A, B sul pad - Q, E, R sulla tastiera - o rotella + clic sinistro). Attenzione: alcuni pacchi sono scherzi, altri contengono due oggetti! Attento: le trappole che lasci prendono anche te!"
 HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the center. Each zone has its own floor color and a giant landmark (Crystal Spire, Orb Tower, Pyramid, Castle), and your screen shows the zone name: peek at the others' screens to find out where they are!
@@ -175,12 +182,12 @@ HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the cente
 - Portals: step into a glowing ring to come out of its twin on the other side of the maze.
 - Map boards: walk up to a map board (look for the red pin) to see everyone on the map for a few seconds.
 - Moving gates: colored walls that open and close by themselves - new shortcuts appear!
-- Mushroom trampolines in dead ends launch you over the walls.","Ogni arena è divisa in 4 zone più la Piazza d'Oro al centro. Ogni zona ha il suo colore di pavimento e un monumento gigante (Guglia di Cristallo, Torre della Sfera, Piramide, Castello), e sul tuo schermo c'è il nome della zona: sbircia gli schermi degli altri per scoprire dove sono!
+- Mushroom trampolines in dead ends launch you over the walls. Watch out for sprinklers: when they spray, the water makes you slip and drop a gem. Fell outside the maze? Somewhere along the outer wall there is a single golden trampoline: find it to bounce back to the Golden Plaza. Once per match the Chaos Gem appears under a rainbow beam: whoever grabs it halves everyone else's gems!","Ogni arena è divisa in 4 zone più la Piazza d'Oro al centro. Ogni zona ha il suo colore di pavimento e un monumento gigante (Guglia di Cristallo, Torre della Sfera, Piramide, Castello), e sul tuo schermo c'è il nome della zona: sbircia gli schermi degli altri per scoprire dove sono!
 
 - Portali: entra in un anello luminoso per uscire dal suo gemello dall'altra parte del labirinto.
 - Bacheche mappa: avvicinati a una bacheca con la mappa (cerca lo spillo rosso) per vedere tutti sulla mappa per qualche secondo.
 - Cancelli mobili: muri colorati che si aprono e chiudono da soli - spuntano nuove scorciatoie!
-- I funghi trampolino nei vicoli ciechi ti lanciano oltre i muri."
+- I funghi trampolino nei vicoli ciechi ti lanciano oltre i muri. Attenti agli irrigatori: quando spruzzano, l'acqua ti fa scivolare e perdere una gemma. Sei finito fuori dal labirinto? Lungo il muro esterno c'è un solo trampolino d'oro: trovalo per rimbalzare nella Piazza d'Oro. Una volta per partita appare la Gemma del Caos sotto un raggio arcobaleno: chi la prende dimezza le gemme di tutti gli altri!"
 MSG_HIT,POW!,POW!
 MSG_HIT_TAKEN,OUCH!,AHIA!
 UI_POWERUP_BLACKBOX,Black Box,Pacco Nero
@@ -188,4 +195,32 @@ UI_POWERUP_BLACKBOX_DESC,Drop it: a fake gift box - whoever opens it loses all i
 MSG_ITEMS_STRIPPED,"BLACK BOX!
 Items and superpower lost","PACCO NERO!
 Oggetti e superpotere persi"
-MSG_BREAK_FREE,"Frozen! Mash {0} to break free!","Congelato! Premi {0} più volte per liberarti!"
+MSG_BREAK_FREE,"Frozen!
+Mash {0} to break free!","Congelato!
+Premi {0} più volte per liberarti!"
+ZONE_OUTSIDE,Outside the maze,Fuori dal labirinto
+MSG_OUTSIDE,"You're outside!
+Find the golden trampoline to bounce back in.","Sei fuori!
+Trova il trampolino d'oro per rientrare."
+MSG_PRANK_BOX,"Prank box! It burst in your face:
+controls flipped for a moment.","Pacco scherzo! Ti è scoppiato in faccia:
+comandi invertiti per un attimo."
+MSG_PRANK_POP,PRANK!,SCHERZO!
+MSG_CHAOS_APPEARED,"The Chaos Gem has appeared! Follow the rainbow beam:
+whoever grabs it halves everyone else's gems!","È apparsa la Gemma del Caos! Segui il raggio arcobaleno:
+chi la prende dimezza le gemme di tutti gli altri!"
+MSG_CHAOS_MINE,"Chaos Gem!
+Everyone else just lost half their gems!","Gemma del Caos!
+Tutti gli altri hanno perso metà delle gemme!"
+MSG_CHAOS_THEIRS,"P{0} grabbed the Chaos Gem:
+you lost {1} gems!","G{0} ha preso la Gemma del Caos:
+hai perso {1} gemme!"
+HUD_FRENZY_TAG,  x2,  x2
+UI_LIVES_N,{0} lives,{0} vite
+UI_KNOCKED_OUT,Out,Eliminato
+MSG_LIFE_LOST_POP,-1 LIFE,-1 VITA
+MSG_LIFE_GAINED_POP,+1 LIFE,+1 VITA
+MSG_LIVES_REFILLED_POP,LIVES REFILLED!,VITE RICARICATE!
+MSG_ELIMINATED,"You're out of lives!
+Now watching a survivor.","Hai finito le vite!
+Ora guardi un sopravvissuto."

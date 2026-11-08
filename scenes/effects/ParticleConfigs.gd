@@ -10,11 +10,17 @@
 class_name ParticleConfigs
 extends RefCounted
 
-## Floating popup text (spawn_popup_text).
+## Floating popup text (spawn_popup_text): height over a hunter's feet and the
+## shared gain / loss colours.
+const POPUP_HEIGHT: float = 2.4
+const POPUP_GAIN_COLOR: Color = Color(0.5, 1.0, 0.55)
+const POPUP_LOSS_COLOR: Color = Color(1.0, 0.4, 0.35)
 const POPUP_FONT_SIZE: int = 160
 const POPUP_OUTLINE_SIZE: int = 22
 const POPUP_START_SCALE: float = 0.4
 const POPUP_POP_TIME: float = 0.18
+## Word popups ("+1 LIFE", "PRANK!") are smaller than number popups ("+2").
+const POPUP_WORD_SCALE: float = 0.5
 const POPUP_PIXEL_SIZE: float = 0.008
 const POPUP_RISE: float = 1.6
 const POPUP_DURATION: float = 1.1
@@ -22,17 +28,6 @@ const POPUP_DURATION: float = 1.1
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
-
-## Creates a gradient texture that wraps a single Color as a constant curve.
-## Used for simple solid-colour particle tinting.
-static func _solid_color_texture(color: Color) -> GradientTexture1D:
-	var grad := Gradient.new()
-	grad.colors = PackedColorArray([color, color])
-	grad.offsets = PackedFloat32Array([0.0, 1.0])
-	var tex := GradientTexture1D.new()
-	tex.gradient = grad
-	return tex
-
 
 ## Creates a gradient texture that fades from `color` to transparent.
 ## Gives particles a natural fade-out without touching ALPHA on the material.
@@ -362,9 +357,9 @@ static func _soft_dot_texture() -> GradientTexture2D:
 	return _dot
 
 
-## Spawns a self-freeing one-shot particle burst at [param pos] under [param parent].
-static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMaterial,
-		amount: int = 24, lifetime: float = 0.8) -> void:
+## Camera-facing soft round sprite tinted by the particle colour: the draw
+## pass for every burst and for looping emitters (sprinkler water, ...).
+static func soft_quad() -> QuadMesh:
 	var draw_mat := StandardMaterial3D.new()
 	draw_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	draw_mat.vertex_color_use_as_albedo = true
@@ -374,9 +369,35 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 	draw_mat.albedo_texture = _soft_dot_texture()
 	var quad := QuadMesh.new()
 	quad.material = draw_mat
+	return quad
+
+
+## water_jet
+## Sprinkler stream: droplets shot forward in an arc that falls back to the ground.
+static func water_jet() -> ParticleProcessMaterial:
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0.0, 0.55, 1.0)
+	mat.spread = 8.0
+	mat.initial_velocity_min = 6.5
+	mat.initial_velocity_max = 8.0
+	mat.gravity = Vector3(0.0, -9.8, 0.0)
+	mat.scale_min = 0.2
+	mat.scale_max = 0.38
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color(0.6, 0.88, 1.0, 1.0), Color(0.15, 0.55, 1.0, 0.95), Color(0.15, 0.55, 1.0, 0.0)])
+	grad.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = grad
+	mat.color_ramp = ramp
+	return mat
+
+
+## Spawns a self-freeing one-shot particle burst at [param pos] under [param parent].
+static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMaterial,
+		amount: int = 24, lifetime: float = 0.8) -> void:
 	var particles := GPUParticles3D.new()
 	particles.process_material = process
-	particles.draw_pass_1 = quad
+	particles.draw_pass_1 = soft_quad()
 	particles.amount = amount
 	particles.lifetime = lifetime
 	particles.one_shot = true
@@ -388,7 +409,9 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 
 
 ## Big floating text (e.g. "+2") that rises and fades out, seen on every screen.
+## Text with letters (not just a number) is drawn smaller so it doesn't fill the view.
 static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Color) -> void:
+	var word: bool = text.to_upper() != text.to_lower()
 	var label: Label3D = Label3D.new()
 	label.text = text
 	label.font = Constants.DISPLAY_FONT
@@ -396,7 +419,7 @@ static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Co
 	label.outline_modulate = Color(0.1, 0.06, 0.15)
 	label.font_size = POPUP_FONT_SIZE
 	label.outline_size = POPUP_OUTLINE_SIZE
-	label.pixel_size = POPUP_PIXEL_SIZE
+	label.pixel_size = POPUP_PIXEL_SIZE * (POPUP_WORD_SCALE if word else 1.0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	parent.add_child(label)
 	label.global_position = pos

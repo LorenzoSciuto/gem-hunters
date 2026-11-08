@@ -4,21 +4,26 @@
 extends CanvasLayer
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
+const MATCH_SCENE: String = "res://scenes/main/Main.tscn"
 const POP_SCALE: float = 1.6
 const POP_DURATION: float = 0.35
 const GO_HOLD: float = 0.6
 const BANNER_PULSE: float = 1.08
+## The frenzy banner is a short announcement; each HUD's clock then shows "x2".
+const FRENZY_BANNER_TIME: float = 3.0
 
 @onready var countdown_label: Label = $CountdownLabel
 @onready var frenzy_banner: PanelContainer = $FrenzyBanner
 @onready var pause_menu: Control = $PauseMenu
 @onready var resume_button: Button = $PauseMenu/Panel/VBox/ResumeButton
+@onready var restart_button: Button = $PauseMenu/Panel/VBox/RestartButton
 @onready var menu_button: Button = $PauseMenu/Panel/VBox/MenuButton
 @onready var quit_button: Button = $PauseMenu/Panel/VBox/QuitButton
 
 
 func _ready() -> void:
 	resume_button.pressed.connect(toggle_pause)
+	restart_button.pressed.connect(_on_restart_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
 
@@ -38,12 +43,14 @@ func show_countdown(seconds_left: int) -> void:
 			countdown_label.modulate.a = 1.0)
 
 
-## The banner stays up and pulses until the match ends.
+## Pulses for a few seconds, then hides (every HUD's clock keeps an "x2" tag).
 func show_frenzy() -> void:
 	frenzy_banner.visible = true
-	var tween: Tween = create_tween().set_loops()
+	var pulses: int = int(FRENZY_BANNER_TIME / (POP_DURATION * 2.0))
+	var tween: Tween = create_tween().set_loops(pulses)
 	tween.tween_property(frenzy_banner, "scale", Vector2.ONE * BANNER_PULSE, POP_DURATION)
 	tween.tween_property(frenzy_banner, "scale", Vector2.ONE, POP_DURATION)
+	tween.finished.connect(func() -> void: frenzy_banner.visible = false)
 
 
 ## Escape (keyboard) or Start (any gamepad) toggles pause during play.
@@ -69,6 +76,13 @@ func toggle_pause() -> void:
 	else:
 		GameManager.resume_match()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+## Same players, arena and hunters, straight back to the 3-2-1 countdown.
+func _on_restart_pressed() -> void:
+	get_tree().paused = false
+	GameManager.reset_to_lobby()
+	get_tree().change_scene_to_file(MATCH_SCENE)
 
 
 func _on_menu_pressed() -> void:
