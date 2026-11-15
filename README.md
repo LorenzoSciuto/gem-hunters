@@ -98,7 +98,7 @@ cd gem-hunters
 
 `start.sh` finds Godot in `.tools/Godot_v4.3-stable_linux.x86_64`, then in `$GODOT_BIN`, then as `godot4` or `godot` on your `PATH`. On Windows or macOS, open `project.godot` in the Godot editor and press **F5**.
 
-CI (`.github/workflows/release.yml`) builds the installers and portable packages on every pull request. When master gets a version (`config/version` in `project.godot`) that has no release yet, CI tags the commit `v<version>` and publishes the release. To ship a new version, bump that number.
+CI (`.github/workflows/release.yml`) runs on pushes to master. When master gets a version (`config/version` in `project.godot`) that has no release yet, CI tags the commit `v<version>` and publishes the release with the installers and portable packages. To ship a new version, bump that number. Any branch can be built by hand from the Actions tab.
 
 ## Project layout
 
