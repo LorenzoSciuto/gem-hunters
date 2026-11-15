@@ -29,11 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The image keeps templates under /root, but Actions sets HOME elsewhere.
-      - name: Install export templates
+      # The image keeps templates and editor settings (rcedit + wine paths, used
+      # to write the icon and version info into the .exe) under /root, but
+      # Actions sets HOME elsewhere.
+      - name: Install export templates and editor settings
         run: |
-          mkdir -p ~/.local/share/godot/export_templates
+          mkdir -p ~/.local/share/godot/export_templates ~/.config
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/
+          cp -r /root/.config/godot ~/.config/
 
       - name: Import assets
         run: godot --headless --path . --import
@@ -41,8 +44,10 @@ jobs:
       - name: Export
         run: |
           mkdir -p build/${{ matrix.dir }}
-          godot --headless --path . --export-release "${{ matrix.preset }}"
+          godot --headless --path . --export-release "${{ matrix.preset }}" 2>&1 | tee export.log
           test -s build/${{ matrix.dir }}/GemHunters*
+          # The .exe must carry our icon and version info, not Godot's.
+          if grep -q "Resources Modification" export.log; then exit 1; fi
 
       - uses: actions/upload-artifact@v4
         with:
