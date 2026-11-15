@@ -186,8 +186,11 @@ const GROUP_SURPRISE_BOXES: String = "surprise_boxes"
 ## Godot group of the level's props (trampolines, sprinklers, portals, beacons,
 ## ice patches): gems never spawn on top of them.
 const GROUP_PROPS: String = "props"
-## Gems keep at least this far from props, boxes and traps.
-const GEM_PROP_CLEARANCE: float = 2.2
+## Godot group of every gem lying in the arena (regular, golden, life, Chaos,
+## loose); with boxes, props and traps it is what SpawnClearance keeps apart.
+const GROUP_PICKUPS: String = "pickups"
+## Nothing spawns closer than this (floor distance) to a pickup, box, prop or trap.
+const SPAWN_CLEARANCE: float = 2.2
 
 ## Godot group of every armed trap placed by a player.
 const GROUP_TRAPS: String = "traps"
@@ -220,9 +223,6 @@ const POWERUP_BOX_RESPAWN: float = 12.0
 
 ## Maximum number of loose collectible gems in the world.
 const MAX_GEMS_IN_WORLD: int = 20
-
-## Minimum distance between two spawned gems (metres).
-const MIN_GEM_SPAWN_DISTANCE: float = 2.0
 
 
 # ─── Movement & camera ────────────────────────────────────────────────────
