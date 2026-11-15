@@ -21,7 +21,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 
 ## Releases
 
-`.github/workflows/release.yml` exports the game with the presets in `export_presets.cfg`. It packages a Windows installer (Inno Setup, `installer/windows/`), a Linux `.deb` (`installer/linux/`) and portable zip/tar.gz builds on every pull request. On master, a new `config/version` in `project.godot` tags the commit `v<version>` and publishes a GitHub Release. The version lives only in that one place.
+`.github/workflows/release.yml` exports the game with the presets in `export_presets.cfg`. It packages a Windows installer (Inno Setup, `installer/windows/`), a Linux `.deb` (`installer/linux/`) and portable zip/tar.gz builds. It runs on its own only for pushes to master: a new `config/version` in `project.godot` tags the commit `v<version>` and publishes a GitHub Release. The version lives only in that one place. To build any other branch, start the workflow by hand (Actions → *Build & release* → *Run workflow*). Manual runs never publish. The Windows export writes the icon and version info into the `.exe` with rcedit, and the build fails if they are missing.
 
 ## Rules
 

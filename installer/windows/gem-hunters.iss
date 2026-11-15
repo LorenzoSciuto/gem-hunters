@@ -27,7 +27,8 @@ ArchitecturesInstallIn64BitMode=x64compatible
 LicenseFile=..\..\LICENSE
 OutputDir={#OutputDir}
 OutputBaseFilename=GemHunters-windows-x86_64-setup
-UninstallDisplayIcon={app}\GemHunters.exe
+SetupIconFile=..\..\icon.ico
+UninstallDisplayIcon={app}\icon.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -43,11 +44,12 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#BuildDir}\GemHunters.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"
 Source: "..\..\README.md"; DestDir: "{app}"
+Source: "..\..\icon.ico"; DestDir: "{app}"
 
 [Icons]
-Name: "{group}\Gem Hunters"; Filename: "{app}\GemHunters.exe"
+Name: "{group}\Gem Hunters"; Filename: "{app}\GemHunters.exe"; IconFilename: "{app}\icon.ico"
 Name: "{group}\{cm:UninstallProgram,Gem Hunters}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Gem Hunters"; Filename: "{app}\GemHunters.exe"; Tasks: desktopicon
+Name: "{autodesktop}\Gem Hunters"; Filename: "{app}\GemHunters.exe"; IconFilename: "{app}\icon.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\GemHunters.exe"; Description: "{cm:LaunchProgram,Gem Hunters}"; Flags: nowait postinstall skipifsilent
