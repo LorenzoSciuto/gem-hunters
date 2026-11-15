@@ -39,7 +39,6 @@ UI_POWERUP_MAGNET,Gem Magnet,Calamita di Gemme
 UI_POWERUP_TICKLE,Tickle Ray,Raggio Solletico
 UI_POWERUP_SHOES,Spring Shoes,Scarpe a Molla
 UI_POWERUP_BUBBLE,Bubble Shield,Scudo a Bolla
-HUD_GOAL,Goal {0},Obiettivo {0}
 MSG_GO,GO!,VIA!
 MSG_FRENZY,FRENZY! Gems x2,FRENESIA! Gemme x2
 MSG_PAUSED,Paused,Pausa
@@ -59,7 +58,6 @@ MSG_DRAW,It's a draw!,Pareggio!
 MSG_YOU_WIN,YOU WIN!,HAI VINTO!
 MSG_YOU_LOSE,You lost...,Hai perso...
 UI_PLAYER_SHORT,P{0},G{0}
-UI_GEMS,gems,gemme
 UI_SELECT_HERO,Choose your hunter,Scegli il tuo hunter
 UI_READY,READY!,PRONTO!
 UI_PROMPT_PAD,Stick / D-Pad: browse   (A): ready   (B): back,Leva / Croce: scorri   (A): pronto   (B): indietro
@@ -235,3 +233,23 @@ MSG_LIVES_REFILLED_POP,LIVES REFILLED!,VITE RICARICATE!
 MSG_ELIMINATED,"You're out of lives!
 Now watching a survivor.","Hai finito le vite!
 Ora guardi un sopravvissuto."
+INPUT_MOUSE_1,Left click,Clic sinistro
+INPUT_MOUSE_2,Right click,Clic destro
+INPUT_MOUSE_3,Middle click,Clic centrale
+INPUT_MOUSE_4,Wheel up,Rotella su
+INPUT_MOUSE_5,Wheel down,Rotella giù
+INPUT_MOUSE_BUTTON,Mouse button {0},Tasto mouse {0}
+INPUT_PAD_BUTTON,Button {0},Pulsante {0}
+INPUT_DPAD_UP,D-pad up,Croce su
+INPUT_DPAD_DOWN,D-pad down,Croce giù
+INPUT_DPAD_LEFT,D-pad left,Croce sinistra
+INPUT_DPAD_RIGHT,D-pad right,Croce destra
+INPUT_KEY_SPACE,Space,Spazio
+INPUT_KEY_ESCAPE,Esc,Esc
+INPUT_KEY_ENTER,Enter,Invio
+INPUT_KEY_SHIFT,Shift,Maiusc
+INPUT_KEY_BACKSPACE,Backspace,Cancella
+INPUT_KEY_UP,Up arrow,Freccia su
+INPUT_KEY_DOWN,Down arrow,Freccia giù
+INPUT_KEY_LEFT,Left arrow,Freccia sinistra
+INPUT_KEY_RIGHT,Right arrow,Freccia destra

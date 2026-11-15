@@ -69,8 +69,8 @@ const PAD_BUTTON_NAMES: Dictionary = {
 	JOY_BUTTON_LEFT_SHOULDER: "LB", JOY_BUTTON_RIGHT_SHOULDER: "RB",
 	JOY_BUTTON_LEFT_STICK: "L3", JOY_BUTTON_RIGHT_STICK: "R3",
 	JOY_BUTTON_BACK: "Back", JOY_BUTTON_START: "Start", JOY_BUTTON_GUIDE: "Home",
-	JOY_BUTTON_DPAD_UP: "D-Up", JOY_BUTTON_DPAD_DOWN: "D-Down",
-	JOY_BUTTON_DPAD_LEFT: "D-Left", JOY_BUTTON_DPAD_RIGHT: "D-Right",
+	JOY_BUTTON_DPAD_UP: "INPUT_DPAD_UP", JOY_BUTTON_DPAD_DOWN: "INPUT_DPAD_DOWN",
+	JOY_BUTTON_DPAD_LEFT: "INPUT_DPAD_LEFT", JOY_BUTTON_DPAD_RIGHT: "INPUT_DPAD_RIGHT",
 }
 
 ## SDL mappings for pads missing from Godot's database (measured on real
@@ -139,19 +139,34 @@ func has_keyboard(player_id: int) -> bool:
 func key_text(action: String) -> String:
 	var code: int = _keyboard[action]
 	if code < 0:
-		return "Mouse %d" % -code
-	return OS.get_keycode_string(DisplayServer.keyboard_get_keycode_from_physical(code))
+		return _translated("INPUT_MOUSE_%d" % -code, tr("INPUT_MOUSE_BUTTON").format([-code]))
+	return _key_name(DisplayServer.keyboard_get_keycode_from_physical(code))
 
 
 ## Display text of the menu "back" key.
 func back_key_text() -> String:
-	return OS.get_keycode_string(KEYBOARD_BACK_KEY)
+	return _key_name(KEYBOARD_BACK_KEY)
+
+
+## The OS name of a key; the named ones the game shows (Space, Escape, arrows...)
+## have an INPUT_KEY_* translation.
+func _key_name(keycode: Key) -> String:
+	var name: String = OS.get_keycode_string(keycode)
+	return _translated("INPUT_KEY_" + name.to_upper(), name)
+
+
+## [param key] translated, or [param fallback] when the table has no such key.
+func _translated(key: String, fallback: String) -> String:
+	var text: String = tr(key)
+	return fallback if text == key else text
 
 
 ## Button for [param action] on pad [param device] (-1: the default layout).
 func pad_text(action: String, device: int = -1) -> String:
 	var button: int = _layout(device)[action]
-	return PAD_BUTTON_NAMES.get(button, "Pad %d" % button)
+	if PAD_BUTTON_NAMES.has(button):
+		return tr(PAD_BUTTON_NAMES[button])
+	return tr("INPUT_PAD_BUTTON").format([button])
 
 
 ## A connected pad's name, short enough for a table header.

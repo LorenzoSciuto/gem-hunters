@@ -96,7 +96,7 @@ var _leader_beam: LightBeam = null
 
 func initialize(new_id: int, color: Color) -> void:
 	player_id = new_id
-	name_tag.text = "P%d" % (new_id + 1)
+	name_tag.text = tr("UI_PLAYER_SHORT").format([new_id + 1])
 	name_tag.font = Constants.DISPLAY_FONT
 	name_tag.modulate = color
 	name_tag.layers = 1 << (Constants.NAME_TAG_LAYER_BASE + new_id)
