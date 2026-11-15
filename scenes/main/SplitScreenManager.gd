@@ -135,7 +135,7 @@ func _bind_huds() -> void:
 		player.status.screen_effect_requested.connect(hud.show_screen_effect)
 		player.status.debuff_cleared.connect(hud.clear_screen_effect)
 		player.notice_requested.connect(hud.show_notice)
-		player.view_changed.connect(_on_view_changed)
+		player.look.view_changed.connect(_on_view_changed)
 		_huds.append(hud)
 
 

@@ -11,6 +11,9 @@ enum Language {
 
 signal language_changed(new_language: Language)
 
+## Section of user://settings.cfg holding the language.
+const SETTINGS_SECTION: String = "ui"
+
 const TRANSLATIONS: Array[String] = [
 	"res://assets/localization/strings.en.translation",
 	"res://assets/localization/strings.it.translation",
@@ -26,11 +29,9 @@ var _current_language: Language = Language.EN
 func _ready() -> void:
 	for path: String in TRANSLATIONS:
 		TranslationServer.add_translation(load(path) as Translation)
-	var cfg: ConfigFile = ConfigFile.new()
-	if cfg.load(Constants.SETTINGS_PATH) == OK:
-		var saved: int = int(cfg.get_value("ui", "language", _current_language))
-		if LOCALES.has(saved):
-			_current_language = saved as Language
+	var saved: int = int(Settings.read(SETTINGS_SECTION).get("language", _current_language))
+	if LOCALES.has(saved):
+		_current_language = saved as Language
 	TranslationServer.set_locale(LOCALES[_current_language])
 
 
@@ -39,10 +40,7 @@ func set_language(lang: Language) -> void:
 		return
 	_current_language = lang
 	TranslationServer.set_locale(LOCALES[lang])
-	var cfg: ConfigFile = ConfigFile.new()
-	cfg.load(Constants.SETTINGS_PATH)  # keep the other sections (missing file is fine)
-	cfg.set_value("ui", "language", lang)
-	cfg.save(Constants.SETTINGS_PATH)
+	Settings.write(SETTINGS_SECTION, { "language": lang })
 	language_changed.emit(lang)
 
 

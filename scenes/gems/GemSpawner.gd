@@ -3,20 +3,18 @@
 ## Uses Marker3D children as candidate spawn positions.
 ##
 ## Anti-clustering algorithm:
-##   _find_valid_spawn_point() scores every candidate against existing live gems
-##   and excludes any candidate within min_spawn_distance of an occupied point.
-##   The remaining candidates are sampled with equal probability so gems spread
-##   evenly across the arena.
+##   _find_valid_spawn_point() drops every candidate too close to a pickup, box,
+##   prop or trap (SpawnClearance) and samples the rest with equal probability,
+##   so gems spread evenly and never share a spot.
 ##
 ## Golden gem:
 ##   At most one golden gem at a time, at the arena center: the first appears
 ##   GOLDEN_GEM_RESPAWN seconds into the match, and each one taken is replaced
 ##   after the same delay.
 ##
-## Gems never spawn on top of props, gift boxes or traps (GEM_PROP_CLEARANCE).
 ##
 ## Chaos Gem: exactly once per match, part-way through (see CHAOS_*), at a
-## random free gem spot; GameManager announces it to every HUD.
+## random free gem spot (waiting for one if needed); GameManager announces it.
 ##
 ## Survival mode: fewer and rarer gems (traded for lives, see GEMS_PER_LIFE),
 ## a slower golden gem, no Chaos Gem, and a life gem every LIFE_GEM_INTERVAL.
@@ -56,7 +54,6 @@ const INITIAL_FILL_FRACTION: float = 0.5
 # ---------------------------------------------------------------------------
 @export var max_gems_in_world: int = Constants.MAX_GEMS_IN_WORLD
 @export var spawn_interval: float = Constants.GEM_RESPAWN_TIME
-@export var min_spawn_distance: float = Constants.MIN_GEM_SPAWN_DISTANCE
 
 # ---------------------------------------------------------------------------
 # Node references
@@ -108,9 +105,7 @@ func _schedule_chaos_gem() -> void:
 	await get_tree().create_timer(delay, false).timeout
 	if not is_inside_tree() or not GameManager.is_playing():
 		return
-	var point: Marker3D = _find_valid_spawn_point()
-	if point == null:
-		point = _spawn_points.pick_random()
+	var point: Marker3D = await _await_free_spawn_point()
 	if point == null:
 		return
 	var chaos: ChaosGem = ChaosGem.new()
@@ -141,6 +136,9 @@ func _run_life_gems() -> void:
 
 func _schedule_golden_gem() -> void:
 	await get_tree().create_timer(_golden_respawn, false).timeout
+	# The center spot is fixed: wait for a loose gem or trap to clear it.
+	while is_inside_tree() and not SpawnClearance.is_clear(get_tree(), golden_gem_marker.global_position):
+		await get_tree().create_timer(SpawnClearance.RETRY_INTERVAL, false).timeout
 	if is_inside_tree():
 		_spawn_golden_gem()
 
@@ -213,42 +211,21 @@ func _try_spawn_gem() -> void:
 	_active_gems.append(weakref(gem))
 
 
-## Return a spawn Marker3D that is at least min_spawn_distance away from all
-## existing live gems. Returns null if no valid candidate exists.
+## A random gem spot clear of every pickup, box, prop and trap
+## (SpawnClearance), or null when none is free.
 func _find_valid_spawn_point() -> Marker3D:
-	# Build list of positions of currently active gems.
-	var occupied_positions: Array[Vector3] = []
-	for wr: WeakRef in _active_gems:
-		var gem: Object = wr.get_ref()
-		if gem and gem is Node3D:
-			occupied_positions.append((gem as Node3D).global_position)
+	var free: Array = _spawn_points.filter(func(point: Marker3D) -> bool:
+		return SpawnClearance.is_clear(get_tree(), point.global_position))
+	return free.pick_random() as Marker3D if not free.is_empty() else null
 
-	var props: Array[Vector3] = []
-	for group: String in [Constants.GROUP_PROPS, Constants.GROUP_SURPRISE_BOXES, Constants.GROUP_TRAPS]:
-		for node: Node in get_tree().get_nodes_in_group(group):
-			props.append((node as Node3D).global_position)
 
-	# Filter candidates.
-	var valid_points: Array[Marker3D] = []
-	for point: Marker3D in _spawn_points:
-		var too_close: bool = false
-		for pos: Vector3 in occupied_positions:
-			if point.global_position.distance_to(pos) < min_spawn_distance:
-				too_close = true
-				break
-		for pos: Vector3 in props:
-			var flat: Vector3 = point.global_position - pos
-			if Vector2(flat.x, flat.z).length() < Constants.GEM_PROP_CLEARANCE:
-				too_close = true
-				break
-		if not too_close:
-			valid_points.append(point)
-
-	if valid_points.is_empty():
-		return null
-
-	# Uniform random selection among valid candidates.
-	return valid_points[randi() % valid_points.size()]
+## Waits until a gem spot is free; null if the match ends first.
+func _await_free_spawn_point() -> Marker3D:
+	var point: Marker3D = _find_valid_spawn_point()
+	while point == null and is_inside_tree() and GameManager.is_playing():
+		await get_tree().create_timer(SpawnClearance.RETRY_INTERVAL, false).timeout
+		point = _find_valid_spawn_point()
+	return point
 
 
 ## Weighted random gem value: 70% → 1pt, 20% → 3pt, 10% → 5pt.

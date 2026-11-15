@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scenes/player/PlayerStatus.gd" id="13_status"]
 [ext_resource type="Script" path="res://scenes/player/PlayerItems.gd" id="14_items"]
 [ext_resource type="Script" path="res://scenes/player/PlayerCombat.gd" id="15_combat"]
+[ext_resource type="Script" path="res://scenes/player/PlayerLook.gd" id="16_look"]
 [ext_resource type="PackedScene" path="res://scenes/player/CharacterModel.tscn" id="2_model"]
 [ext_resource type="PackedScene" path="res://scenes/gems/GemLoose.tscn" id="3_gem"]
 [ext_resource type="PackedScene" path="res://scenes/powerups/projectiles/ProjSpringGlove.tscn" id="4_glove"]
@@ -160,3 +161,6 @@ trap_black_box_scene = ExtResource("12_blackbox")
 
 [node name="Combat" type="Node" parent="."]
 script = ExtResource("15_combat")
+
+[node name="Look" type="Node" parent="."]
+script = ExtResource("16_look")

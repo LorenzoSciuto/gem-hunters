@@ -31,6 +31,7 @@ signal collected(by_player_id: int, gem_value: int)
 var _already_collected: bool = false
 
 func _ready() -> void:
+	add_to_group(Constants.GROUP_PICKUPS)
 	body_entered.connect(_on_body_entered)
 	_apply_visuals()
 
@@ -98,5 +99,5 @@ func _on_body_entered(body: Node3D) -> void:
 
 
 func _popup(player: Player, key: String) -> void:
-	ParticleConfigs.spawn_popup_text(get_parent(), player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
+	PopupText.spawn(get_parent(), player.global_position + Vector3.UP * PopupText.HEIGHT,
 		tr(key), POPUP_LIFE_COLOR)
