@@ -46,7 +46,7 @@ jobs:
 
       - name: Package
         run: |
-          cp README.md build/${{ matrix.dir }}/
+          cp README.md LICENSE build/${{ matrix.dir }}/
           cd build/${{ matrix.dir }}
           case "${{ matrix.package }}" in
             *.zip) zip -r ../${{ matrix.package }} . ;;
