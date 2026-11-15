@@ -10,6 +10,9 @@
 ## they must NOT mutate internal state directly.
 extends Node
 
+## Section of user://settings.cfg holding the last match setup.
+const SETTINGS_SECTION: String = "match"
+
 
 # ─── Signals ──────────────────────────────────────────────────────────────
 
@@ -93,30 +96,25 @@ func _ready() -> void:
 
 ## Restores the last configured match; anything missing or invalid keeps the default.
 func _load_last_setup() -> void:
-	var cfg: ConfigFile = ConfigFile.new()
-	if cfg.load(Constants.SETTINGS_PATH) != OK:
-		return
-	_num_players = clampi(int(cfg.get_value("match", "players", _num_players)), Constants.MIN_PLAYERS, Constants.MAX_PLAYERS)
-	var mode: int = int(cfg.get_value("match", "mode", match_mode))
+	var saved: Dictionary = Settings.read(SETTINGS_SECTION)
+	_num_players = clampi(int(saved.get("players", _num_players)), Constants.MIN_PLAYERS, Constants.MAX_PLAYERS)
+	var mode: int = int(saved.get("mode", match_mode))
 	if mode in Constants.MatchMode.values():
 		match_mode = mode as Constants.MatchMode
 	if match_mode != Constants.MatchMode.LIVES:
 		var targets: Array[int] = Constants.TIME_TARGETS if match_mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
-		var target: int = int(cfg.get_value("match", "target", match_target))
+		var target: int = int(saved.get("target", match_target))
 		match_target = target if target in targets else targets[1]
-	var arena: String = str(cfg.get_value("match", "arena", ""))
+	var arena: String = str(saved.get("arena", ""))
 	if arena in Constants.LEVEL_CONFIGS:
 		level_config = load(arena) as LevelConfig
 
 
 func _save_last_setup() -> void:
-	var cfg: ConfigFile = ConfigFile.new()
-	cfg.load(Constants.SETTINGS_PATH)  # keep the other sections (missing file is fine)
-	cfg.set_value("match", "players", _num_players)
-	cfg.set_value("match", "mode", match_mode)
-	cfg.set_value("match", "target", match_target)
-	cfg.set_value("match", "arena", level_config.resource_path if level_config else "")
-	cfg.save(Constants.SETTINGS_PATH)
+	Settings.write(SETTINGS_SECTION, {
+		"players": _num_players, "mode": match_mode, "target": match_target,
+		"arena": level_config.resource_path if level_config else "",
+	})
 
 
 func _process(delta: float) -> void:

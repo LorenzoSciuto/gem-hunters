@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Gem Hunters: Tag & Trap
+Comment=Couch party game for 2-4 players: grab gems, set traps, steal from friends
+Comment[it]=Party game da divano per 2-4 giocatori: raccogli gemme, piazza trappole, ruba agli amici
+Exec=gem-hunters
+Icon=gem-hunters
+Terminal=false
+Categories=Game;ActionGame;
+Keywords=party;split-screen;multiplayer;kids;

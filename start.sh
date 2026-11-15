@@ -15,8 +15,16 @@ for candidate in "$PROJECT_DIR/.tools/Godot_v4.3-stable_linux.x86_64" "$GODOT_BI
 done
 
 if [ -z "$GODOT_EXEC" ]; then
-	echo "Error: Godot 4 not found. Put the binary in $PROJECT_DIR/.tools/ or set GODOT_BIN."
+	echo "Error: Godot 4.3 not found. Download it from https://godotengine.org/download/archive/4.3-stable/"
+	echo "and put it in $PROJECT_DIR/.tools/, set GODOT_BIN, or add godot to your PATH."
 	exit 1
+fi
+
+# A fresh clone has never been imported: fonts, sounds and translations would
+# be missing, so build the import cache once before the first launch.
+if [ ! -d "$PROJECT_DIR/.godot/imported" ]; then
+	echo "First launch: importing assets (takes a minute)..."
+	"$GODOT_EXEC" --headless --path "$PROJECT_DIR" --import >/dev/null 2>&1 || true
 fi
 
 cat <<'BANNER'
