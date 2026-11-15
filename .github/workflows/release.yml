@@ -47,6 +47,8 @@ jobs:
           WINEPREFIX: /tmp/wine
         run: |
           mkdir -p build/${{ matrix.dir }}
+          # Set up wine first, so its one-time setup noise isn't read as an rcedit error.
+          wine64-stable wineboot --init >/dev/null 2>&1 || true
           godot --headless --path . --export-release "${{ matrix.preset }}" 2>&1 | tee export.log
           test -s build/${{ matrix.dir }}/GemHunters*
           # The .exe must carry our icon and version info, not Godot's.
