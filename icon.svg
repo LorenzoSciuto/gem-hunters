@@ -1,8 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="28" fill="#1b1c2e"/>
-  <polygon points="64,16 108,44 88,108 40,108 20,44" fill="#00d2ff"/>
-  <polygon points="64,16 108,44 64,68 20,44" fill="#6fe3ff"/>
-  <polygon points="40,108 88,108 64,68" fill="#0099cc"/>
-  <polygon points="20,44 64,68 40,108" fill="#00b4d8"/>
-  <polygon points="108,44 88,108 64,68" fill="#48cae4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Gem Hunters app icon (Wennovate): faceted gem with a toon outline on the splash purple. -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="70%">
+      <stop offset="0" stop-color="#5b3aa8"/>
+      <stop offset="1" stop-color="#211444"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffd76a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffd76a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <circle cx="128" cy="136" r="104" fill="url(#glow)"/>
+  <!-- Gem: crown (top) and pavilion (bottom) facets, outlined like the in-game toon shader. -->
+  <g stroke="#1a0f33" stroke-width="9" stroke-linejoin="round">
+    <polygon points="72,62 184,62 222,104 128,226 34,104" fill="#ff5fa2"/>
+  </g>
+  <polygon points="72,62 104,62 88,104 34,104" fill="#ff8cc0"/>
+  <polygon points="104,62 152,62 168,104 88,104" fill="#ffc2dd"/>
+  <polygon points="152,62 184,62 222,104 168,104" fill="#ff8cc0"/>
+  <polygon points="34,104 88,104 128,226" fill="#e8418a"/>
+  <polygon points="88,104 168,104 128,226" fill="#ff5fa2"/>
+  <polygon points="168,104 222,104 128,226" fill="#c92f73"/>
+  <g fill="none" stroke="#1a0f33" stroke-width="4" stroke-linejoin="round" opacity="0.55">
+    <polyline points="34,104 222,104"/>
+    <polyline points="104,62 88,104 128,226 168,104 152,62"/>
+  </g>
+  <g stroke="#1a0f33" stroke-width="9" stroke-linejoin="round" fill="none">
+    <polygon points="72,62 184,62 222,104 128,226 34,104"/>
+  </g>
+  <!-- Shine on the table facet and a four-point sparkle. -->
+  <polygon points="112,70 132,70 120,96 102,96" fill="#ffffff" opacity="0.85"/>
+  <path d="M198 30 L205 50 L225 57 L205 64 L198 84 L191 64 L171 57 L191 50 Z" fill="#fff6c9" stroke="#1a0f33" stroke-width="5" stroke-linejoin="round"/>
 </svg>

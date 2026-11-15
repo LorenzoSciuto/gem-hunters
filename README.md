@@ -1,6 +1,8 @@
 <div align="center">
 
-# 💎 Gem Hunters: Tag & Trap
+<img src="icon.svg" width="128" alt="Gem Hunters icon">
+
+# Gem Hunters: Tag & Trap
 
 **A couch party game for 2–4 players: grab gems, set traps, steal from your friends.**
 
