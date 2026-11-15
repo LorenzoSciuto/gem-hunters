@@ -19,6 +19,10 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 - Such a script compiles before the autoloads, so it can't name project classes (`MazeLevel`, `PlayerStatus`...) at compile time. `load()` them at runtime instead.
 - Detach real gamepads (set every `InputManager.player_joypad_map` entry to -1, call `_apply()`, `Input.action_release` every `p*` action), or a pad in someone's hands will steer a test player.
 
+## Releases
+
+`.github/workflows/release.yml` exports the game with the presets in `export_presets.cfg`. It packages a Windows installer (Inno Setup, `installer/windows/`), a Linux `.deb` (`installer/linux/`) and portable zip/tar.gz builds on every pull request. On master, a new `config/version` in `project.godot` tags the commit `v<version>` and publishes a GitHub Release. The version lives only in that one place.
+
 ## Rules
 
 - **Clean code.** No legacy or dead code (remove whatever a change makes obsolete), reusable components instead of copies, compact single-purpose classes. When a script grows past a few hundred lines, split it into components (a child `Node` with a `class_name`, or a `RefCounted` helper).

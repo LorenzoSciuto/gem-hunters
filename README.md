@@ -40,12 +40,12 @@ Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennova
 
 ## Download
 
-Grab the latest portable build from [**Releases**](../../releases/latest). There's nothing to install:
+Grab the latest build from [**Releases**](../../releases/latest): an installer or a portable build that runs without installing.
 
-| Platform | Package | Run |
+| Platform | Installer | Portable |
 |---|---|---|
-| Windows x86_64 | `GemHunters-windows-x86_64.zip` | unzip, then double-click `GemHunters.exe` |
-| Linux x86_64 | `GemHunters-linux-x86_64.tar.gz` | `tar -xzf GemHunters-linux-x86_64.tar.gz && ./GemHunters.x86_64` |
+| Windows x86_64 | `GemHunters-windows-x86_64-setup.exe`: Start menu entry and uninstaller, no admin rights needed | `GemHunters-windows-x86_64-portable.zip`: unzip, then run `GemHunters.exe` |
+| Linux x86_64 | `GemHunters-linux-x86_64.deb`: `sudo apt install ./GemHunters-linux-x86_64.deb`, then find it in your app menu or run `gem-hunters` | `GemHunters-linux-x86_64-portable.tar.gz`: extract, then run `./GemHunters.x86_64` |
 
 ## How to play
 
@@ -96,7 +96,7 @@ cd gem-hunters
 
 `start.sh` finds Godot in `.tools/Godot_v4.3-stable_linux.x86_64`, then in `$GODOT_BIN`, then as `godot4` or `godot` on your `PATH`. On Windows or macOS, open `project.godot` in the Godot editor and press **F5**.
 
-To make your own builds, use the export presets in `export_presets.cfg` (Linux + Windows, a single portable file each). CI builds both on every pull request, and a `v*` tag publishes a release.
+CI (`.github/workflows/release.yml`) builds the installers and portable packages on every pull request. When master gets a version (`config/version` in `project.godot`) that has no release yet, CI tags the commit `v<version>` and publishes the release. To ship a new version, bump that number.
 
 ## Project layout
 
