@@ -1,7 +1,7 @@
 ## ParticleConfigs.gd
 ## Factory class providing pre-configured ParticleProcessMaterial instances
 ## for all visual effects in the game. Keeps particle configuration
-## centralised and reusable.
+## centralised and reusable (floating text lives in PopupText).
 ##
 ## Usage:
 ##   ParticleConfigs.spawn_burst(get_parent(), global_position, ParticleConfigs.gem_collect_burst())
@@ -9,21 +9,6 @@
 ## All methods are static — no instance is ever needed.
 class_name ParticleConfigs
 extends RefCounted
-
-## Floating popup text (spawn_popup_text): height over a hunter's feet and the
-## shared gain / loss colours.
-const POPUP_HEIGHT: float = 2.4
-const POPUP_GAIN_COLOR: Color = Color(0.5, 1.0, 0.55)
-const POPUP_LOSS_COLOR: Color = Color(1.0, 0.4, 0.35)
-const POPUP_FONT_SIZE: int = 160
-const POPUP_OUTLINE_SIZE: int = 22
-const POPUP_START_SCALE: float = 0.4
-const POPUP_POP_TIME: float = 0.18
-## Word popups ("+1 LIFE", "PRANK!") are smaller than number popups ("+2").
-const POPUP_WORD_SCALE: float = 0.5
-const POPUP_PIXEL_SIZE: float = 0.008
-const POPUP_RISE: float = 1.6
-const POPUP_DURATION: float = 1.1
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -406,27 +391,3 @@ static func spawn_burst(parent: Node, pos: Vector3, process: ParticleProcessMate
 	particles.global_position = pos
 	particles.emitting = true
 	particles.finished.connect(particles.queue_free)
-
-
-## Big floating text (e.g. "+2") that rises and fades out, seen on every screen.
-## Text with letters (not just a number) is drawn smaller so it doesn't fill the view.
-static func spawn_popup_text(parent: Node, pos: Vector3, text: String, color: Color) -> void:
-	var word: bool = text.to_upper() != text.to_lower()
-	var label: Label3D = Label3D.new()
-	label.text = text
-	label.font = Constants.DISPLAY_FONT
-	label.modulate = color
-	label.outline_modulate = Color(0.1, 0.06, 0.15)
-	label.font_size = POPUP_FONT_SIZE
-	label.outline_size = POPUP_OUTLINE_SIZE
-	label.pixel_size = POPUP_PIXEL_SIZE * (POPUP_WORD_SCALE if word else 1.0)
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	parent.add_child(label)
-	label.global_position = pos
-	var tween: Tween = label.create_tween().set_parallel()
-	label.scale = Vector3.ONE * POPUP_START_SCALE
-	tween.tween_property(label, "scale", Vector3.ONE, POPUP_POP_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(label, "global_position:y", pos.y + POPUP_RISE, POPUP_DURATION) \
-		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(label, "modulate:a", 0.0, POPUP_DURATION).set_delay(POPUP_DURATION * 0.5)
-	tween.chain().tween_callback(label.queue_free)

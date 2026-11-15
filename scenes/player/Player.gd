@@ -1,7 +1,8 @@
 ## Player.gd
-## One hunter's body: movement, look and input, jumps and landings, gems in and
-## out, knockback, teleports and launches, leader marker and elimination.
+## One hunter's body: movement and input, jumps and landings, gems in and out,
+## knockback, teleports and launches, leader marker and elimination.
 ## Behaviour lives in child components:
+##   Look   (PlayerLook)   — stick/mouse look, camera view, P1's mouse buttons
 ##   Status (PlayerStatus) — debuffs, stun, buffs, grace periods
 ##   Items  (PlayerItems)  — gift-box items and the character's superpower
 ##   Combat (PlayerCombat) — tackles, stomps, contact steals, ground pound
@@ -11,8 +12,6 @@ class_name Player
 
 ## Asks this player's HUD to show the arena map for [param duration] seconds.
 signal map_reveal_requested(player_id: int, duration: float)
-## The camera switched between first-person (true) and third-person view.
-signal view_changed(player_id: int, first_person: bool)
 ## Something happened that this player's HUD should explain ([param message_key]
 ## is a localization key; [param good] picks the toast colour).
 signal notice_requested(player_id: int, message_key: String, good: bool)
@@ -25,8 +24,6 @@ const ICE_STEER: float = 4.0
 ## Height at which gems burst out of / into a hunter.
 const GEM_BURST_HEIGHT: float = 1.0
 const GEM_CHEER_TIME: float = 0.35
-## Third-person camera sits slightly right of the head, over the shoulder.
-const SHOULDER_OFFSET: float = 0.6
 const MIN_KNOCKBACK_RESISTANCE: float = 0.1
 ## Any knockback takes control away briefly so the hit actually carries the
 ## victim; while stunned they slide with this (lower) friction.
@@ -73,11 +70,10 @@ const LIFE_POPUP_HEIGHT_SCALE: float = 1.8
 @onready var status: PlayerStatus = $Status
 @onready var items: PlayerItems = $Items
 @onready var combat: PlayerCombat = $Combat
+@onready var look: PlayerLook = $Look
 @onready var model: CharacterModel = $Model
 @onready var muzzle: Marker3D = $Muzzle
-@onready var camera_origin: Node3D = $CameraOrigin
 @onready var camera_target: Node3D = $CameraOrigin/SpringArm3D/CameraTarget
-@onready var spring_arm: SpringArm3D = $CameraOrigin/SpringArm3D
 @onready var name_tag: Label3D = $NameTag
 @onready var player_ring: MeshInstance3D = $PlayerRing
 
@@ -87,9 +83,6 @@ var controls_enabled: bool = false
 var _speed: float = Constants.BASE_SPEED
 var _jump_velocity: float = Constants.JUMP_VELOCITY
 var _jump_count: int = 0
-var _uses_mouse: bool = false
-var _first_person: bool = false
-var _laugh_time: float = 0.0
 ## Riding an aimed launch (return pad): no control until it lands. Ended by
 ## touching the floor, not a timer, so a frame hitch can't drop it mid-air.
 var _launched: bool = false
@@ -113,9 +106,7 @@ func initialize(new_id: int, color: Color) -> void:
 	var ring_mat: StandardMaterial3D = (player_ring.mesh.surface_get_material(0) as StandardMaterial3D).duplicate()
 	ring_mat.albedo_color = color
 	player_ring.material_override = ring_mat
-	# Never let the camera arm collide with its own body.
-	spring_arm.add_excluded_object(get_rid())
-	camera_origin.rotation.x = deg_to_rad(Constants.CAMERA_START_PITCH_DEG)
+	look.setup()
 
 
 func apply_character_data(data: CharacterData) -> void:
@@ -130,10 +121,7 @@ func apply_character_data(data: CharacterData) -> void:
 
 func set_controls_enabled(enabled: bool) -> void:
 	controls_enabled = enabled
-	_uses_mouse = player_id == 0 and InputManager.player_joypad_map.get(0, -1) < 0
-	if _uses_mouse:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if enabled else Input.MOUSE_MODE_VISIBLE
-		items.selection_changed.emit(player_id, items.selected_slot)
+	look.set_controls_enabled(enabled)
 
 
 func set_leader(is_leader: bool) -> void:
@@ -157,63 +145,19 @@ func rivals() -> Array[Player]:
 	return out
 
 
-## Switches between the over-the-shoulder camera and the character's eyes.
-func toggle_view() -> void:
-	_first_person = not _first_person
-	spring_arm.spring_length = 0.0 if _first_person else Constants.CAMERA_TP_DISTANCE
-	spring_arm.position.x = 0.0 if _first_person else SHOULDER_OFFSET
-	camera_origin.position.y = Constants.CAMERA_FP_HEIGHT if _first_person else Constants.CAMERA_TP_HEIGHT
-	_apply_look(Vector2.ZERO)  # Re-clamp pitch to the new view's limits.
-	view_changed.emit(player_id, _first_person)
-
-
 # ─── Input ────────────────────────────────────────────────────────────────
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not controls_enabled or not _uses_mouse:
-		return
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if status.has(Constants.DebuffType.FROZEN):
-			return
-		var look: Vector2 = (event as InputEventMouseMotion).relative * Constants.MOUSE_SENSITIVITY
-		_apply_look(-look if status.has(Constants.DebuffType.INVERTED) else look)
-	elif event is InputEventMouseButton and event.pressed:
-		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		else:
-			_handle_mouse_button(event.button_index)
-		get_viewport().set_input_as_handled()
-
-
-## Wheel arms a slot (items, then the superpower), left click fires it, right click jumps.
-func _handle_mouse_button(button: MouseButton) -> void:
-	match button:
-		MOUSE_BUTTON_WHEEL_UP: items.cycle_selection(-1)
-		MOUSE_BUTTON_WHEEL_DOWN: items.cycle_selection(1)
-		MOUSE_BUTTON_LEFT:
-			if not status.has(Constants.DebuffType.FROZEN):
-				items.use_selected()
-		MOUSE_BUTTON_RIGHT: _jump()
-
 
 func _action(action: String) -> String:
 	return "p%d_%s" % [player_id, action]
 
 
-func _stick(neg_x: String, pos_x: String, neg_y: String, pos_y: String) -> Vector2:
+## A stick's value from four actions, dead zone applied.
+func stick(neg_x: String, pos_x: String, neg_y: String, pos_y: String) -> Vector2:
 	var raw: Vector2 = Vector2(
 		Input.get_axis(_action(neg_x), _action(pos_x)),
 		Input.get_axis(_action(neg_y), _action(pos_y))
 	)
 	return Vector2.ZERO if raw.length() < Constants.JOYSTICK_DEAD_ZONE else raw.limit_length(1.0)
-
-
-## Yaw turns the whole body, pitch tilts the camera pivot.
-func _apply_look(look: Vector2) -> void:
-	rotate_y(-look.x)
-	var min_deg: float = Constants.CAMERA_FP_MIN_DEG if _first_person else Constants.CAMERA_VERTICAL_MIN_DEG
-	var max_deg: float = Constants.CAMERA_FP_MAX_DEG if _first_person else Constants.CAMERA_VERTICAL_MAX_DEG
-	camera_origin.rotation.x = clampf(camera_origin.rotation.x - look.y, deg_to_rad(min_deg), deg_to_rad(max_deg))
 
 
 # ─── Frame update ─────────────────────────────────────────────────────────
@@ -226,16 +170,16 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= Constants.GRAVITY * combat.gravity_scale() * delta
 
 	if Input.is_action_just_pressed(_action("toggle_view")):
-		toggle_view()
+		look.toggle_view()
 	var frozen: bool = status.has(Constants.DebuffType.FROZEN)
 	if controls_enabled and not frozen and not status.is_stunned() and not _launched:
-		_handle_look(delta)
+		look.update(delta)
 		_handle_movement(delta)
 		_handle_actions()
 		combat.update(delta)
 	elif controls_enabled and frozen:
 		if Input.is_action_just_pressed(_action("jump")):
-			_jump()  # Frozen: a jump press cracks the ice instead.
+			jump()  # Frozen: a jump press cracks the ice instead.
 		_decelerate(delta, Constants.FRICTION_GROUND)
 	elif status.is_stunned() or _launched:
 		# Knocked back or launched: keep the momentum in the air, slide it out
@@ -254,21 +198,8 @@ func _physics_process(delta: float) -> void:
 	_animate_model(delta)
 
 
-func _handle_look(delta: float) -> void:
-	var look: Vector2 = _stick("look_left", "look_right", "look_up", "look_down")
-	if status.has(Constants.DebuffType.INVERTED):
-		look = -look
-	look *= Constants.JOYSTICK_SENSITIVITY * delta
-	if status.has(Constants.DebuffType.LAUGHING):
-		_laugh_time += delta
-		var wobble: float = deg_to_rad(Constants.CAMERA_LAUGHING_AMPLITUDE) * delta
-		look.y += sin(_laugh_time * Constants.CAMERA_LAUGHING_FREQUENCY) * wobble
-		look.x += cos(_laugh_time * Constants.CAMERA_LAUGHING_FREQUENCY * 0.5) * wobble
-	_apply_look(look)
-
-
 func _handle_movement(delta: float) -> void:
-	var move: Vector2 = _stick("move_left", "move_right", "move_forward", "move_back")
+	var move: Vector2 = stick("move_left", "move_right", "move_forward", "move_back")
 	if status.has(Constants.DebuffType.INVERTED):
 		move = -move
 	var on_ice: bool = status.has(Constants.DebuffType.ICE_SLIDE)
@@ -291,7 +222,7 @@ func _decelerate(delta: float, friction: float) -> void:
 
 func _handle_actions() -> void:
 	if Input.is_action_just_pressed(_action("jump")):
-		_jump()
+		jump()
 	for slot: int in Constants.ITEM_SLOT_COUNT:
 		if Input.is_action_just_pressed(_action(InputManager.ITEM_ACTIONS[slot])):
 			items.use_item(slot)
@@ -299,7 +230,8 @@ func _handle_actions() -> void:
 		items.use_superpower()
 
 
-func _jump() -> void:
+## Jump, mid-air jump, or (frozen) crack the ice.
+func jump() -> void:
 	if not controls_enabled:
 		return
 	if status.has(Constants.DebuffType.FROZEN):
@@ -363,7 +295,7 @@ func collect_gem(value: int, boost: bool = true) -> int:
 	var lives_before: int = GameManager.get_lives(player_id)
 	var gained: int = GameManager.add_gems(player_id, value, boost)
 	if GameManager.get_lives(player_id) > lives_before:
-		_life_popup("MSG_LIFE_GAINED_POP", ParticleConfigs.POPUP_GAIN_COLOR)
+		_life_popup("MSG_LIFE_GAINED_POP", PopupText.GAIN_COLOR)
 	if gained > 0:
 		AudioManager.play_sfx(AudioManager.SoundEffect.GEM_COLLECT)
 		ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * GEM_BURST_HEIGHT,
@@ -423,12 +355,12 @@ func take_hit() -> void:
 		return
 	status.grant_grace(PlayerStatus.Grace.LIFE, Constants.LIFE_LOSS_GRACE)
 	GameManager.lose_life(player_id)
-	_life_popup("MSG_LIFE_LOST_POP", ParticleConfigs.POPUP_LOSS_COLOR)
+	_life_popup("MSG_LIFE_LOST_POP", PopupText.LOSS_COLOR)
 
 
 ## Life popups float above the gem numbers so both stay readable.
 func _life_popup(key: String, color: Color) -> void:
-	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * LIFE_POPUP_HEIGHT_SCALE,
+	PopupText.spawn(get_parent(), global_position + Vector3.UP * PopupText.HEIGHT * LIFE_POPUP_HEIGHT_SCALE,
 		tr(key), color)
 
 
