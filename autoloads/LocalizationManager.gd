@@ -29,10 +29,19 @@ var _current_language: Language = Language.EN
 func _ready() -> void:
 	for path: String in TRANSLATIONS:
 		TranslationServer.add_translation(load(path) as Translation)
-	var saved: int = int(Settings.read(SETTINGS_SECTION).get("language", _current_language))
+	var saved: int = int(Settings.read(SETTINGS_SECTION).get("language", _system_language()))
 	if LOCALES.has(saved):
 		_current_language = saved as Language
 	TranslationServer.set_locale(LOCALES[_current_language])
+
+
+## First launch: the system's language when the game speaks it, else English.
+func _system_language() -> Language:
+	var code: String = OS.get_locale_language()
+	for lang: Language in LOCALES:
+		if LOCALES[lang] == code:
+			return lang
+	return Language.EN
 
 
 func set_language(lang: Language) -> void:
