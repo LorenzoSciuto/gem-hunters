@@ -93,7 +93,7 @@ func _prank(player: Player) -> void:
 	player.velocity.y = PRANK_LAUNCH_VELOCITY
 	player.status.apply_debuff(Constants.DebuffType.INVERTED, PRANK_CONFUSION)
 	player.notify("MSG_PRANK_BOX")
-	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
+	PopupText.spawn(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
 		tr("MSG_PRANK_POP"), PRANK_TEXT_COLOR)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.confetti_shower())
 	AudioManager.play_sfx(AudioManager.SoundEffect.FART_HORN)
@@ -115,7 +115,7 @@ func _give_powerup(player: Player) -> void:
 	if pickup_particles:
 		pickup_particles.restart()
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP, ParticleConfigs.confetti_shower(), OPEN_CONFETTI, OPEN_LIFETIME)
-	ParticleConfigs.spawn_popup_text(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
+	PopupText.spawn(get_parent(), global_position + Vector3.UP * TEXT_HEIGHT,
 		tr(ItemCatalog.NAME_KEYS[data.type]), ITEM_TEXT_COLOR)
 	AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
 

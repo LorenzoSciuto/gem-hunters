@@ -102,8 +102,8 @@ func _on_body_entered(body: Node3D) -> void:
 		rival.combat.spin_from_hit()
 		ParticleConfigs.spawn_burst(get_parent(), rival.global_position + Vector3.UP, ParticleConfigs.gem_lost_burst(), 40)
 		if lost[rival.player_id] > 0:
-			ParticleConfigs.spawn_popup_text(get_parent(), rival.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
-				"-%d" % lost[rival.player_id], ParticleConfigs.POPUP_LOSS_COLOR)
+			PopupText.spawn(get_parent(), rival.global_position + Vector3.UP * PopupText.HEIGHT,
+				"-%d" % lost[rival.player_id], PopupText.LOSS_COLOR)
 	finder.model.play_cheer(1.5)
 	ParticleConfigs.spawn_burst(get_parent(), global_position + Vector3.UP * FLOAT_HEIGHT,
 		ParticleConfigs.confetti_shower(), 80, 1.5)

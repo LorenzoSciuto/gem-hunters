@@ -230,8 +230,8 @@ func _hit_feedback(rival: Player, gems: int, stolen: bool) -> void:
 	ParticleConfigs.spawn_burst(world, player.global_position + Vector3.UP, ParticleConfigs.gem_collect_burst(),
 		WIN_SPARKLE_AMOUNT, HIT_BURST_LIFETIME)
 	# Higher than the loser's text so the two never overlap.
-	ParticleConfigs.spawn_popup_text(world, player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT * 1.5,
-		"+%d" % gems if stolen and gems > 0 else tr("MSG_HIT"), ParticleConfigs.POPUP_GAIN_COLOR)
+	PopupText.spawn(world, player.global_position + Vector3.UP * PopupText.HEIGHT * 1.5,
+		"+%d" % gems if stolen and gems > 0 else tr("MSG_HIT"), PopupText.GAIN_COLOR)
 	rival.combat.spin_from_hit()
 	rival.combat.show_loss(gems)
 	impact.emit(player.player_id, rival.player_id, gems)
@@ -249,5 +249,5 @@ func take_remote_hit(attacker_id: int, gems: int) -> void:
 func show_loss(gems: int) -> void:
 	ParticleConfigs.spawn_burst(player.get_parent(), player.global_position + Vector3.UP, ParticleConfigs.gem_lost_burst(),
 		LOSS_BURST_AMOUNT, HIT_BURST_LIFETIME)
-	ParticleConfigs.spawn_popup_text(player.get_parent(), player.global_position + Vector3.UP * ParticleConfigs.POPUP_HEIGHT,
-		"-%d" % gems if gems > 0 else tr("MSG_HIT_TAKEN"), ParticleConfigs.POPUP_LOSS_COLOR)
+	PopupText.spawn(player.get_parent(), player.global_position + Vector3.UP * PopupText.HEIGHT,
+		"-%d" % gems if gems > 0 else tr("MSG_HIT_TAKEN"), PopupText.LOSS_COLOR)
