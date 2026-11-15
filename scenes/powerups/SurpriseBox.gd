@@ -167,6 +167,8 @@ func _pick_weighted(favor_attacks: bool, favor_radar: bool, exclude: int) -> Pow
 ## Deactivate the box, wait respawn_time, relocate to a new position, then reactivate.
 func _start_respawn() -> void:
 	_is_active = false
+	# Only boxes waiting to be opened count for spacing and SpawnClearance.
+	remove_from_group(Constants.GROUP_SURPRISE_BOXES)
 	if visual_root:
 		visual_root.visible = false
 	set_deferred("monitoring", false)
@@ -175,46 +177,39 @@ func _start_respawn() -> void:
 		anim.stop()
 
 	await get_tree().create_timer(respawn_time, false).timeout
-	_relocate_to_new_spot()
+	while not _relocate_to_new_spot():
+		await get_tree().create_timer(SpawnClearance.RETRY_INTERVAL, false).timeout
 	_activate()
 
 
-## Selects a fresh, random spawn spot from the level's powerup_spawns markers.
-func _relocate_to_new_spot() -> void:
-	var spawns: Array[Node] = get_tree().get_nodes_in_group(Constants.GROUP_POWERUP_SPAWNS)
-	if spawns.is_empty():
-		return
-
-	# Gather other active surprise boxes to avoid spawning right on top of another
-	var other_boxes: Array[Node] = get_tree().get_nodes_in_group(Constants.GROUP_SURPRISE_BOXES)
-	var candidates: Array[Node] = []
-
-	for s in spawns:
-		if not (s is Node3D):
-			continue
-		var m_pos: Vector3 = (s as Node3D).global_position
-		# Check distance from currently active boxes
-		var too_close: bool = false
-		for b in other_boxes:
-			if b != self and (b as SurpriseBox).is_active():
-				if (b as Node3D).global_position.distance_to(m_pos) < MIN_BOX_SPACING:
-					too_close = true
-					break
-		if not too_close:
-			candidates.append(s)
-
-	var pool: Array[Node] = candidates if not candidates.is_empty() else spawns
-	var chosen: Vector3 = (pool[randi() % pool.size()] as Node3D).global_position
+## Moves to a random power-up spot clear of every pickup, prop and trap
+## (SpawnClearance) and MIN_BOX_SPACING from the other active boxes.
+## Returns false, without moving, while no spot is free.
+func _relocate_to_new_spot() -> bool:
+	var candidates: Array[Vector3] = []
+	for marker: Node in get_tree().get_nodes_in_group(Constants.GROUP_POWERUP_SPAWNS):
+		var pos: Vector3 = (marker as Node3D).global_position
+		if SpawnClearance.is_clear(get_tree(), pos, self) and not _near_active_box(pos):
+			candidates.append(pos)
+	if candidates.is_empty():
+		return false
+	var chosen: Vector3 = candidates.pick_random()
 	# Markers float at gem height; boxes sit on the floor.
 	global_position = Vector3(chosen.x, _initial_position.y, chosen.z)
+	return true
 
 
-func is_active() -> bool:
-	return _is_active
+func _near_active_box(pos: Vector3) -> bool:
+	for node: Node in get_tree().get_nodes_in_group(Constants.GROUP_SURPRISE_BOXES):
+		var box: SurpriseBox = node as SurpriseBox
+		if box != self and box.global_position.distance_to(pos) < MIN_BOX_SPACING:
+			return true
+	return false
 
 
 ## Restore the box to its active, visible state.
 func _activate() -> void:
+	add_to_group(Constants.GROUP_SURPRISE_BOXES)
 	if visual_root:
 		visual_root.visible = true
 	monitoring = true

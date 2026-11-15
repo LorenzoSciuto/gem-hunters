@@ -34,7 +34,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 - **Stylized look.**
   - Characters and interactive props use `ToonMaterials.get_material(color, outline)`, a `ShaderMaterial` on `shaders/stylized_lit.gdshader` whose outline is a dark shade of the object's colour. Level architecture uses it with outline 0.
   - Every surface shader includes `shaders/stylized_light.gdshaderinc` (soft ramp, glossy highlight, lit-side rim). Skies use `stylized_sky.gdshader`.
-  - Effects: particle bursts with `ParticleConfigs.spawn_burst(...)`, floating text with `PopupText.spawn(...)`, light pillars with `LightBeam.create(...)`.
+  - Effects: particle bursts with `ParticleConfigs.spawn_burst(...)`, floating text with `PopupText.spawn(...)` (popups that start together stack instead of overlapping), light pillars with `LightBeam.create(...)`.
 
 ## Architecture
 
@@ -99,7 +99,8 @@ The HUD shows gems, rank, zone, the goal bar and the clock, and wires its compon
 
 ### Gems, items and traps
 
-- `GemSpawner` keeps at most `MAX_GEMS_IN_WORLD` gems (fewer in survival), clear of props and traps. It also runs the golden gem, survival life gems and the once-per-match `ChaosGem`.
+- **Nothing spawns on top of something else.** Every gem joins `Constants.GROUP_PICKUPS`, and `SpawnClearance.is_clear()` keeps new gems and relocated gift boxes `SPAWN_CLEARANCE` away from pickups, boxes, props and traps. When no spot is free, the spawner waits and tries again.
+- `GemSpawner` keeps at most `MAX_GEMS_IN_WORLD` gems (fewer in survival). It also runs the golden gem, survival life gems and the once-per-match `ChaosGem`.
 - Loose gems (`GemLoose`) blink until they can be picked up, drift toward the nearest hunter, and can't go back to their dropper for `DROPPER_DELAY`.
 - `PowerUpData` (type + pool weight) feeds `SurpriseBox`, which favours attacks for the last player and the radar for anyone not leading.
 - Traps extend `TrapBase`: the victim loses `gems_stolen`, half go to the owner and the rest scatter. A bubble or shield absorbs a trap, and `TRAP_GRACE` stops chain-trapping.

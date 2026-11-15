@@ -31,6 +31,7 @@ var _taken: bool = false
 
 
 func _ready() -> void:
+	add_to_group(Constants.GROUP_PICKUPS)
 	collision_layer = 0
 	collision_mask = Constants.LAYER_PLAYERS
 	var shape: CollisionShape3D = CollisionShape3D.new()

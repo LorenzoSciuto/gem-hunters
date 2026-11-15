@@ -45,6 +45,7 @@ var _pickable: bool = false
 
 
 func _ready() -> void:
+	add_to_group(Constants.GROUP_PICKUPS)
 	_apply_material()
 	get_tree().create_timer(PICKUP_DELAY, false).timeout.connect(func() -> void:
 		_pickable = true
