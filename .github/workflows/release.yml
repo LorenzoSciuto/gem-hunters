@@ -42,12 +42,15 @@ jobs:
         run: godot --headless --path . --import
 
       - name: Export
+        env:
+          # wine (runs rcedit) refuses a HOME the container user doesn't own.
+          WINEPREFIX: /tmp/wine
         run: |
           mkdir -p build/${{ matrix.dir }}
           godot --headless --path . --export-release "${{ matrix.preset }}" 2>&1 | tee export.log
           test -s build/${{ matrix.dir }}/GemHunters*
           # The .exe must carry our icon and version info, not Godot's.
-          if grep -q "Resources Modification" export.log; then exit 1; fi
+          if grep -qE "Resources Modification|rcedit \(" export.log; then exit 1; fi
 
       - uses: actions/upload-artifact@v4
         with:
