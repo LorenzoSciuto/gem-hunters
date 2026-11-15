@@ -1,99 +1,124 @@
-# Gem Hunters: Tag & Trap
+<div align="center">
 
-A 2–4 player local split-screen 3D party game for kids 9+, made with **Godot 4.3** by Wennovate.
+# 💎 Gem Hunters: Tag & Trap
 
-Hunters race through a freshly generated themed maze, grab gems, open gift boxes for items and
-traps, and knock gems out of each other. English and Italian UI.
+**A couch party game for 2–4 players: grab gems, set traps, steal from your friends.**
 
-## How to play
+Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennovate**.
 
-- **Goal:** *Time Attack* (most gems when the clock hits zero) or *Gem Race* (first to the target).
-  Gems are worth 1, 3 or 5; the golden gem in the center is worth 10. In the final **frenzy** every
-  gem counts double.
-- **Survival:** everyone starts with 3 lives; stomps, items and superpowers cost one (3 s of
-  safety after each loss), bumps only cost gems. Every 10 gems buy a life, and pink life gems give one too (5 lives at most). Last hunter standing wins.
-- **Stomp:** jump on a rival's head to steal their gems. Just bumping into each other wins
-  nothing: both bounce apart and drop 3 gems on the ground. The leader wears a crown and a golden
-  light beam visible from anywhere in the maze.
-- **Items:** gift boxes fill up to 3 slots (a full inventory can't open boxes). Some boxes are
-  pranks, some hold two items. 15 items: traps (cake, water balloon, speaker, banana peel,
-  black box), attacks with light aim assist (spring glove, magnet, tickle ray, snowball, thunder)
-  and utilities (spring shoes, bubble, jackpot, warp, radar). Traps catch their owner too.
-- **Hunters:** 8 hunters, each with its own always-on ability and one of four superpowers you
-  trigger (recharging every 30 s): *Turbo* (Dashy: fastest; Sparkle: superpower ready sooner), *Ground Pound* (Bouncer:
-  highest jump + double jump; Bloom: triple jump), *Iron Shield* (Tanky: barely pushed, loses fewer
-  gems; Coco: effects last half as long), *Swap* with the leader (Tricky: robs 2 gems at a time;
-  Mimi: stomps steal 1 extra gem).
-- **Arenas:** Candy Kingdom, Enchanted Forest, Secret Garden, Roman Colosseum, Desert Temple,
-  Frozen Peaks. Each is split into four colored zones with a giant landmark plus the Golden Plaza,
-  and every screen names its zone so you can peek at where rivals are. Portals, map boards,
-  moving gates and trampolines keep routes unpredictable.
+[![Godot 4.3](https://img.shields.io/badge/Godot-4.3-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)
+![Players](https://img.shields.io/badge/players-2--4%20local-ff6f61)
+![Languages](https://img.shields.io/badge/languages-EN%20%7C%20IT-blueviolet)
 
-The in-game **How to play** screen explains all of this; **Controls** shows and remaps every button.
+[**⬇ Download**](../../releases/latest) · [How to play](#how-to-play) · [Controls](#controls) · [Run from source](#run-from-source) · [Contributing](CONTRIBUTING.md)
 
-## Controls
+![Four hunters racing through the Candy Kingdom](docs/screenshots/four-players.jpg)
 
-Player 1 plays with keyboard and mouse; players 2–4 need a gamepad.
+</div>
 
-| Action        | P1 keyboard + mouse          | Gamepad          |
-|---------------|------------------------------|------------------|
-| Move          | W A S D                      | Left stick       |
-| Look          | Mouse (or I J K L)           | Right stick      |
-| Jump          | Space / right click          | RB / RT          |
-| Items 1–3     | Q E R (wheel + left click)   | X A B            |
-| Superpower    | F (wheel + left click)       | Y                |
-| Camera view   | V                            | LB               |
-| Pause         | Esc                          | Start            |
+## Why you'll love it
 
-Gamepads go to P2, P3, P4 in connection order; P1 gets a pad only when every other player has one.
-Menus work with the pad too (A confirm, B back). **Controls** has a column per connected gamepad:
-each pad model keeps its own buttons (handy when two different pads are plugged in). Rebinds are
-saved to `user://controls.cfg`;
-the language and the last match setup (players, goal, arena) to `user://settings.cfg`, both
-restored at startup. `user://` is `~/.local/share/gem-hunters/` on Linux
-(`%APPDATA%\gem-hunters` on Windows).
+- 🎮 **2–4 players on one screen.** One on keyboard and mouse, everyone else on a gamepad. No accounts, no internet.
+- 🌍 **A new maze every match.** Six themed worlds, each with its own twist: candy trampolines, forest portals, garden sprinklers, Roman moving gates, desert quicksand and slippery winter ice.
+- 🎁 **15 items in gift boxes.** Cake traps, water balloons, banana peels, spring gloves, snowballs, thunder, warps, radar... and boxes that are just pranks.
+- 🦸 **8 hunters, 4 superpowers.** Each hunter has an always-on trait plus one superpower: Turbo, Ground Pound, Iron Shield or Swap with the leader.
+- 🏆 **3 ways to win.** *Time Attack*, *Gem Race* or *Survival*, with a double-gems **frenzy** for the final stretch.
+- 👨‍👩‍👧 **Made for kids 9+.** Bright, readable and silly. Hitting a rival makes them drop gems, never hurts anyone.
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/menu.jpg" alt="Main menu with a live arena preview"></td>
+    <td><img src="docs/screenshots/hunters.jpg" alt="Four players choosing their hunters"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/forest.jpg" alt="Two players in the Enchanted Forest next to a portal"></td>
+    <td><img src="docs/screenshots/survival.jpg" alt="Survival mode in the Frozen Peaks with lives shown as hearts"></td>
+  </tr>
+</table>
 
 ## Download
 
-Portable builds for Windows and Linux (x86_64) are on the
-[Releases](https://github.com/thegoodflow/gem-hunters/releases) page: no install needed.
+Grab the latest portable build from [**Releases**](../../releases/latest). There's nothing to install:
 
-- **Windows:** unzip `GemHunters-windows-x86_64.zip` and run `GemHunters.exe`.
-- **Linux:** `tar -xzf GemHunters-linux-x86_64.tar.gz` and run `./GemHunters.x86_64`.
+| Platform | Package | Run |
+|---|---|---|
+| Windows x86_64 | `GemHunters-windows-x86_64.zip` | unzip, then double-click `GemHunters.exe` |
+| Linux x86_64 | `GemHunters-linux-x86_64.tar.gz` | `tar -xzf GemHunters-linux-x86_64.tar.gz && ./GemHunters.x86_64` |
 
-Every pull request and master push builds both packages (Actions → *Build & release*); pushing a
-`v*` tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) publishes them as a release. Export
-presets live in `export_presets.cfg`.
+## How to play
 
-## Running from source
+- **Grab gems.** They're worth 1, 3 or 5. The golden gem in the center plaza is worth 10, and the once-per-match **Chaos Gem** halves every rival's gems.
+- **Jump on heads.** Landing on a rival steals their gems. Just bumping into each other wins nothing: you both bounce apart and drop 3 gems.
+- **Open gift boxes.** You get up to 3 item slots. Traps catch their owner too, and some boxes are pranks.
+- **Watch the crown.** The leader wears a crown and a golden light beam that everyone can see over the walls.
+- **Know your zone.** Every arena has four colored zones with giant landmarks around a Golden Plaza, and each screen names its zone, so a peek at a rival's screen tells you where they are.
 
-Godot 4.3 is required. The editor binary is not in the repository (it is over GitHub's file
-size limit); download **Godot 4.3 stable** (standard, not .NET) from
-<https://godotengine.org/download/archive/4.3-stable/> and either:
+| Mode | How to win |
+|---|---|
+| **Time Attack** | Most gems when the clock runs out |
+| **Gem Race** | First to the target (30, 50 or 80 gems) |
+| **Survival** | Everyone starts with 3 lives and every hit costs one. Every 10 gems buy a life (5 at most). Last hunter standing wins |
 
-- put it at `.tools/Godot_v4.3-stable_linux.x86_64`, or
-- set `GODOT_BIN=/path/to/godot`, or
-- have `godot4` / `godot` on your `PATH`.
+The in-game **How to play** screen covers everything, with pictures.
+
+## Controls
+
+Player 1 plays with keyboard and mouse. Players 2–4 each need a gamepad.
+
+| Action | Keyboard + mouse | Gamepad |
+|---|---|---|
+| Move | W A S D | Left stick |
+| Look | Mouse (or I J K L) | Right stick |
+| Jump | Space / right click | RB / RT |
+| Items 1–3 | Q E R (or wheel + left click) | X A B |
+| Superpower | F (or wheel + left click) | Y |
+| Camera view | V | LB |
+| Pause | Esc | Start |
+
+- Gamepads go to P2, P3 and P4 in the order you connect them. P1 gets a pad only when everyone else already has one.
+- The menus work with a pad too (A to confirm, B to go back).
+- **Controls** in the main menu remaps every button, with a separate layout for each gamepad model.
+- Settings are saved to `~/.local/share/gem-hunters/` on Linux and `%APPDATA%\gem-hunters` on Windows.
+
+## Run from source
+
+1. Install **Godot 4.3 stable** (the standard build, not .NET) from the [Godot archive](https://godotengine.org/download/archive/4.3-stable/).
+2. Clone this repository and launch:
 
 ```bash
-./start.sh                                   # launch (extra args go to Godot)
-./start.sh --windowed --resolution 1600x900  # windowed
-godot --path . -e                            # open the editor
-godot --headless --path . --import           # re-import (surfaces parse/load errors)
+git clone <this-repo-url> gem-hunters
+cd gem-hunters
+./start.sh                                   # first run imports assets, then starts the game
+./start.sh --windowed --resolution 1600x900  # extra arguments go to Godot
 ```
+
+`start.sh` finds Godot in `.tools/Godot_v4.3-stable_linux.x86_64`, then in `$GODOT_BIN`, then as `godot4` or `godot` on your `PATH`. On Windows or macOS, open `project.godot` in the Godot editor and press **F5**.
+
+To make your own builds, use the export presets in `export_presets.cfg` (Linux + Windows, a single portable file each). CI builds both on every pull request, and a `v*` tag publishes a release.
 
 ## Project layout
 
 ```
-autoloads/    Constants, GameManager (scores, state, clock), InputManager, Audio, Localization
-scenes/main/  Main.tscn + SplitScreenManager (match composition root)
-scenes/level/ MazeLevel (generated arenas), portals, map boards, moving gates, trampolines
-scenes/player/ Player, shared CharacterModel
-scenes/powerups/, scenes/traps/  gift boxes, projectiles, traps
-scenes/ui/    menus, HUD, character selection, How to play, Controls
-resources/    CharacterData, PowerUpData and LevelConfig .tres files
-assets/       UI icons and splash, audio, localization/strings.csv (en, it)
+autoloads/       global singletons: Constants, GameManager (match state, scores, lives), InputManager, ...
+scenes/main/     Main.tscn + SplitScreenManager, which assembles a match
+scenes/level/    procedural arenas: MazeGrid (data) → MazeLevel (walls/floor) → MazeScenery + MazeProps
+scenes/player/   Player body + Look / Status / Items / Combat components, shared CharacterModel
+scenes/ui/       menus, HUD and its components, character selection, How to play, Controls
+scenes/powerups/ gift boxes and projectiles      scenes/traps/  trap scenes (all extend TrapBase)
+resources/       data: characters, power-ups and arenas as .tres files, the UI theme
+assets/          fonts, sounds, icons, localization/strings.csv (English + Italian)
 ```
 
-Coding rules (English-only code, localization keys for UI text, no magic numbers, static typing,
-theme-only UI styling) are in [GEMINI.md](GEMINI.md); architecture notes are in [CLAUDE.md](CLAUDE.md).
+The architecture and coding rules are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it explains how the code is organized and the few rules every change follows. Translations are a great first contribution, since every string lives in `assets/localization/strings.csv`.
+
+## Credits & license
+
+Made by **Wennovate**. Code and game assets are released under the [MIT License](LICENSE).
+
+Fonts: [Nunito](https://fonts.google.com/specimen/Nunito) and [Lilita One](https://fonts.google.com/specimen/Lilita+One), both under the SIL Open Font License (see `assets/fonts/`). Built with the [Godot Engine](https://godotengine.org/).
