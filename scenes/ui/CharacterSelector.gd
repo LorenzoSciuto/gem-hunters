@@ -7,6 +7,7 @@
 ##   Back (pad B, Esc or right click for P0, or the
 ##   on-screen button): unlocks a locked choice, otherwise leaves to the menu.
 extends Control
+class_name CharacterSelector
 
 signal character_locked(player_id: int, data: CharacterData)
 signal character_previewed(player_id: int, data: CharacterData)

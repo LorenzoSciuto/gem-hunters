@@ -6,7 +6,7 @@
 ##           → spawn markers and gameplay props (MazeProps).
 ##
 ## The maze is a grid of square cells centered on the origin. Walls live on cell
-## edges: _grid.east[i] is the wall on the +X side of cell i, _grid.south[i] the wall on
+## edges: grid.east[i] is the wall on the +X side of cell i, grid.south[i] the wall on
 ## its +Z side. The perimeter is always closed.
 ##
 ## Every arena is split into four quadrant zones plus the center plaza. Each
@@ -48,7 +48,8 @@ const CENTER_FLOOR_LIFT: float = 0.02
 @export var config: LevelConfig
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
-var _grid: MazeGrid = null
+## The maze as data: bots find their way on it.
+var grid: MazeGrid = null
 var _cs: float = 0.0
 
 var _batch: MeshBatcher = MeshBatcher.new()
@@ -60,11 +61,11 @@ func _ready() -> void:
 		push_error("MazeLevel: no LevelConfig assigned.")
 		return
 	_rng.randomize()
-	_grid = MazeGrid.new(config, _rng)
-	_grid.generate(config)
-	_cs = _grid.cell_size
+	grid = MazeGrid.new(config, _rng)
+	grid.generate(config)
+	_cs = grid.cell_size
 
-	_scenery = MazeScenery.new(self, _grid, config, _rng, _batch)
+	_scenery = MazeScenery.new(self, grid, config, _rng, _batch)
 
 	ArenaEnvironment.build(self, config)
 	_build_floor()
@@ -75,26 +76,26 @@ func _ready() -> void:
 	_scenery.build_scenery()
 	_scenery.build_decorations()
 	_batch.flush(self)
-	MazeProps.new(self, _grid, config, _rng).place()
+	MazeProps.new(self, grid, config, _rng).place()
 
 
 func _build_gates() -> void:
 	var t: float = config.wall_thickness
-	for edge: Array in _grid.gate_edges:
+	for edge: Array in grid.gate_edges:
 		var gate: MovingGate = MovingGate.new()
 		var along_x: bool = edge[0].x == edge[1].x  # cells stacked in Z: the wall runs along X
 		gate.gate_size = Vector3(_cs - t, config.wall_height, t * 0.8) if along_x \
 			else Vector3(t * 0.8, config.wall_height, _cs - t)
 		gate.color = config.accent_colors[0]
-		gate.position = (_grid.cell_pos(edge[0]) + _grid.cell_pos(edge[1])) * 0.5
+		gate.position = (grid.cell_pos(edge[0]) + grid.cell_pos(edge[1])) * 0.5
 		add_child(gate)
 
 
 # ─── Environment & floor ──────────────────────────────────────────────────
 
 func _build_floor() -> void:
-	var width: float = _grid.cols * _cs
-	var depth: float = _grid.rows * _cs
+	var width: float = grid.cols * _cs
+	var depth: float = grid.rows * _cs
 
 	var body: StaticBody3D = StaticBody3D.new()
 	body.collision_layer = Constants.LAYER_WORLD
@@ -163,13 +164,13 @@ static func is_outside(pos: Vector3, level: LevelConfig) -> bool:
 
 ## Merge consecutive wall edges on each grid line into long segments.
 func _build_walls() -> void:
-	var half_w: float = _grid.cols * _cs * 0.5
-	var half_d: float = _grid.rows * _cs * 0.5
+	var half_w: float = grid.cols * _cs * 0.5
+	var half_d: float = grid.rows * _cs * 0.5
 	# Lines of constant X (walls running along Z).
-	for line: int in range(_grid.cols + 1):
+	for line: int in range(grid.cols + 1):
 		var run_start: int = -1
-		for j: int in range(_grid.rows + 1):
-			var solid: bool = j < _grid.rows and (line == 0 or line == _grid.cols or _grid.east[_grid.idx(line - 1, j)] == 1)
+		for j: int in range(grid.rows + 1):
+			var solid: bool = j < grid.rows and (line == 0 or line == grid.cols or grid.east[grid.idx(line - 1, j)] == 1)
 			if solid and run_start < 0:
 				run_start = j
 			elif not solid and run_start >= 0:
@@ -179,10 +180,10 @@ func _build_walls() -> void:
 				_add_wall(Vector3(x, 0.0, (z0 + z1) * 0.5), z1 - z0, false)
 				run_start = -1
 	# Lines of constant Z (walls running along X).
-	for line: int in range(_grid.rows + 1):
+	for line: int in range(grid.rows + 1):
 		var run_start: int = -1
-		for i: int in range(_grid.cols + 1):
-			var solid: bool = i < _grid.cols and (line == 0 or line == _grid.rows or _grid.south[_grid.idx(i, line - 1)] == 1)
+		for i: int in range(grid.cols + 1):
+			var solid: bool = i < grid.cols and (line == 0 or line == grid.rows or grid.south[grid.idx(i, line - 1)] == 1)
 			if solid and run_start < 0:
 				run_start = i
 			elif not solid and run_start >= 0:
@@ -265,18 +266,18 @@ func _add_candy_wall(center: Vector3, size: Vector3) -> void:
 ## in the forest where every vertex gets a tree to thicken the canopy.
 func _build_posts() -> void:
 	var dirs: Dictionary = {}  # grid vertex → bitmask of wall directions (1 +X, 2 -X, 4 +Z, 8 -Z)
-	for j: int in _grid.rows:
-		for i: int in _grid.cols:
+	for j: int in grid.rows:
+		for i: int in grid.cols:
 			if i == 0:
 				_mark_edge(dirs, Vector2i(i, j), Vector2i(i, j + 1))
-			if i == _grid.cols - 1 or _grid.east[_grid.idx(i, j)] == 1:
+			if i == grid.cols - 1 or grid.east[grid.idx(i, j)] == 1:
 				_mark_edge(dirs, Vector2i(i + 1, j), Vector2i(i + 1, j + 1))
 			if j == 0:
 				_mark_edge(dirs, Vector2i(i, j), Vector2i(i + 1, j))
-			if j == _grid.rows - 1 or _grid.south[_grid.idx(i, j)] == 1:
+			if j == grid.rows - 1 or grid.south[grid.idx(i, j)] == 1:
 				_mark_edge(dirs, Vector2i(i, j + 1), Vector2i(i + 1, j + 1))
-	var half_w: float = _grid.cols * _cs * 0.5
-	var half_d: float = _grid.rows * _cs * 0.5
+	var half_w: float = grid.cols * _cs * 0.5
+	var half_d: float = grid.rows * _cs * 0.5
 	for v: Vector2i in dirs:
 		var straight: bool = dirs[v] == 3 or dirs[v] == 12
 		if straight and config.style != LevelConfig.Style.FOREST:

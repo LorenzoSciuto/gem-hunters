@@ -11,7 +11,7 @@ extends Node
 ## Maximum number of players supported in a single match.
 const MAX_PLAYERS: int = 4
 
-## Minimum number of players required to start a match.
+## Minimum number of players (humans + bots) required to start a match.
 const MIN_PLAYERS: int = 2
 
 ## Pastel/vivid player palette (Fall Guys / Splatoon style).

@@ -40,7 +40,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 
 ## Architecture
 
-**Scene flow.** `MainMenu.tscn` → `GameManager.configure(players, mode, target, level_config)` → `scenes/main/Main.tscn` → `GameOverScreen.tscn`. *Rematch* reuses `GameManager.chosen_characters`; *Change hunters* clears them and reopens selection. In character selection, Back (pad B, Esc / right click for P1, or the on-screen button) unlocks a locked choice, or otherwise returns to the main menu. An unlock during `READY_DELAY` cancels the pending start.
+**Scene flow.** `MainMenu.tscn` → `GameManager.configure(players, mode, target, level_config, bots)` → `scenes/main/Main.tscn` → `GameOverScreen.tscn`. *Rematch* reuses `GameManager.chosen_characters`; *Change hunters* clears them and reopens selection. In character selection, Back (pad B, Esc / right click for P1, or the on-screen button) unlocks a locked choice, or otherwise returns to the main menu. An unlock during `READY_DELAY` cancels the pending start.
 
 ### Autoloads (`autoloads/`)
 
@@ -48,6 +48,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 - `GameManager`: **the only owner of scores and lives**.
   - State machine LOBBY → COUNTDOWN (3-2-1) → PLAYING ⇄ PAUSED → GAME_OVER. Also owns the clock, `game_time()`, win conditions, the frenzy and the leader.
   - `add_gems` / `remove_gems` return the amount applied. Transfers pass `boost=false` so the frenzy never creates gems.
+  - Bots: the last `bots` player_ids are computer-driven (`is_bot`, `get_num_humans`). At least one human always plays.
   - Survival: `lose_life` / `add_life` / `refill_lives`. `get_standings()` ranks survivors first.
   - Collector: `collections` holds each hunter's colours and the score mirrors its size. `add_gems(..., color)` adds a colour gem, or a wild one (-1: loose, stolen, jackpot) that fills a random missing colour. Every transfer moves one gem. `take_golden_gem` ends the match for a full collection and empties every collection otherwise.
   - Signals: `countdown_tick`, `timer_updated`, `score_updated`, `leader_changed`, `frenzy_started`, `match_ended`, `lives_changed`, `player_eliminated`, `collection_completed`, `collections_reset`, `chaos_gem_appeared`, `chaos_gem_taken`.
@@ -64,6 +65,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 
 `scenes/main/SplitScreenManager.gd` is the composition root. It builds the arena (`MazeLevel` + `GemSpawner`, the spawner *after* the level), spawns the players, one `CameraRig` per `SubViewport`, the HUDs and the 3-player overview (`Scoreboard`), then shows the character selectors and calls `GameManager.start_match()`.
 
+- Only humans get a screen, a camera and a HUD (one human plays full screen). A bot gets a `PlayerBot` child and a random hunter.
 - In 3-4 player matches, each quarter view renders its 2D layer on a larger virtual canvas (`QUARTER_UI_SCALE`), so HUDs are smaller.
 - In survival, an eliminated hunter's camera follows a survivor.
 - `MatchOverlay` shows the countdown and the frenzy, and owns the pause menu.
@@ -72,7 +74,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 
 Arenas come from `LevelConfig` resources in `resources/levels/*.tres`. Each one sets a layout (CLASSIC/ROOMS/RINGS), a style (CANDY/FOREST/GARDEN/ROMAN/EGYPT/WINTER), the grid, colours, sky/fog and prop counts. `scenes/level/` turns them into geometry:
 
-- `MazeGrid`: the maze as data. Walls sit on cell edges. It handles layout generation, the plaza, connectivity repair, and `gate_edges` for `MovingGate`s (picked after repair, so a closed gate never cuts the maze).
+- `MazeGrid`: the maze as data. Walls sit on cell edges. `cell_at()` and `path()` (breadth-first) are what bots navigate with. It handles layout generation, the plaza, connectivity repair, and `gate_edges` for `MovingGate`s (picked after repair, so a closed gate never cuts the maze).
 - `MazeLevel`: the orchestrator. It builds the floor (tinted per zone), merged wall segments, gates and post positions, and answers `zone_of()` / `is_outside()` (4 quadrant zones + the center plaza; the HUD names them).
 - `MazeScenery`: themed set dressing. Landmarks, posts, trees, the scenery ring and corner decorations.
 - `MazeProps`: everything players interact with. Spawn/gem/power-up markers, trampolines in dead ends, gift boxes, sprinklers, ice patches, `Portal` pairs, `MapBeacon`s, and the golden return `Trampoline` outside the outer wall. All props join `Constants.GROUP_PROPS`.
@@ -88,6 +90,8 @@ A new theme is a new `.tres`, plus a `Style` branch in `MazeLevel` / `MazeScener
 - `Status` (`PlayerStatus`): debuffs (`apply_debuff`, `has`), stun, buffs (`grant(Buff.BUBBLE/SHIELD/SHOES/TURBO)`, `absorb_hit()`), grace periods, the frozen struggle. It shows the ice block, dizzy stars and bubble, and emits the HUD's debuff signals.
 - `Items` (`PlayerItems`): `ITEM_SLOT_COUNT` slots (`equip`, `use_item`), the character superpower and its recharge. Projectile/trap scenes are `@export`s, **not** preloads: those scenes reference `Player`, so a preload would create a load cycle.
 - `Combat` (`PlayerCombat`): bumps (both players drop `BUMP_GEMS`, never a life), stomps (the only contact that wins), robbing frozen/confused rivals, the ground pound. Every hit goes through `_hit_feedback()`.
+
+A bot's hunter also has a `PlayerBot` child. It picks the nearest gem or gift box, follows `MazeGrid.path()` to it by pressing its own `p{N}_move_forward` action (so debuffs and stuns apply as to a human), jumps when stuck or next to a rival, and fires items and the superpower at rivals nearby.
 
 The shared `CharacterModel.tscn` is the visual body, also used in the selection preview. It is procedurally animated (`set_motion`, `play_hurt` / `play_squash` / `play_cheer`). A character's traits are data on its `CharacterData`, and its `superpower` picks one of four. **A new character** needs:
 

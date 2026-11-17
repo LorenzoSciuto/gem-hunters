@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-"Gem Hunters: Tag & Trap" by Wennovate: a 2–4 player local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus), for kids 9+.
+"Gem Hunters: Tag & Trap" by Wennovate: a 1–4 player (with optional bots) local split-screen 3D party game in **Godot 4.3** (GDScript, Forward Plus), for kids 9+.
 
 The rules and the architecture are in @CONTRIBUTING.md. Follow them on every change and update that file when the structure changes. The player-facing overview is in README.md.
 

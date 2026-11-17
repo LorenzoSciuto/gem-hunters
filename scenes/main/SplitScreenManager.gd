@@ -3,6 +3,7 @@
 ##
 ##   _ready() → build arena + gem spawner → spawn players → cameras → HUDs
 ##            → overview panel (3P) → character selection (or reuse on rematch)
+##            (bots get a PlayerBot and a random hunter, but no screen or HUD)
 ##            → GameManager countdown → PLAYING → match_ended → GameOverScreen
 extends Node3D
 
@@ -40,7 +41,9 @@ const QUARTER_UI_SCALE: float = 0.68
 	$ViewportGrid/SVContainer2/SubViewport2, $ViewportGrid/SVContainer3/SubViewport3,
 ]
 
+var _level: MazeLevel = null
 var _players: Array[Player] = []
+## One per human, indexed by player_id (humans are the first player_ids).
 var _huds: Array[CanvasLayer] = []
 var _selectors: Array[Control] = []
 var _cameras: Array[CameraRig] = []
@@ -53,7 +56,7 @@ func _ready() -> void:
 	_build_arena()
 	InputManager.auto_configure_devices()
 	var count: int = GameManager.get_num_players()
-	_configure_layout(count)
+	_configure_layout(GameManager.get_num_humans())
 	_spawn_players(count)
 	_bind_huds()
 	_setup_overview_panel()
@@ -75,20 +78,21 @@ func _ready() -> void:
 func _build_arena() -> void:
 	if GameManager.level_config == null:
 		GameManager.level_config = load(Constants.LEVEL_CONFIGS[0]) as LevelConfig
-	var level: MazeLevel = MazeLevel.new()
-	level.config = GameManager.level_config
-	world.add_child(level)
+	_level = MazeLevel.new()
+	_level.config = GameManager.level_config
+	world.add_child(_level)
 	# The spawner reads the level's gem markers in _ready, so it must come after.
 	world.add_child(GEM_SPAWNER_SCENE.instantiate())
 
 
-## 2 players: side by side. 3–4 players: 2×2 grid (slot 4 is the overview in 3P),
-## with the 2D layer of each quarter rendered on a larger virtual canvas and
-## scaled down (anchors keep working; the 3D view is unaffected).
+## One screen per human. 1: full screen. 2: side by side. 3–4: 2×2 grid (slot 4
+## is the overview in 3P), with the 2D layer of each quarter rendered on a
+## larger virtual canvas and scaled down (anchors keep working; the 3D view is
+## unaffected).
 func _configure_layout(num_players: int) -> void:
-	viewport_grid.columns = 2
+	viewport_grid.columns = mini(num_players, 2)
 	for i: int in SLOT_COUNT:
-		_sv_containers[i].visible = num_players > 2 or i < 2
+		_sv_containers[i].visible = num_players > 2 or i < num_players
 		if num_players > 2:
 			var viewport: SubViewport = _subviewports[i]
 			viewport.size_2d_override_stretch = true
@@ -106,6 +110,11 @@ func _spawn_players(count: int) -> void:
 		player.global_rotation = Vector3(0.0, spawn.global_rotation.y, 0.0)
 		player.initialize(i, Constants.PLAYER_COLORS[i])
 		_players.append(player)
+		if GameManager.is_bot(i):
+			var bot: PlayerBot = PlayerBot.new()
+			bot.level = _level
+			player.add_child(bot)
+			continue
 
 		var viewport: SubViewport = _subviewports[i]
 		viewport.world_3d = get_viewport().world_3d
@@ -119,6 +128,9 @@ func _spawn_players(count: int) -> void:
 func _bind_huds() -> void:
 	for i: int in _players.size():
 		var player: Player = _players[i]
+		player.combat.impact.connect(_on_impact)
+		if GameManager.is_bot(i):
+			continue
 		var hud: CanvasLayer = HUD_SCENE.instantiate() as CanvasLayer
 		_subviewports[i].add_child(hud)
 		hud.setup(player, Constants.PLAYER_COLORS[i])
@@ -131,7 +143,6 @@ func _bind_huds() -> void:
 		player.items.items_stripped.connect(hud.show_items_stripped)
 		player.items.selection_changed.connect(hud.update_selection)
 		player.map_reveal_requested.connect(hud.show_map)
-		player.combat.impact.connect(_on_impact)
 		player.status.screen_effect_requested.connect(hud.show_screen_effect)
 		player.status.debuff_cleared.connect(hud.clear_screen_effect)
 		player.notice_requested.connect(hud.show_notice)
@@ -141,7 +152,7 @@ func _bind_huds() -> void:
 
 ## In 3-player mode the spare slot shows a top-down view and the live standings.
 func _setup_overview_panel() -> void:
-	if _players.size() != 3:
+	if GameManager.get_num_humans() != 3:
 		return
 	var viewport: SubViewport = _subviewports[3]
 	viewport.world_3d = get_viewport().world_3d
@@ -154,8 +165,14 @@ func _setup_overview_panel() -> void:
 
 # ─── Character selection ──────────────────────────────────────────────────
 
+## Humans pick their hunter; every bot gets a random one straight away.
 func _setup_character_selectors() -> void:
 	for i: int in _players.size():
+		if GameManager.is_bot(i):
+			var pick: CharacterData = CharacterSelector.CHARACTERS.pick_random()
+			_players[i].apply_character_data(pick)
+			GameManager.chosen_characters[i] = pick
+			continue
 		var selector: Control = CHARACTER_SELECTOR_SCENE.instantiate() as Control
 		_sv_containers[i].add_child(selector)
 		selector.setup(i, Constants.PLAYER_COLORS[i], GameManager.chosen_characters.get(i))
@@ -224,17 +241,19 @@ func _on_view_changed(pid: int, first_person: bool) -> void:
 
 
 func _on_impact(attacker_id: int, victim_id: int, gems: int) -> void:
-	if attacker_id != PlayerCombat.NO_ATTACKER:
+	if attacker_id != PlayerCombat.NO_ATTACKER and not GameManager.is_bot(attacker_id):
 		_cameras[attacker_id].shake(ATTACKER_SHAKE)
 		_huds[attacker_id].show_impact(true, gems)
-	_cameras[victim_id].shake(VICTIM_SHAKE)
-	_huds[victim_id].show_impact(false, gems)
+	if not GameManager.is_bot(victim_id):
+		_cameras[victim_id].shake(VICTIM_SHAKE)
+		_huds[victim_id].show_impact(false, gems)
 
 
 ## Survival: the knocked-out hunter disappears and their screen follows a survivor.
 func _on_player_eliminated(pid: int) -> void:
 	_players[pid].eliminate()
-	_huds[pid].show_eliminated()
+	if not GameManager.is_bot(pid):
+		_huds[pid].show_eliminated()
 	_retarget_spectators()
 
 
@@ -247,9 +266,9 @@ func _retarget_spectators() -> void:
 			break
 	if survivor == null:
 		return
-	for player: Player in _players:
-		if not GameManager.is_alive(player.player_id):
-			_cameras[player.player_id].set_target(survivor.get_camera_target())
+	for pid: int in _cameras.size():
+		if not GameManager.is_alive(pid):
+			_cameras[pid].set_target(survivor.get_camera_target())
 
 
 func _on_leader_changed(leader_id: int) -> void:
@@ -276,10 +295,11 @@ func _on_match_ended(_results: Array) -> void:
 	for player: Player in _players:
 		var pid: int = player.player_id
 		var view: Node3D = player.get_camera_target()
-		_cameras[pid].set_target(view)
 		if winner_id >= 0:
 			player.play_finale(pid == winner_id, view.global_position)
-		_huds[pid].show_result(winner_id, WINNER_DISPLAY_DURATION)
+		if not GameManager.is_bot(pid):
+			_cameras[pid].set_target(view)
+			_huds[pid].show_result(winner_id, WINNER_DISPLAY_DURATION)
 	AudioManager.play_sfx(AudioManager.SoundEffect.MATCH_END)
 	await get_tree().create_timer(WINNER_DISPLAY_DURATION).timeout
 	get_tree().change_scene_to_file(GAME_OVER_SCENE)
