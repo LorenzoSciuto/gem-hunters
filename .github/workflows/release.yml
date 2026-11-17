@@ -1,7 +1,12 @@
-# Builds Windows and Linux packages (installer + portable). Runs on its own
-# only for master pushes: a version (config/version in project.godot) with no
-# release yet is tagged v<version> and published. Any branch can be built by
-# hand (Actions > Build & release > Run workflow); manual runs never publish.
+# Builds Windows and Linux packages (installer + portable) and the web build.
+# Runs on its own only for master pushes: each one is a new version (see the
+# version job), tagged v<version> and published as a GitHub Release, and the
+# web build goes live on GitHub Pages (see deploy-web).
+# Any branch can be built by hand (Actions > Build & release > Run workflow);
+# manual runs never publish or deploy.
+#
+# Actions and the build image are pinned to a commit / digest, so a moved tag
+# can't change what builds the game. Update the hash together with the comment.
 name: Build & release
 
 on:
@@ -9,14 +14,44 @@ on:
     branches: [master]
   workflow_dispatch:
 
+# master: one run at a time, in order, so the versions count up. A branch: a
+# newer run replaces the one still going.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+# Least privilege: a job that writes asks for it.
+permissions:
+  contents: read
+
 env:
   GODOT_VERSION: "4.3"
 
 jobs:
+  # The version is MAJOR.MINOR.PATCH. MAJOR.MINOR are bumped by hand in
+  # config/version of project.godot (its PATCH is not read). PATCH counts by
+  # itself: one more than the last tag v<MAJOR.MINOR>.*, so every push to
+  # master is a new version, stamped into the game it exports.
+  version:
+    name: Next version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - id: read
+        run: |
+          v=$(sed -n 's/^config\/version="\(.*\)"$/\1/p' project.godot)
+          echo "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "::error::project.godot version '$v' is not MAJOR.MINOR.PATCH"; exit 1; }
+          base=${v%.*}
+          last=$(git ls-remote --tags origin "refs/tags/v$base.*" | sed -n "s/.*refs\/tags\/v$base\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
+          echo "version=$base.$(( ${last:--1} + 1 ))" >> "$GITHUB_OUTPUT"
+
   export:
     name: Export ${{ matrix.preset }}
+    needs: version
     runs-on: ubuntu-latest
-    container: barichello/godot-ci:4.3
+    container: barichello/godot-ci:4.3@sha256:8d3a9fc683fcaa5b7d8b1c90fa94318402ebb00edeb5f6e2df4bac46665b98ff
     strategy:
       matrix:
         include:
@@ -24,8 +59,10 @@ jobs:
             dir: linux
           - preset: Windows
             dir: windows
+          - preset: Web
+            dir: web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # The image keeps templates and editor settings (rcedit + wine paths, used
       # to write the icon and version info into the .exe) under /root, but
@@ -35,6 +72,11 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates ~/.config
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/
           cp -r /root/.config/godot ~/.config/
+
+      - name: Stamp the version
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: sed -i "s/^config\/version=.*/config\/version=\"$VERSION\"/" project.godot
 
       - name: Import assets
         run: godot --headless --path . --import
@@ -47,55 +89,58 @@ jobs:
         run: |
           mkdir -p build/${{ matrix.dir }}
           godot --headless --path . --export-release "${{ matrix.preset }}"
-          test -s build/${{ matrix.dir }}/GemHunters*
+          ls build/${{ matrix.dir }}/GemHunters* build/${{ matrix.dir }}/index.wasm 2>/dev/null | grep -q .
           # The .exe must carry our icon and version info (UTF-16 "Wennovate"), not Godot's.
           if [ "${{ matrix.dir }}" = windows ]; then
             grep -qaP 'W\x00e\x00n\x00n\x00o\x00v\x00a\x00t\x00e' build/windows/GemHunters.exe \
               || { echo "GemHunters.exe still has Godot's icon and metadata"; exit 1; }
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: build-${{ matrix.dir }}
           path: build/${{ matrix.dir }}
 
   package-linux:
     name: Package Linux (.deb + portable)
-    needs: export
+    needs: [version, export]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: build-linux
           path: build/linux
       - name: Build packages
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          VERSION="$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)"
           mkdir -p dist
           chmod +x build/linux/GemHunters.x86_64
           cp README.md LICENSE build/linux/
           tar -czf dist/GemHunters-linux-x86_64-portable.tar.gz -C build/linux .
           installer/linux/build-deb.sh build/linux/GemHunters.x86_64 "$VERSION" dist/GemHunters-linux-x86_64.deb
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: packages-linux
           path: dist/*
 
   package-windows:
     name: Package Windows (installer + portable)
-    needs: export
+    needs: [version, export]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: build-windows
           path: build/windows
       - name: Build packages
         shell: pwsh
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          $version = (Select-String -Path project.godot -Pattern '^config/version="(.*)"').Matches[0].Groups[1].Value
+          $version = $env:VERSION
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item README.md, LICENSE build/windows/
           Compress-Archive -Path build/windows/* -DestinationPath dist/GemHunters-windows-x86_64-portable.zip
@@ -103,21 +148,45 @@ jobs:
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
           & $iscc "/DAppVersion=$version" "/DBuildDir=$PWD\build\windows" "/DOutputDir=$PWD\dist" installer\windows\gem-hunters.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: packages-windows
           path: dist/*
 
+  # Publishes the web build on GitHub Pages (Settings > Pages > Source: GitHub
+  # Actions). No server and no secrets: the job only gets a short-lived token.
+  deploy-web:
+    name: Deploy web build to GitHub Pages
+    needs: export
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: build-web
+          path: build/web
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: build/web
+      - id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
   release:
     name: Tag & publish release
-    needs: [package-linux, package-windows]
+    needs: [version, package-linux, package-windows]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: packages-*
           path: dist
@@ -125,10 +194,5 @@ jobs:
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="v$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists: bump config/version in project.godot to publish a new one."
-            exit 0
-          fi
-          gh release create "$TAG" dist/* --target "$GITHUB_SHA" --title "Gem Hunters $TAG" --generate-notes
+          TAG: v${{ needs.version.outputs.version }}
+        run: gh release create "$TAG" dist/* --target "$GITHUB_SHA" --title "Gem Hunters $TAG" --generate-notes

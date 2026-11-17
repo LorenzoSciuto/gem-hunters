@@ -28,6 +28,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file(MATCH_SCENE))
 	menu_btn.pressed.connect(_on_menu_pressed)
 	quit_btn.pressed.connect(get_tree().quit)
+	quit_btn.visible = not OS.has_feature("web")  # A browser tab can't be quit from inside.
 	_display_results()
 	rematch_btn.grab_focus()
 

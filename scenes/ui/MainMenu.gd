@@ -51,6 +51,7 @@ func _ready() -> void:
 
 	start_btn.pressed.connect(_on_start_pressed)
 	quit_btn.pressed.connect(get_tree().quit)
+	quit_btn.visible = not OS.has_feature("web")  # A browser tab can't be quit from inside.
 	lang_btn.pressed.connect(_on_lang_pressed)
 	controls_btn.pressed.connect(_show_controls.bind(true))
 	help_btn.pressed.connect(help_dialog.open)

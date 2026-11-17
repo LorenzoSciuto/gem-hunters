@@ -26,6 +26,7 @@ func _ready() -> void:
 	restart_button.pressed.connect(_on_restart_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
+	quit_button.visible = not OS.has_feature("web")  # A browser tab can't be quit from inside.
 
 
 ## [param seconds_left] 3, 2, 1 shows the number; 0 shows "GO!" then hides.
