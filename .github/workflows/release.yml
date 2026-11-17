@@ -47,9 +47,20 @@ jobs:
           last=$(git ls-remote --tags origin "refs/tags/v$base.*" | sed -n "s/.*refs\/tags\/v$base\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
           echo "version=$base.$(( ${last:--1} + 1 ))" >> "$GITHUB_OUTPUT"
 
+  # The headless checks of tests/run.sh: the import (unused code and untyped
+  # declarations are script errors) and the test scripts. Nothing is exported,
+  # released or deployed when they fail.
+  check:
+    name: Checks
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.3@sha256:8d3a9fc683fcaa5b7d8b1c90fa94318402ebb00edeb5f6e2df4bac46665b98ff
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: tests/run.sh
+
   export:
     name: Export ${{ matrix.preset }}
-    needs: version
+    needs: [version, check]
     runs-on: ubuntu-latest
     container: barichello/godot-ci:4.3@sha256:8d3a9fc683fcaa5b7d8b1c90fa94318402ebb00edeb5f6e2df4bac46665b98ff
     strategy:

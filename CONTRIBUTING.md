@@ -12,7 +12,16 @@ godot --path . -e                             # open the editor
 godot --headless --path . --import            # re-import; shows parse and load errors
 ```
 
-There is no automated test suite. Before opening a PR, run the headless import (it must print no `SCRIPT ERROR`) and play a match in each mode you touched. A headless run prints many harmless `Parameter "m" is null` and `Unicode parsing error` lines (that's the dummy renderer).
+Before opening a PR, run the checks and play a match in each mode you touched:
+
+```bash
+GODOT=.tools/Godot_v4.3-stable_linux.x86_64 tests/run.sh
+```
+
+It runs the headless import, which must print no `SCRIPT ERROR`, then every `tests/test_*.gd`. CI runs the same script before it exports anything. A headless run prints many harmless `Parameter "m" is null` and `Unicode parsing error` lines (that's the dummy renderer).
+
+- **Dead code is an error.** `[debug]` in `project.godot` turns these GDScript warnings into errors: unused variables, parameters, constants and signals, unreachable code, shadowed names and untyped declarations. Prefix a parameter you must accept but don't use with `_`. A signal is emitted by the class that declares it (others call a method, like `GameManager.announce_chaos_gem()`).
+- **Tests** extend `tests/match_test.gd`, which starts a match and gives `expect()` / `finish()`. Add one for new rules or systems (`test_collector_rules.gd` checks rules on `GameManager` alone; `test_bots.gd` and `test_touch.gd` play a real match). `tests/` is left out of the exports.
 
 To drive the game from a script, run a `extends SceneTree` script with `-s <script.gd>`. Autoloads are available, so it can call `GameManager.configure(...)`, change to `res://scenes/main/Main.tscn`, call `lock_in()` on the character selectors and save `root.get_texture().get_image()` screenshots. Two things to watch out for:
 
@@ -56,10 +65,12 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
   - P1 plays with keyboard + mouse: wheel arms a slot, left click fires it, right click jumps.
   - Every pad model (keyed by GUID) has its own layout. A new model starts from the default: face buttons = items 1-3, Y = superpower, RB/RT = jump, LB = camera view.
   - Pads go to P2..P4 in connection order. A leftover pad goes to P1.
-  - Touch: the first screen touch sets `touch_active`. From then on P1 plays with `TouchControls` (a stick under the left thumb, drag on the right to look, a jump button, pause) and the HUD's item pad moves to the right, grows and becomes tappable (`ItemPad.make_touchable`). They press P1's own actions, so nothing else changes.
+  - `action_name(player_id, action)` is the only place that builds a `p{N}_*` name.
+  - Touch: the first screen touch sets `touch_active`. From then on P1 plays with `TouchControls` (a stick under the left thumb, drag on the right to look, a jump button, pause), which also moves the HUD's item pad under the right thumb, enlarges it and makes it tappable (`ItemPad.make_touchable`). They press P1's own actions, so nothing else changes.
   - Rebindable from `ControlsDialog` and saved to `user://controls.cfg`. Files older than `SAVE_VERSION` are migrated.
 - `AudioManager` (`play_sfx`), `LocalizationManager` (en/it).
 - `UiMotion`: every Button grows a few pixels on hover/focus and squishes on press, and plain `PanelContainer` cards pop in. `pulse(control)` is the shared "value changed" pop.
+- `ScreenLayout`: on a tall window (a phone held upright) it turns the base canvas on its side, so the UI fills the width. Design UI to fit both a 1920×1080 and a 1080×1920 canvas.
 - `Settings` (static helper, not an autoload): reads and writes one section of `user://settings.cfg` (language, last match setup).
 
 ### A match

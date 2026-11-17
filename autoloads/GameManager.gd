@@ -370,6 +370,11 @@ func _set_lives(player_id: int, value: int) -> void:
 	_update_leader()
 
 
+## The Chaos Gem is in the arena (GemSpawner decides when and where).
+func announce_chaos_gem() -> void:
+	chaos_gem_appeared.emit()
+
+
 ## Chaos Gem: every player except [param finder_id] loses half their gems
 ## (rounded down). Returns rival player_id → gems lost.
 func halve_rivals(finder_id: int) -> Dictionary:
