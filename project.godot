@@ -61,6 +61,7 @@ theme/custom="res://resources/theme/game_theme.tres"
 
 renderer/rendering_method="forward_plus"
 anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/msaa_3d.web=0
 textures/default_filters/anisotropic_filtering_level=3
 environment/defaults/default_clear_color=Color(0.118, 0.071, 0.251, 1)
 
