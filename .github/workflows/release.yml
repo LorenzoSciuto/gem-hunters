@@ -101,6 +101,7 @@ jobs:
           # wine (runs rcedit) refuses a HOME the container user doesn't own.
           WINEPREFIX: /tmp/wine
           WINEDEBUG: -all
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           mkdir -p build/${{ matrix.dir }}
           godot --headless --path . --export-release "${{ matrix.preset }}"
@@ -109,6 +110,10 @@ jobs:
           if [ "${{ matrix.dir }}" = windows ]; then
             grep -qaP 'W\x00e\x00n\x00n\x00o\x00v\x00a\x00t\x00e' build/windows/GemHunters.exe \
               || { echo "GemHunters.exe still has Godot's icon and metadata"; exit 1; }
+          fi
+          # Versioned file names, so no browser serves a cached old release.
+          if [ "${{ matrix.dir }}" = web ]; then
+            installer/version_web_build.sh build/web "$VERSION"
           fi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
