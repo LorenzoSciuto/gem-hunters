@@ -7,6 +7,7 @@
 ## SplitScreenManager connects only this hunter's signals to it; GameManager
 ## drives scores, lives, the clock and match-wide events.
 extends CanvasLayer
+class_name HUD
 
 const LOW_TIME_COLOR: Color = Color(1.0, 0.35, 0.35)
 const LEADER_COLOR: Color = Color(1.0, 0.85, 0.3)

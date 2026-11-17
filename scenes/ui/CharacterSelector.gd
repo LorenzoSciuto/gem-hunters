@@ -177,7 +177,7 @@ func _back() -> void:
 
 
 func _action(name: String) -> String:
-	return "p%d_%s" % [player_id, name]
+	return InputManager.action_name(player_id, name)
 
 
 func _cycle(dir: int) -> void:

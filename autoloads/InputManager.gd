@@ -81,6 +81,9 @@ const EXTRA_PAD_MAPPINGS: Array[String] = [
 
 ## player_id → joypad device id (-1 = keyboard only).
 var player_joypad_map: Dictionary = {}
+## True once the screen has been touched (phone, tablet): the match then shows
+## TouchControls for P1, who stops using the mouse.
+var touch_active: bool = false
 
 var _keyboard: Dictionary = {}
 ## Default layout for pad models without their own (and the HUD of a padless player).
@@ -97,6 +100,11 @@ func _ready() -> void:
 	_load()
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	auto_configure_devices()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		touch_active = true
 
 
 ## Godot's ui_accept / ui_cancel only know the keyboard; menus need the pad too.
@@ -267,12 +275,17 @@ func _load() -> void:
 		_save_and_apply()  # Re-saves as the current version.
 
 
+## The InputMap action of [param action] ("jump", "move_left"...) for one player.
+func action_name(player_id: int, action: String) -> String:
+	return "p%d_%s" % [player_id, action]
+
+
 ## Rebuilds every p{N}_* action from the keyboard scheme and assigned pads.
 func _apply() -> void:
 	for pid: int in Constants.MAX_PLAYERS:
 		var joy: int = player_joypad_map.get(pid, -1)
 		for action: String in MOVE_ACTIONS + BUTTON_ACTIONS:
-			var name: String = "p%d_%s" % [pid, action]
+			var name: String = action_name(pid, action)
 			if not InputMap.has_action(name):
 				InputMap.add_action(name, ACTION_DEADZONE)
 			InputMap.action_erase_events(name)

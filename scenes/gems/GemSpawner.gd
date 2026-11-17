@@ -118,7 +118,7 @@ func _schedule_chaos_gem() -> void:
 	var chaos: ChaosGem = ChaosGem.new()
 	add_child(chaos)
 	chaos.global_position = Vector3(point.global_position.x, 0.0, point.global_position.z)
-	GameManager.chaos_gem_appeared.emit()
+	GameManager.announce_chaos_gem()
 
 
 ## Survival: a life gem appears every LIFE_GEM_INTERVAL (one at a time).

@@ -44,7 +44,7 @@ const QUARTER_UI_SCALE: float = 0.68
 var _level: MazeLevel = null
 var _players: Array[Player] = []
 ## One per human, indexed by player_id (humans are the first player_ids).
-var _huds: Array[CanvasLayer] = []
+var _huds: Array[HUD] = []
 var _selectors: Array[Control] = []
 var _cameras: Array[CameraRig] = []
 ## Bumped on every lock / unlock so a pending "everyone ready" start is dropped
@@ -131,7 +131,7 @@ func _bind_huds() -> void:
 		player.combat.impact.connect(_on_impact)
 		if GameManager.is_bot(i):
 			continue
-		var hud: CanvasLayer = HUD_SCENE.instantiate() as CanvasLayer
+		var hud: HUD = HUD_SCENE.instantiate() as HUD
 		_subviewports[i].add_child(hud)
 		hud.setup(player, Constants.PLAYER_COLORS[i])
 		hud.visible = false
@@ -219,8 +219,16 @@ func _start_with_chosen_characters() -> void:
 
 
 func _begin_countdown() -> void:
-	for hud: CanvasLayer in _huds:
+	for hud: HUD in _huds:
 		hud.visible = true
+	if InputManager.touch_active:
+		var touch: TouchControls = TouchControls.new()
+		touch.player = _players[InputManager.KEYBOARD_PLAYER]
+		touch.item_pad = _huds[InputManager.KEYBOARD_PLAYER].item_pad
+		touch.pause_requested.connect(func() -> void:
+			if GameManager.is_playing():
+				overlay.toggle_pause())
+		add_child(touch)
 	GameManager.start_match()
 
 
@@ -230,7 +238,7 @@ func _on_state_changed(state: int) -> void:
 	if state == Constants.GameState.PLAYING:
 		AudioManager.play_sfx(AudioManager.SoundEffect.MATCH_START)
 		_set_controls(true)
-		for hud: CanvasLayer in _huds:
+		for hud: HUD in _huds:
 			hud.show_tip()
 
 
