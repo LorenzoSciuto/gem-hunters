@@ -4,7 +4,7 @@
 ##   right half  - drag to look around
 ##   bottom right - the HUD's item pad, moved under the right thumb, enlarged
 ##                  and made tappable, with the jump button beside it
-##   top centre  - pause
+##   top right   - pause, under the clock
 ## The stick and the jump button press P1's own input actions, so the hunter
 ## code is the same as with a keyboard or a pad.
 ## SplitScreenManager adds it once InputManager.touch_active is set.
@@ -13,19 +13,21 @@ class_name TouchControls
 
 signal pause_requested
 
-const STICK_RADIUS: float = 120.0
-const KNOB_RADIUS: float = 52.0
+## Sizes are in canvas pixels, which ScreenLayout already enlarges on a phone.
+const STICK_RADIUS: float = 105.0
+const KNOB_RADIUS: float = 46.0
 ## Where the idle stick is drawn, from the bottom-left corner.
-const STICK_REST: Vector2 = Vector2(230.0, 250.0)
-const JUMP_RADIUS: float = 95.0
+const STICK_REST: Vector2 = Vector2(130.0, 190.0)
+const JUMP_RADIUS: float = 70.0
 ## The jump button sits this far left of the item pad and above the bottom edge.
-const JUMP_GAP: float = 30.0
-const JUMP_BOTTOM: float = 140.0
-## The item pad grows to finger size and keeps this margin from the corner.
-const PAD_SCALE: float = 1.6
-const PAD_MARGIN: int = 24
+const JUMP_GAP: float = 20.0
+const JUMP_BOTTOM: float = 110.0
+## The item pad grows a little and keeps this margin from the corner.
+const PAD_SCALE: float = 1.2
+const PAD_MARGIN: int = 16
 const PAUSE_SIZE: Vector2 = Vector2(90.0, 64.0)
-const PAUSE_TOP: float = 16.0
+## Pause button, from the top-right corner: just under the clock.
+const PAUSE_OFFSET: Vector2 = Vector2(16.0, 104.0)
 const FILL: Color = Color(1.0, 1.0, 1.0, 0.18)
 const KNOB: Color = Color(1.0, 1.0, 1.0, 0.45)
 const OUTLINE: Color = Color(1.0, 1.0, 1.0, 0.6)
@@ -83,7 +85,7 @@ func _exit_tree() -> void:
 func _layout() -> void:
 	var screen: Vector2 = _screen()
 	_jump.position = _jump_center()
-	_pause.position = Vector2((screen.x - PAUSE_SIZE.x) * 0.5, PAUSE_TOP)
+	_pause.position = Vector2(screen.x - PAUSE_SIZE.x - PAUSE_OFFSET.x, PAUSE_OFFSET.y)
 	_canvas.queue_redraw()
 
 
