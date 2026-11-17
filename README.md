@@ -113,6 +113,7 @@ scenes/level/    procedural arenas: MazeGrid (data) → MazeLevel (walls/floor) 
 scenes/player/   Player body + Look / Status / Items / Combat components, shared CharacterModel
 scenes/ui/       menus, HUD and its components, character selection, How to play, Controls
 scenes/powerups/ gift boxes and projectiles      scenes/traps/  trap scenes (all extend TrapBase)
+scenes/debug/    graphics probe: finds what a browser cannot render (probe.html on the site)
 resources/       data: characters, power-ups and arenas as .tres files, the UI theme
 assets/          fonts, sounds, icons, localization/strings.csv (English + Italian)
 ```
