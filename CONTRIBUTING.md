@@ -68,7 +68,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
   - Every pad model (keyed by GUID) has its own layout. A new model starts from the default: face buttons = items 1-3, Y = superpower, RB/RT = jump, LB = camera view.
   - Pads go to P2..P4 in connection order. A leftover pad goes to P1.
   - `action_name(player_id, action)` is the only place that builds a `p{N}_*` name.
-  - Touch: the first screen touch sets `touch_active`. From then on P1 plays with `TouchControls` (a stick under the left thumb, drag on the right to look, a jump button, pause), which also moves the HUD's item pad under the right thumb, enlarges it and makes it tappable (`ItemPad.make_touchable`). They press P1's own actions, so nothing else changes.
+  - Touch: the first screen touch sets `touch_active`. From then on P1 plays with `TouchControls` (two sticks that appear under the thumbs: left moves, right looks, like a pad; a jump button, pause), which also moves the HUD's item pad under the right thumb, enlarges it and makes it tappable (`ItemPad.make_touchable`). They press P1's own actions, so nothing else changes.
   - Rebindable from `ControlsDialog` and saved to `user://controls.cfg`. Files older than `SAVE_VERSION` are migrated.
 - `AudioManager` (`play_sfx`), `LocalizationManager` (en/it).
 - `UiMotion`: every Button grows a few pixels on hover/focus and squishes on press, and plain `PanelContainer` cards pop in. `pulse(control)` is the shared "value changed" pop.

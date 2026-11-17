@@ -71,7 +71,7 @@ The in-game **How to play** screen covers everything, with pictures.
 
 Player 1 plays with keyboard and mouse. Players 2–4 each need a gamepad.
 
-On a phone or tablet (in the browser) Player 1 plays with touch controls: a stick under the left thumb, drag on the right to look around, and buttons for jump, items and the superpower.
+On a phone or tablet (in the browser) Player 1 plays with touch controls: a stick under the left thumb to move, a second one under the right thumb to look around, and buttons for jump, items and the superpower.
 
 | Action | Keyboard + mouse | Gamepad |
 |---|---|---|
