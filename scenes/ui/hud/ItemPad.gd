@@ -94,6 +94,21 @@ func _add_view_hint() -> void:
 	add_child(hint)
 
 
+## Touch screens: every slot fires its action when tapped, and the key prompts
+## (there are no keys) go away.
+func make_touchable() -> void:
+	for slot: int in _slots.size():
+		var button: TouchScreenButton = TouchScreenButton.new()
+		var circle: CircleShape2D = CircleShape2D.new()
+		circle.radius = SLOT_SIZE * 0.5
+		button.shape = circle
+		button.action = "p%d_%s" % [player_id, SLOT_ACTIONS[slot]]
+		button.position = _slots[slot].size * 0.5
+		_slots[slot].add_child(button)
+		_prompts[slot].visible = false
+	_view_prompt.get_parent().get_parent().visible = false
+
+
 ## Key/button names follow the current bindings and device.
 func refresh_prompts() -> void:
 	for slot: int in _prompts.size():

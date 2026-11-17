@@ -1,5 +1,5 @@
 ## PlayerLook.gd
-## Where a hunter looks: stick and mouse look (inverted / wobbling under
+## Where a hunter looks: stick, mouse and touch look (inverted / wobbling under
 ## debuffs), the first/third-person camera view, and P1's mouse buttons
 ## (wheel arms a slot, left click fires it, right click jumps).
 ## Child node "Look" of Player.
@@ -30,7 +30,8 @@ func setup() -> void:
 
 ## P1 without a pad plays with the mouse: capture it while controls are on.
 func set_controls_enabled(enabled: bool) -> void:
-	_uses_mouse = player.player_id == 0 and InputManager.player_joypad_map.get(0, -1) < 0
+	_uses_mouse = player.player_id == 0 and InputManager.player_joypad_map.get(0, -1) < 0 \
+		and not InputManager.touch_active
 	if _uses_mouse:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if enabled else Input.MOUSE_MODE_VISIBLE
 		player.items.selection_changed.emit(player.player_id, player.items.selected_slot)
@@ -64,16 +65,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not player.controls_enabled or not _uses_mouse:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if player.status.has(Constants.DebuffType.FROZEN):
-			return
-		var look: Vector2 = (event as InputEventMouseMotion).relative * Constants.MOUSE_SENSITIVITY
-		_apply_look(-look if player.status.has(Constants.DebuffType.INVERTED) else look)
+		look_by((event as InputEventMouseMotion).relative)
 	elif event is InputEventMouseButton and event.pressed:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		else:
 			_handle_mouse_button(event.button_index)
 		get_viewport().set_input_as_handled()
+
+
+## Pointer look: a mouse move or a touch drag of [param pixels].
+func look_by(pixels: Vector2) -> void:
+	if player.status.has(Constants.DebuffType.FROZEN):
+		return
+	var look: Vector2 = pixels * Constants.MOUSE_SENSITIVITY
+	_apply_look(-look if player.status.has(Constants.DebuffType.INVERTED) else look)
 
 
 func _handle_mouse_button(button: MouseButton) -> void:

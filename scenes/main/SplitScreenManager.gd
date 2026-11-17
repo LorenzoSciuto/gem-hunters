@@ -221,6 +221,13 @@ func _start_with_chosen_characters() -> void:
 func _begin_countdown() -> void:
 	for hud: CanvasLayer in _huds:
 		hud.visible = true
+	if InputManager.touch_active:
+		var touch: TouchControls = TouchControls.new()
+		touch.player = _players[InputManager.KEYBOARD_PLAYER]
+		touch.pause_requested.connect(func() -> void:
+			if GameManager.is_playing():
+				overlay.toggle_pause())
+		add_child(touch)
 	GameManager.start_match()
 
 

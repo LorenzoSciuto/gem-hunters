@@ -81,6 +81,9 @@ const EXTRA_PAD_MAPPINGS: Array[String] = [
 
 ## player_id → joypad device id (-1 = keyboard only).
 var player_joypad_map: Dictionary = {}
+## True once the screen has been touched (phone, tablet): the match then shows
+## TouchControls for P1, who stops using the mouse.
+var touch_active: bool = false
 
 var _keyboard: Dictionary = {}
 ## Default layout for pad models without their own (and the HUD of a padless player).
@@ -97,6 +100,11 @@ func _ready() -> void:
 	_load()
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	auto_configure_devices()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		touch_active = true
 
 
 ## Godot's ui_accept / ui_cancel only know the keyboard; menus need the pad too.

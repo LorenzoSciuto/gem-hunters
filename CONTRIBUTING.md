@@ -56,6 +56,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
   - P1 plays with keyboard + mouse: wheel arms a slot, left click fires it, right click jumps.
   - Every pad model (keyed by GUID) has its own layout. A new model starts from the default: face buttons = items 1-3, Y = superpower, RB/RT = jump, LB = camera view.
   - Pads go to P2..P4 in connection order. A leftover pad goes to P1.
+  - Touch: the first screen touch sets `touch_active`. From then on P1 plays with `TouchControls` (a stick under the left thumb, drag on the right to look, a jump button, pause) and the HUD's item pad moves to the right, grows and becomes tappable (`ItemPad.make_touchable`). They press P1's own actions, so nothing else changes.
   - Rebindable from `ControlsDialog` and saved to `user://controls.cfg`. Files older than `SAVE_VERSION` are migrated.
 - `AudioManager` (`play_sfx`), `LocalizationManager` (en/it).
 - `UiMotion`: every Button grows a few pixels on hover/focus and squishes on press, and plain `PanelContainer` cards pop in. `pulse(control)` is the shared "value changed" pop.
@@ -69,6 +70,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 - In 3-4 player matches, each quarter view renders its 2D layer on a larger virtual canvas (`QUARTER_UI_SCALE`), so HUDs are smaller.
 - In survival, an eliminated hunter's camera follows a survivor.
 - `MatchOverlay` shows the countdown and the frenzy, and owns the pause menu.
+- On a touch screen `TouchControls` (`scenes/ui/TouchControls.gd`) is added over the match when the countdown starts.
 
 ### Arenas are generated
 
