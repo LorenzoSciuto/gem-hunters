@@ -57,6 +57,10 @@ theme/custom="res://resources/theme/game_theme.tres"
 3d/default_gravity=9.8
 3d/default_gravity_vector=Vector3(0, -1, 0)
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://assets/localization/strings.en.translation", "res://assets/localization/strings.it.translation")
+
 [rendering]
 
 renderer/rendering_method="forward_plus"
