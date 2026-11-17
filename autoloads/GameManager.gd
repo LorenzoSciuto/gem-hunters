@@ -45,6 +45,13 @@ signal lives_changed(player_id: int, lives: int)
 ## Survival mode: [param player_id] ran out of lives and is out of the match.
 signal player_eliminated(player_id: int)
 
+## Collector mode: [param player_id] now holds every colour (the golden gem appears).
+signal collection_completed(player_id: int)
+
+## Collector mode: [param player_id] took the golden gem without a full
+## collection, so every hunter's collection was emptied.
+signal collections_reset(player_id: int)
+
 ## The once-per-match Chaos Gem appeared somewhere in the arena.
 signal chaos_gem_appeared
 
@@ -85,6 +92,8 @@ var scores: Dictionary = {}
 var lives: Dictionary = {}
 ## Survival mode: player_ids in the order they were knocked out.
 var _eliminated: Array[int] = []
+## Collector mode: player_id → indices of the COLLECT_COLORS held; the score mirrors its size.
+var collections: Dictionary = {}
 
 
 # ─── Lifecycle ────────────────────────────────────────────────────────────
@@ -101,7 +110,7 @@ func _load_last_setup() -> void:
 	var mode: int = int(saved.get("mode", match_mode))
 	if mode in Constants.MatchMode.values():
 		match_mode = mode as Constants.MatchMode
-	if match_mode != Constants.MatchMode.LIVES:
+	if match_mode in [Constants.MatchMode.TIME, Constants.MatchMode.SCORE]:
 		var targets: Array[int] = Constants.TIME_TARGETS if match_mode == Constants.MatchMode.TIME else Constants.SCORE_TARGETS
 		var target: int = int(saved.get("target", match_target))
 		match_target = target if target in targets else targets[1]
@@ -198,10 +207,15 @@ func is_frenzy() -> bool:
 
 ## Add gems. Pickups pass [param boost] = true so the frenzy doubles them;
 ## transfers between players do not, so stealing never creates gems.
+## Collector: [param color] is the gem's COLLECT_COLORS index (a colour already
+## held adds nothing); -1 is a wild gem (loose, stolen, jackpot) that fills a
+## random missing colour.
 ## Returns the amount actually added.
-func add_gems(player_id: int, amount: int, boost: bool = true) -> int:
+func add_gems(player_id: int, amount: int, boost: bool = true, color: int = -1) -> int:
 	if not _is_valid_player(player_id) or not is_playing():
 		return 0
+	if is_collector():
+		return _collect(player_id, amount, color)
 	var gained: int = maxi(amount, 0) * (Constants.FRENZY_MULTIPLIER if _frenzy and boost else 1)
 	if gained == 0:
 		return 0
@@ -220,14 +234,40 @@ func _trade_gems_for_lives(player_id: int) -> void:
 		add_life(player_id)
 
 
-## Remove up to [param amount] gems. Returns the amount actually removed.
+func _collect(player_id: int, amount: int, color: int) -> int:
+	var held: Array = collections[player_id]
+	var gained: Array = range(Constants.COLLECT_COLORS.size()).filter(func(c: int) -> bool: return c not in held)
+	if color >= 0:
+		gained = [color] if color in gained else []
+	else:
+		gained.shuffle()
+		gained = gained.slice(0, mini(amount, Constants.COLLECT_GEMS_PER_TRANSFER))
+	if gained.is_empty():
+		return 0
+	held.append_array(gained)
+	scores[player_id] = held.size()
+	score_updated.emit(player_id, scores[player_id])
+	_update_leader()
+	if has_full_collection(player_id):
+		collection_completed.emit(player_id)
+	return gained.size()
+
+
+## Remove up to [param amount] gems (collector: random colours, at most
+## COLLECT_GEMS_PER_TRANSFER). Returns the amount actually removed.
 func remove_gems(player_id: int, amount: int) -> int:
 	if not _is_valid_player(player_id) or not is_playing():
 		return 0
+	if is_collector():
+		amount = mini(amount, Constants.COLLECT_GEMS_PER_TRANSFER)
 	var removed: int = mini(maxi(amount, 0), scores[player_id] as int)
 	if removed == 0:
 		return 0
 	scores[player_id] = (scores[player_id] as int) - removed
+	if is_collector():
+		var held: Array = collections[player_id]
+		held.shuffle()
+		held.resize(scores[player_id])
 	score_updated.emit(player_id, scores[player_id])
 	_after_score_change()
 	return removed
@@ -235,6 +275,39 @@ func remove_gems(player_id: int, amount: int) -> int:
 
 func is_survival() -> bool:
 	return match_mode == Constants.MatchMode.LIVES
+
+
+func is_collector() -> bool:
+	return match_mode == Constants.MatchMode.COLLECT
+
+
+## Collector: the COLLECT_COLORS indices [param player_id] holds.
+func get_collection(player_id: int) -> Array:
+	return collections.get(player_id, [])
+
+
+func has_full_collection(player_id: int) -> bool:
+	return get_collection(player_id).size() == Constants.COLLECT_COLORS.size()
+
+
+## Collector: the golden gem wins the match for a hunter holding every colour
+## (it counts as one more gem, so they top the standings alone). In anyone
+## else's hands it empties every collection.
+func take_golden_gem(player_id: int) -> void:
+	if not is_collector() or not is_playing() or not _is_valid_player(player_id):
+		return
+	if has_full_collection(player_id):
+		scores[player_id] = (scores[player_id] as int) + 1
+		score_updated.emit(player_id, scores[player_id])
+		_update_leader()
+		end_match()
+		return
+	for pid: int in collections:
+		(collections[pid] as Array).clear()
+		scores[pid] = 0
+		score_updated.emit(pid, 0)
+	_update_leader()
+	collections_reset.emit(player_id)
 
 
 func get_lives(player_id: int) -> int:
@@ -414,8 +487,10 @@ func _reset_scores() -> void:
 	scores.clear()
 	lives.clear()
 	_eliminated.clear()
+	collections.clear()
 	for i: int in range(_num_players):
 		scores[i] = 0
+		collections[i] = []
 		if is_survival():
 			lives[i] = Constants.START_LIVES
 

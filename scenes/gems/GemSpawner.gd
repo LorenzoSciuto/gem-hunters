@@ -18,6 +18,9 @@
 ##
 ## Survival mode: fewer and rarer gems (traded for lives, see GEMS_PER_LIFE),
 ## a slower golden gem, no Chaos Gem, and a life gem every LIFE_GEM_INTERVAL.
+##
+## Collector mode: every gem has one of the COLLECT_COLORS, there is no Chaos
+## Gem, and the golden gem appears only when a hunter completes a collection.
 extends Node3D
 
 # ---------------------------------------------------------------------------
@@ -81,6 +84,10 @@ func _ready() -> void:
 		max_gems_in_world = Constants.SURVIVAL_MAX_GEMS
 		spawn_interval = Constants.SURVIVAL_GEM_RESPAWN
 		_golden_respawn = Constants.SURVIVAL_GOLDEN_RESPAWN
+	if GameManager.is_collector():
+		max_gems_in_world = Constants.COLLECT_MAX_GEMS
+		_golden_respawn = Constants.COLLECT_GOLDEN_DELAY
+		GameManager.collection_completed.connect(func(_pid: int) -> void: _schedule_golden_gem())
 	_collect_spawn_points()
 	_create_spawn_timer()
 	_initial_fill()
@@ -89,7 +96,7 @@ func _ready() -> void:
 
 ## The golden gem's clock starts with the match (not during character selection).
 func _on_state_changed(state: int) -> void:
-	if state == Constants.GameState.PLAYING and not _golden_scheduled:
+	if state == Constants.GameState.PLAYING and not _golden_scheduled and not GameManager.is_collector():
 		_golden_scheduled = true
 		_schedule_golden_gem()
 		if GameManager.is_survival():
@@ -201,10 +208,12 @@ func _try_spawn_gem() -> void:
 	if not point:
 		return
 
-	var gem_value: int = _pick_gem_value()
 	var gem: GemCollectible = GEM_SCENE.instantiate() as GemCollectible
-	gem.value = gem_value
-	gem.gem_type = _value_to_gem_type(gem_value)
+	if GameManager.is_collector():
+		gem.color_index = randi() % Constants.COLLECT_COLORS.size()
+	else:
+		gem.value = _pick_gem_value()
+		gem.gem_type = _value_to_gem_type(gem.value)
 	add_child(gem)
 	gem.global_position = point.global_position
 
@@ -276,7 +285,8 @@ func _spawn_golden_gem() -> void:
 ## Called when the golden gem is picked up. Re-spawns after GOLDEN_GEM_RESPAWN seconds.
 func _on_golden_gem_collected(_player_id: int, _gem_value: int) -> void:
 	_golden_gem_active = false
-	_schedule_golden_gem()
+	if not GameManager.is_collector():
+		_schedule_golden_gem()
 
 
 # ---------------------------------------------------------------------------

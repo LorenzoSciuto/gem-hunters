@@ -26,7 +26,7 @@ Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennova
 - 🌍 **A new maze every match.** Six themed worlds, each with its own twist: candy trampolines, forest portals, garden sprinklers, Roman moving gates, desert quicksand and slippery winter ice.
 - 🎁 **15 items in gift boxes.** Cake traps, water balloons, banana peels, spring gloves, snowballs, thunder, warps, radar... and boxes that are just pranks.
 - 🦸 **8 hunters, 4 superpowers.** Each hunter has an always-on trait plus one superpower: Turbo, Ground Pound, Iron Shield or Swap with the leader.
-- 🏆 **3 ways to win.** *Time Attack*, *Gem Race* or *Survival*, with a double-gems **frenzy** for the final stretch.
+- 🏆 **4 ways to win.** *Time Attack*, *Gem Race*, *Survival* or *Collector*, with a double-gems **frenzy** for the final stretch.
 - 👨‍👩‍👧 **Made for kids 9+.** Bright, readable and silly. Hitting a rival makes them drop gems, never hurts anyone.
 
 <table>
@@ -62,6 +62,7 @@ Grab the latest build from [**Releases**](../../releases/latest): an installer o
 | **Time Attack** | Most gems when the clock runs out |
 | **Gem Race** | First to the target (30, 50 or 80 gems) |
 | **Survival** | Everyone starts with 3 lives and every hit costs one. Every 10 gems buy a life (5 at most). Last hunter standing wins |
+| **Collector** | Collect one gem of each of the 5 colours, then grab the golden gem in the plaza. If a rival grabs it first, every collection is emptied |
 
 The in-game **How to play** screen covers everything, with pictures.
 

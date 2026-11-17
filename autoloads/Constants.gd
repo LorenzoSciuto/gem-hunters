@@ -46,7 +46,23 @@ enum MatchMode {
 	TIME,   ## Most gems when the clock runs out.
 	SCORE,  ## First player to reach the gem target.
 	LIVES,  ## Survival: everyone starts with START_LIVES; every attack costs a life; last one standing wins.
+	COLLECT,  ## Collector: hold one gem of every COLLECT_COLORS colour, then grab the golden gem.
 }
+
+## Collector mode: the colours to collect, one gem each.
+const COLLECT_COLORS: Array[Color] = [
+	Color(1.0, 0.25, 0.3),   # Red
+	Color(0.3, 0.9, 0.35),   # Green
+	Color(0.25, 0.55, 1.0),  # Blue
+	Color(0.75, 0.35, 1.0),  # Purple
+	Color(0.95, 0.95, 1.0),  # White
+]
+## Collector: a hit, steal, jackpot or loose gem never moves more than this many gems.
+const COLLECT_GEMS_PER_TRANSFER: int = 1
+## Collector: fewer gems in the arena, so each colour has to be hunted for.
+const COLLECT_MAX_GEMS: int = 10
+## Collector: seconds between a collection being completed and the golden gem appearing.
+const COLLECT_GOLDEN_DELAY: float = 1.0
 
 ## Survival mode: lives at the start, and the floor the golden gem refills to
 ## (life gems and gems top it up to MAX_LIVES).

@@ -15,6 +15,8 @@ UI_MODE_TIME_DESC,Most gems when the clock hits zero wins!,Vince chi ha più gem
 UI_MODE_SCORE_DESC,First to {0} gems wins!,Vince il primo che arriva a {0} gemme!
 UI_MODE_LIVES,Survival,Sopravvivenza
 UI_MODE_LIVES_DESC,"Everyone starts with {0} lives: every attack costs a life, every {1} gems buy one. Last one standing wins!","Tutti partono con {0} vite: ogni attacco toglie una vita, ogni {1} gemme ne comprano una. Vince chi sopravvive!"
+UI_MODE_COLLECT,Collector,Collezionista
+UI_MODE_COLLECT_DESC,"Collect a gem of each of the {0} colours, then grab the golden gem in the plaza to win. If a rival grabs it first, everyone starts over!","Colleziona una gemma per ognuno dei {0} colori, poi prendi la gemma d'oro nella piazza per vincere. Se la prende prima un rivale, tutti ripartono da zero!"
 UI_TARGET_GEMS,{0} gems,{0} gemme
 UI_SELECT_ARENA,Arena,Arena
 UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
@@ -172,7 +174,9 @@ Gift boxes give you items (up to 3). Every hunter also has a superpower that rec
 
 In the final frenzy every gem counts double: never give up!
 
-Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (up to 5 lives), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
+Survival: everyone starts with 3 lives. Every attack costs a life: gift-box items (shots, traps, thunder), stomps on your head, ground pounds and being robbed while frozen. After losing one you are safe for 3 seconds; a bubble or shield saves it. Every 10 gems you collect turn into +1 life (the bar under your gems shows how close you are), pink life gems give +1 life too (up to 5 lives), the golden gem in the center refills you to 3. Run out and you're out: the last hunter standing wins!
+
+Collector: gems come in 5 colours and you need one of each (a colour you already have adds nothing). Any hit costs you one gem. When a hunter holds all 5, the golden gem appears in the plaza: if a hunter with a full collection grabs it, they win. If anyone else grabs it, every collection is emptied and the hunt starts over!","Sei un Gem Hunter! Corri nel labirinto e raccogli più gemme che puoi.
 
 - A Tempo: vince chi ha più gemme allo scadere del tempo.
 - Corsa alle Gemme: vince il primo hunter che raggiunge l'obiettivo.
@@ -183,7 +187,9 @@ I pacchi regalo danno oggetti (fino a 3). Ogni hunter ha anche un superpotere ch
 
 Nella frenesia finale ogni gemma vale doppio: non arrenderti mai!
 
-Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), salti in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (fino a 5 vite), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!"
+Sopravvivenza: tutti partono con 3 vite. Ogni attacco toglie una vita: oggetti dei pacchi (spari, trappole, fulmine), salti in testa, attacchi a terra e furti mentre sei congelato. Dopo averne persa una sei al sicuro per 3 secondi; bolla e scudo la salvano. Ogni 10 gemme raccolte diventano +1 vita (la barra sotto le gemme mostra quanto manca), anche le gemme vita rosa danno +1 vita (fino a 5 vite), la gemma dorata al centro ti riporta a 3. Se le finisci sei fuori: vince l'ultimo hunter in piedi!
+
+Collezionista: le gemme hanno 5 colori e te ne serve una per colore (un colore che hai già non aggiunge nulla). Ogni colpo subito ti costa una gemma. Quando un hunter le ha tutte e 5, nella piazza appare la gemma d'oro: se la prende un hunter con la collezione completa, vince. Se la prende chiunque altro, tutte le collezioni si svuotano e la caccia riparte da zero!"
 HELP_HUNTERS_INTRO,"Each hunter has an always-on ability (in yellow: it works by itself, all the time) and a superpower you trigger (Y on the pad, F on the keyboard, or pick it with the mouse wheel), which then recharges: the icon shows when it is ready again.","Ogni hunter ha un'abilità sempre attiva (in giallo: funziona da sola, sempre) e un superpotere da attivare tu (Y sul pad, F sulla tastiera, o sceglilo con la rotella del mouse), che poi si ricarica: l'icona mostra quando è di nuovo pronto."
 HELP_ITEMS_INTRO,"Open gift boxes to get items: you can carry 3 (X, A, B on the pad - Q, E, R on the keyboard - or wheel + left click). Watch out: some boxes are pranks, some hold two items! Careful: the traps you drop catch you too!","Apri i pacchi regalo per avere oggetti: ne puoi tenere 3 (X, A, B sul pad - Q, E, R sulla tastiera - o rotella + clic sinistro). Attenzione: alcuni pacchi sono scherzi, altri contengono due oggetti! Attento: le trappole che lasci prendono anche te!"
 HELP_ARENA,"Every arena is split into 4 zones plus the Golden Plaza in the center. Each zone has its own floor color and a giant landmark (Crystal Spire, Orb Tower, Pyramid, Castle), and your screen shows the zone name: peek at the others' screens to find out where they are!
@@ -224,6 +230,15 @@ Tutti gli altri hanno perso metà delle gemme!"
 MSG_CHAOS_THEIRS,"P{0} grabbed the Chaos Gem:
 you lost {1} gems!","G{0} ha preso la Gemma del Caos:
 hai perso {1} gemme!"
+MSG_COLLECT_COMPLETE_MINE,"Collection complete!
+Run to the golden gem in the plaza to win!","Collezione completa!
+Corri alla gemma d'oro nella piazza per vincere!"
+MSG_COLLECT_COMPLETE_THEIRS,"P{0} has every colour!
+Grab the golden gem in the plaza before they do!","G{0} ha tutti i colori!
+Prendi la gemma d'oro nella piazza prima di loro!"
+MSG_COLLECT_RESET,"P{0} grabbed the golden gem:
+every collection is empty, start over!","G{0} ha preso la gemma d'oro:
+tutte le collezioni sono vuote, si riparte!"
 HUD_FRENZY_TAG,  x2,  x2
 UI_LIVES_N,{0} lives,{0} vite
 UI_KNOCKED_OUT,Out,Eliminato

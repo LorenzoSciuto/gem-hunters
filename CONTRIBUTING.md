@@ -47,7 +47,8 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
   - State machine LOBBY → COUNTDOWN (3-2-1) → PLAYING ⇄ PAUSED → GAME_OVER. Also owns the clock, `game_time()`, win conditions, the frenzy and the leader.
   - `add_gems` / `remove_gems` return the amount applied. Transfers pass `boost=false` so the frenzy never creates gems.
   - Survival: `lose_life` / `add_life` / `refill_lives`. `get_standings()` ranks survivors first.
-  - Signals: `countdown_tick`, `timer_updated`, `score_updated`, `leader_changed`, `frenzy_started`, `match_ended`, `lives_changed`, `player_eliminated`, `chaos_gem_appeared`, `chaos_gem_taken`.
+  - Collector: `collections` holds each hunter's colours and the score mirrors its size. `add_gems(..., color)` adds a colour gem, or a wild one (-1: loose, stolen, jackpot) that fills a random missing colour. Every transfer moves one gem. `take_golden_gem` ends the match for a full collection and empties every collection otherwise.
+  - Signals: `countdown_tick`, `timer_updated`, `score_updated`, `leader_changed`, `frenzy_started`, `match_ended`, `lives_changed`, `player_eliminated`, `collection_completed`, `collections_reset`, `chaos_gem_appeared`, `chaos_gem_taken`.
 - `InputManager`: creates every `p{N}_*` action at runtime.
   - P1 plays with keyboard + mouse: wheel arms a slot, left click fires it, right click jumps.
   - Every pad model (keyed by GUID) has its own layout. A new model starts from the default: face buttons = items 1-3, Y = superpower, RB/RT = jump, LB = camera view.
@@ -95,12 +96,12 @@ The shared `CharacterModel.tscn` is the visual body, also used in the selection 
 
 ### HUD (`scenes/ui/HUD.gd` + `scenes/ui/hud/`)
 
-The HUD shows gems, rank, zone, the goal bar and the clock, and wires its components: `ItemPad`, `Toast`, `MiniMap`, `DebuffOverlay` and `LivesRow`. It only connects to its own player's signals. Item icons and name keys live in `scenes/ui/ItemCatalog.gd`, shared with the How to play screen.
+The HUD shows gems, rank, zone, the goal bar and the clock, and wires its components: `ItemPad`, `Toast`, `MiniMap`, `DebuffOverlay`, `LivesRow` (survival) and `CollectionRow` (collector). It only connects to its own player's signals. Item icons and name keys live in `scenes/ui/ItemCatalog.gd`, shared with the How to play screen.
 
 ### Gems, items and traps
 
 - **Nothing spawns on top of something else.** Every gem joins `Constants.GROUP_PICKUPS`, and `SpawnClearance.is_clear()` keeps new gems and relocated gift boxes `SPAWN_CLEARANCE` away from pickups, boxes, props and traps. When no spot is free, the spawner waits and tries again.
-- `GemSpawner` keeps at most `MAX_GEMS_IN_WORLD` gems (fewer in survival). It also runs the golden gem, survival life gems and the once-per-match `ChaosGem`.
+- `GemSpawner` keeps at most `MAX_GEMS_IN_WORLD` gems (fewer in survival). It also runs the golden gem, survival life gems and the once-per-match `ChaosGem`. In collector mode every gem has one of `Constants.COLLECT_COLORS`, there is no Chaos Gem, and the golden gem appears only when a collection is complete.
 - Loose gems (`GemLoose`) blink until they can be picked up, drift toward the nearest hunter, and can't go back to their dropper for `DROPPER_DELAY`.
 - `PowerUpData` (type + pool weight) feeds `SurpriseBox`, which favours attacks for the last player and the radar for anyone not leading.
 - Traps extend `TrapBase`: the victim loses `gems_stolen`, half go to the owner and the rest scatter. A bubble or shield absorbs a trap, and `TRAP_GRACE` stops chain-trapping.

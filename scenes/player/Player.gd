@@ -291,9 +291,10 @@ func _dust(amount: int) -> void:
 # ─── Gems ─────────────────────────────────────────────────────────────────
 
 ## Pickup from the world. Returns the gems actually gained (frenzy doubles them).
-func collect_gem(value: int, boost: bool = true) -> int:
+## [param color]: the gem's colour in collector mode (see GameManager.add_gems).
+func collect_gem(value: int, boost: bool = true, color: int = -1) -> int:
 	var lives_before: int = GameManager.get_lives(player_id)
-	var gained: int = GameManager.add_gems(player_id, value, boost)
+	var gained: int = GameManager.add_gems(player_id, value, boost, color)
 	if GameManager.get_lives(player_id) > lives_before:
 		_life_popup("MSG_LIFE_GAINED_POP", PopupText.GAIN_COLOR)
 	if gained > 0:
