@@ -8,6 +8,8 @@ cd "$(dirname "$0")/.."
 GODOT="${GODOT:-godot}"
 # Seconds before a test that never finishes counts as failed.
 TEST_TIMEOUT=180
+# Lines of a failing test's errors to print: the first ones tell the story.
+ERROR_LINES=20
 failed=0
 
 # A fresh checkout has no import cache: its first import parses scripts before
@@ -27,7 +29,7 @@ for test in tests/test_*.gd; do
 		echo "ok   $test"
 	else
 		echo "FAIL $test"
-		grep -A2 "FAILED\|SCRIPT ERROR" <<<"$output"
+		grep -A2 "FAILED\|SCRIPT ERROR" <<<"$output" | head -"$ERROR_LINES"
 		failed=1
 	fi
 done

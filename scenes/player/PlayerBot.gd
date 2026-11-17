@@ -68,7 +68,11 @@ func _think() -> void:
 		player.jump()
 	if GameManager.game_time() >= _wander_until:
 		_goal = _pick_goal()
-	_path = [] if _is_outside() else level.grid.path(level.grid.cell_at(player.global_position), level.grid.cell_at(_goal))
+	# Outside the walls there is no maze to follow: straight to the return pad.
+	if _is_outside():
+		_path.clear()
+	else:
+		_path = level.grid.path(level.grid.cell_at(player.global_position), level.grid.cell_at(_goal))
 
 
 ## Outside the walls: the return pad. Otherwise the nearest thing worth
