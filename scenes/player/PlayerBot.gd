@@ -156,7 +156,7 @@ func _steer(delta: float) -> void:
 
 
 func _run(strength: float) -> void:
-	var action: String = "p%d_move_forward" % player.player_id
+	var action: String = InputManager.action_name(player.player_id, "move_forward")
 	if strength > 0.0:
 		Input.action_press(action, strength)
 	else:

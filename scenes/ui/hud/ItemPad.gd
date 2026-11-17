@@ -67,13 +67,13 @@ func _add_slot(slot: int) -> void:
 	icon.custom_minimum_size = Vector2.ONE * SLOT_ICON_SIZE
 	panel.add_child(icon)
 	add_child(panel)
-	var prompt: Label = Label.new()
-	prompt.theme_type_variation = &"KeyChip"
-	prompt.position = panel.position + KEY_CHIP_OFFSET
-	add_child(prompt)
+	var chip: Label = Label.new()
+	chip.theme_type_variation = &"KeyChip"
+	chip.position = panel.position + KEY_CHIP_OFFSET
+	add_child(chip)
 	_slots.append(panel)
 	_icons.append(icon)
-	_prompts.append(prompt)
+	_prompts.append(chip)
 
 
 func _add_view_hint() -> void:
@@ -102,7 +102,7 @@ func make_touchable() -> void:
 		var circle: CircleShape2D = CircleShape2D.new()
 		circle.radius = SLOT_SIZE * 0.5
 		button.shape = circle
-		button.action = "p%d_%s" % [player_id, SLOT_ACTIONS[slot]]
+		button.action = InputManager.action_name(player_id, SLOT_ACTIONS[slot])
 		button.position = _slots[slot].size * 0.5
 		_slots[slot].add_child(button)
 		_prompts[slot].visible = false

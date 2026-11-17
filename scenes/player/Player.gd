@@ -148,7 +148,7 @@ func rivals() -> Array[Player]:
 # ─── Input ────────────────────────────────────────────────────────────────
 
 func _action(action: String) -> String:
-	return "p%d_%s" % [player_id, action]
+	return InputManager.action_name(player_id, action)
 
 
 ## A stick's value from four actions, dead zone applied.

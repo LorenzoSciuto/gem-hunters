@@ -59,13 +59,13 @@ func center() -> Vector2i:
 
 
 func ring_of(c: Vector2i) -> int:
-	var center: Vector2i = center()
-	return maxi(absi(c.x - center.x), absi(c.y - center.y))
+	var middle: Vector2i = center()
+	return maxi(absi(c.x - middle.x), absi(c.y - middle.y))
 
 
 func cell_pos(c: Vector2i) -> Vector3:
-	var center: Vector2i = center()
-	return Vector3((c.x - center.x) * cell_size, 0.0, (c.y - center.y) * cell_size)
+	var middle: Vector2i = center()
+	return Vector3((c.x - middle.x) * cell_size, 0.0, (c.y - middle.y) * cell_size)
 
 
 ## The cell containing [param pos] (clamped to the grid for points outside it).

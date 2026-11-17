@@ -275,12 +275,17 @@ func _load() -> void:
 		_save_and_apply()  # Re-saves as the current version.
 
 
+## The InputMap action of [param action] ("jump", "move_left"...) for one player.
+func action_name(player_id: int, action: String) -> String:
+	return "p%d_%s" % [player_id, action]
+
+
 ## Rebuilds every p{N}_* action from the keyboard scheme and assigned pads.
 func _apply() -> void:
 	for pid: int in Constants.MAX_PLAYERS:
 		var joy: int = player_joypad_map.get(pid, -1)
 		for action: String in MOVE_ACTIONS + BUTTON_ACTIONS:
-			var name: String = "p%d_%s" % [pid, action]
+			var name: String = action_name(pid, action)
 			if not InputMap.has_action(name):
 				InputMap.add_action(name, ACTION_DEADZONE)
 			InputMap.action_erase_events(name)

@@ -7,6 +7,7 @@
 ## SplitScreenManager connects only this hunter's signals to it; GameManager
 ## drives scores, lives, the clock and match-wide events.
 extends CanvasLayer
+class_name HUD
 
 const LOW_TIME_COLOR: Color = Color(1.0, 0.35, 0.35)
 const LEADER_COLOR: Color = Color(1.0, 0.85, 0.3)
@@ -17,9 +18,6 @@ const ZONE_OUTSIDE: int = -2
 const OUTSIDE_COLOR: Color = Color(1.0, 0.8, 0.2)
 ## The knocked-out message stays up for the rest of the match.
 const ELIMINATED_HOLD: float = 3600.0
-## Touch screens: the item pad moves to the right thumb and grows to finger size.
-const TOUCH_PAD_SCALE: float = 1.6
-const TOUCH_PAD_MARGIN: float = 24.0
 
 @onready var overlay: DebuffOverlay = $EffectOverlay
 @onready var badge: Label = $ScorePanel/VBox/Row/Badge
@@ -59,11 +57,6 @@ func setup(player: Player, color: Color) -> void:
 		GameManager.collection_completed.connect(_on_collection_completed)
 		GameManager.collections_reset.connect(_on_collections_reset)
 	item_pad.setup(player_id)
-	if InputManager.touch_active and player_id == InputManager.KEYBOARD_PLAYER:
-		item_pad.make_touchable()
-		item_pad.pivot_offset = item_pad.size
-		item_pad.scale = Vector2.ONE * TOUCH_PAD_SCALE
-		item_pad.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_KEEP_SIZE, int(TOUCH_PAD_MARGIN))
 	var config: LevelConfig = GameManager.level_config
 	mini_map.setup(player_id, maxf(config.columns, config.rows) * config.cell_size)
 	_on_score_updated(player_id, 0)
