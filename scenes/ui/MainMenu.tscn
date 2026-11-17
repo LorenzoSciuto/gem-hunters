@@ -50,6 +50,19 @@ text = "UI_SELECT_PLAYERS"
 [node name="PlayersRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
 layout_mode = 2
 
+[node name="HumansRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options/PlayersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BotsTitle" type="Label" parent="Margin/VBox/Panel/Options/PlayersRow"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "UI_BOTS"
+
+[node name="BotsRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options/PlayersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="ModeTitle" type="Label" parent="Margin/VBox/Panel/Options"]
 layout_mode = 2
 theme_type_variation = &"HeadingLabel"

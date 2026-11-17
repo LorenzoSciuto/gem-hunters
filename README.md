@@ -4,7 +4,7 @@
 
 # Gem Hunters: Tag & Trap
 
-**A couch party game for 2–4 players: grab gems, set traps, steal from your friends.**
+**A couch party game for 1–4 players: grab gems, set traps, steal from your friends.**
 
 Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennovate**.
 
@@ -22,10 +22,11 @@ Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennova
 
 ## Why you'll love it
 
-- 🎮 **2–4 players on one screen.** One on keyboard and mouse, everyone else on a gamepad. No accounts, no internet.
+- 🎮 **1–4 players on one screen.** One on keyboard and mouse, everyone else on a gamepad. No accounts, no internet.
 - 🌍 **A new maze every match.** Six themed worlds, each with its own twist: candy trampolines, forest portals, garden sprinklers, Roman moving gates, desert quicksand and slippery winter ice.
 - 🎁 **15 items in gift boxes.** Cake traps, water balloons, banana peels, spring gloves, snowballs, thunder, warps, radar... and boxes that are just pranks.
 - 🦸 **8 hunters, 4 superpowers.** Each hunter has an always-on trait plus one superpower: Turbo, Ground Pound, Iron Shield or Swap with the leader.
+- 🤖 **Computer rivals.** Bots fill the empty seats, so you can play alone too.
 - 🏆 **4 ways to win.** *Time Attack*, *Gem Race*, *Survival* or *Collector*, with a double-gems **frenzy** for the final stretch.
 - 👨‍👩‍👧 **Made for kids 9+.** Bright, readable and silly. Hitting a rival makes them drop gems, never hurts anyone.
 

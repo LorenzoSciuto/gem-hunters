@@ -7,7 +7,7 @@ UI_CONTROLS,Controls,Comandi
 UI_CLOSE,Close,Chiudi
 UI_LANGUAGE,Language: English,Lingua: Italiano
 UI_SELECT_PLAYERS,Players,Giocatori
-UI_PLAYERS_N,{0} Players,{0} Giocatori
+UI_BOTS,Bots,Bot
 UI_SELECT_MODE,Goal,Obiettivo
 UI_MODE_TIME,Time Attack,A Tempo
 UI_MODE_SCORE,Gem Race,Corsa alle Gemme

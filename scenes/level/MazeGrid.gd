@@ -68,6 +68,33 @@ func cell_pos(c: Vector2i) -> Vector3:
 	return Vector3((c.x - center.x) * cell_size, 0.0, (c.y - center.y) * cell_size)
 
 
+## The cell containing [param pos] (clamped to the grid for points outside it).
+func cell_at(pos: Vector3) -> Vector2i:
+	var c: Vector2i = Vector2i(roundi(pos.x / cell_size), roundi(pos.z / cell_size)) + center()
+	return c.clamp(Vector2i.ZERO, Vector2i(cols - 1, rows - 1))
+
+
+## Shortest walk from [param from] to [param to] (breadth-first), both ends
+## included; empty when there is none. Gates count as open.
+func path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var came_from: Dictionary = { from: from }
+	var queue: Array[Vector2i] = [from]
+	while not queue.is_empty() and not came_from.has(to):
+		var c: Vector2i = queue.pop_front()
+		for n: Vector2i in neighbors(c):
+			if not came_from.has(n) and not wall_between(c, n):
+				came_from[n] = c
+				queue.append(n)
+	var out: Array[Vector2i] = []
+	if came_from.has(to):
+		var c: Vector2i = to
+		while c != from:
+			out.push_front(c)
+			c = came_from[c]
+		out.push_front(from)
+	return out
+
+
 func in_grid(c: Vector2i) -> bool:
 	return c.x >= 0 and c.y >= 0 and c.x < cols and c.y < rows
 

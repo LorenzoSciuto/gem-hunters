@@ -77,6 +77,8 @@ var chosen_characters: Dictionary = {}
 # ─── Internal state ───────────────────────────────────────────────────────
 
 var _num_players: int = 2
+## How many of the players are computer-driven: always the last player_ids.
+var _num_bots: int = 0
 var _clock: float = 0.0
 var _tick_accumulator: float = 0.0
 var _countdown_left: int = 0
@@ -107,6 +109,7 @@ func _ready() -> void:
 func _load_last_setup() -> void:
 	var saved: Dictionary = Settings.read(SETTINGS_SECTION)
 	_num_players = clampi(int(saved.get("players", _num_players)), Constants.MIN_PLAYERS, Constants.MAX_PLAYERS)
+	_num_bots = clampi(int(saved.get("bots", 0)), 0, _num_players - 1)
 	var mode: int = int(saved.get("mode", match_mode))
 	if mode in Constants.MatchMode.values():
 		match_mode = mode as Constants.MatchMode
@@ -121,7 +124,7 @@ func _load_last_setup() -> void:
 
 func _save_last_setup() -> void:
 	Settings.write(SETTINGS_SECTION, {
-		"players": _num_players, "mode": match_mode, "target": match_target,
+		"players": _num_players, "bots": _num_bots, "mode": match_mode, "target": match_target,
 		"arena": level_config.resource_path if level_config else "",
 	})
 
@@ -142,8 +145,11 @@ func game_time() -> float:
 # ─── Public API ───────────────────────────────────────────────────────────
 
 ## Configure the next match. [param target] is seconds (TIME) or gems (SCORE).
-func configure(num_players: int, mode: Constants.MatchMode, target: int, config: LevelConfig) -> void:
+## [param num_players] counts everyone; the last [param bots] of them are
+## computer-driven (at least one human always plays).
+func configure(num_players: int, mode: Constants.MatchMode, target: int, config: LevelConfig, bots: int = 0) -> void:
 	_num_players = clampi(num_players, Constants.MIN_PLAYERS, Constants.MAX_PLAYERS)
+	_num_bots = clampi(bots, 0, _num_players - 1)
 	match_mode = mode
 	match_target = maxi(target, 1)
 	level_config = config
@@ -153,6 +159,15 @@ func configure(num_players: int, mode: Constants.MatchMode, target: int, config:
 
 func get_num_players() -> int:
 	return _num_players
+
+
+func get_num_humans() -> int:
+	return _num_players - _num_bots
+
+
+## Computer-driven hunters have no screen, HUD or input device.
+func is_bot(player_id: int) -> bool:
+	return player_id >= get_num_humans()
 
 
 ## Begin the 3-2-1 countdown; PLAYING follows automatically.

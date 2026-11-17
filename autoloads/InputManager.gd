@@ -110,7 +110,7 @@ func _add_menu_pad_buttons() -> void:
 
 func auto_configure_devices() -> void:
 	var pads: Array[int] = Input.get_connected_joypads()
-	var players: int = GameManager.get_num_players()
+	var players: int = GameManager.get_num_humans()
 	for pid: int in Constants.MAX_PLAYERS:
 		# Pad i drives player (i + 1) % players: P1..P(n-1) first, P0 last.
 		var pad_index: int = (pid + players - 1) % players

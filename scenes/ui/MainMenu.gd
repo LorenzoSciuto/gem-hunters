@@ -6,7 +6,8 @@ extends Control
 const MATCH_SCENE: String = "res://scenes/main/Main.tscn"
 
 @onready var backdrop: Node = $ArenaBackdrop
-@onready var players_row: HBoxContainer = $Margin/VBox/Panel/Options/PlayersRow
+@onready var players_row: HBoxContainer = $Margin/VBox/Panel/Options/PlayersRow/HumansRow
+@onready var bots_row: HBoxContainer = $Margin/VBox/Panel/Options/PlayersRow/BotsRow
 @onready var mode_row: HBoxContainer = $Margin/VBox/Panel/Options/ModeRow
 @onready var target_row: HBoxContainer = $Margin/VBox/Panel/Options/TargetRow
 @onready var mode_desc: Label = $Margin/VBox/Panel/Options/ModeDesc
@@ -23,12 +24,15 @@ const MATCH_SCENE: String = "res://scenes/main/Main.tscn"
 @onready var close_controls_btn: Button = $ControlsDialog/Center/Panel/VBox/Buttons/CloseButton
 
 var _levels: Array[LevelConfig] = []
+## Humans; with _bots they make the MIN_PLAYERS..MAX_PLAYERS hunters of a match.
 var _players: int = 2
+var _bots: int = 0
 var _mode: Constants.MatchMode = Constants.MatchMode.TIME
 var _target: int = Constants.TIME_TARGETS[1]
 var _level: LevelConfig = null
 
 var _player_buttons: Array[Button] = []
+var _bot_buttons: Array[Button] = []
 var _mode_buttons: Array[Button] = []
 var _target_buttons: Array[Button] = []
 var _arena_buttons: Array[Button] = []
@@ -40,12 +44,14 @@ func _ready() -> void:
 		_levels.append(load(path) as LevelConfig)
 
 	# Restore the previous session's choices when coming back from a match.
-	_players = GameManager.get_num_players()
+	_players = GameManager.get_num_humans()
+	_bots = GameManager.get_num_players() - _players
 	_mode = GameManager.match_mode
 	_target = GameManager.match_target
 	_level = GameManager.level_config if GameManager.level_config else _levels[0]
 
-	_player_buttons = _make_toggles(players_row, range(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS + 1), _select_players)
+	_player_buttons = _make_toggles(players_row, range(1, Constants.MAX_PLAYERS + 1), _select_players)
+	_bot_buttons = _make_toggles(bots_row, range(Constants.MAX_PLAYERS), _select_bots)
 	_mode_buttons = _make_toggles(mode_row, Constants.MatchMode.values(), _select_mode)
 	_arena_buttons = _make_toggles(arena_grid, range(_levels.size()), func(i: int) -> void: _select_arena(_levels[i]))
 
@@ -84,8 +90,15 @@ func _make_toggles(parent: Container, values: Array, on_pick: Callable) -> Array
 	return buttons
 
 
+## Keeps humans + bots within MIN_PLAYERS..MAX_PLAYERS.
 func _select_players(count: int) -> void:
 	_players = count
+	_select_bots(_bots)
+
+
+func _select_bots(count: int) -> void:
+	_bots = clampi(count, Constants.MIN_PLAYERS - _players, Constants.MAX_PLAYERS - _players)
+	_refresh_texts()
 
 
 ## Switching mode rebuilds the target buttons (seconds or gems); survival has
@@ -119,9 +132,13 @@ func _select_arena(config: LevelConfig) -> void:
 
 func _refresh_texts() -> void:
 	for i: int in _player_buttons.size():
-		var count: int = Constants.MIN_PLAYERS + i
-		_player_buttons[i].text = tr("UI_PLAYERS_N").format([count])
+		var count: int = i + 1
+		_player_buttons[i].text = str(count)
 		_player_buttons[i].set_pressed_no_signal(count == _players)
+	for i: int in _bot_buttons.size():
+		_bot_buttons[i].text = str(i)
+		_bot_buttons[i].set_pressed_no_signal(i == _bots)
+		_bot_buttons[i].disabled = i < Constants.MIN_PLAYERS - _players or i > Constants.MAX_PLAYERS - _players
 
 	_mode_buttons[0].text = tr("UI_MODE_TIME")
 	_mode_buttons[1].text = tr("UI_MODE_SCORE")
@@ -180,7 +197,7 @@ func _close_help() -> void:
 
 
 func _on_start_pressed() -> void:
-	GameManager.configure(_players, _mode, _target, _level)
+	GameManager.configure(_players + _bots, _mode, _target, _level, _bots)
 	GameManager.chosen_characters.clear()
 	get_tree().change_scene_to_file(MATCH_SCENE)
 
