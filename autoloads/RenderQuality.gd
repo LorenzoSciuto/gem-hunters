@@ -1,6 +1,6 @@
 ## RenderQuality.gd
-## Decides how much the renderer does. Phones and tablets get the lite
-## profile; everything else keeps the full look.
+## Decides how much the renderer does. Handheld devices (ScreenLayout.handheld)
+## get the lite profile; everything else keeps the full look.
 ##
 ## Lite: the 3D view is drawn at LITE_3D_SCALE of the screen resolution and
 ## upscaled, with no multisampling, bloom or sun shadows, and without the small
@@ -17,7 +17,7 @@ var lite: bool = false
 
 
 func _ready() -> void:
-	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+	if ScreenLayout.handheld:
 		enable_lite()
 
 

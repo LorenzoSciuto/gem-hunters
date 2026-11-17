@@ -22,6 +22,12 @@ func _initialize() -> void:
 	game = root.get_node("GameManager")
 	constants = root.get_node("Constants")
 	input = root.get_node("InputManager")
+	_begin()
+
+
+## The autoloads are in the tree but not ready yet: the check starts a frame later.
+func _begin() -> void:
+	await process_frame
 	_run_test()
 
 
