@@ -92,6 +92,10 @@ jobs:
       - name: Import assets
         run: godot --headless --path . --import
 
+      # After the import, so the project's scripts load cleanly.
+      - name: Write the version on the splash
+        run: godot --headless --path . -s installer/stamp_splash.gd
+
       - name: Export
         env:
           # wine (runs rcedit) refuses a HOME the container user doesn't own.

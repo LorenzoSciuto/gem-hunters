@@ -29,6 +29,7 @@ LocalizationManager="*res://autoloads/LocalizationManager.gd"
 InputManager="*res://autoloads/InputManager.gd"
 UiMotion="*res://autoloads/UiMotion.gd"
 ScreenLayout="*res://autoloads/ScreenLayout.gd"
+RenderQuality="*res://autoloads/RenderQuality.gd"
 
 [display]
 

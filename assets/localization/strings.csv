@@ -5,7 +5,7 @@ UI_START,PLAY!,GIOCA!
 UI_QUIT,Quit,Esci
 UI_CONTROLS,Controls,Comandi
 UI_CLOSE,Close,Chiudi
-UI_LANGUAGE,Language: English,Lingua: Italiano
+UI_LANGUAGE,English,Italiano
 UI_SELECT_PLAYERS,Players,Giocatori
 UI_BOTS,Bots,Bot
 UI_SELECT_MODE,Goal,Obiettivo
@@ -16,8 +16,10 @@ UI_MODE_SCORE_DESC,First to {0} gems wins!,Vince il primo che arriva a {0} gemme
 UI_MODE_LIVES,Survival,Sopravvivenza
 UI_MODE_LIVES_DESC,"Everyone starts with {0} lives: every attack costs a life, every {1} gems buy one. Last one standing wins!","Tutti partono con {0} vite: ogni attacco toglie una vita, ogni {1} gemme ne comprano una. Vince chi sopravvive!"
 UI_MODE_COLLECT,Collector,Collezionista
-UI_MODE_COLLECT_DESC,"Collect a gem of each of the {0} colours, then grab the golden gem in the plaza to win. If a rival grabs it first, everyone starts over!","Colleziona una gemma per ognuno dei {0} colori, poi prendi la gemma d'oro nella piazza per vincere. Se la prende prima un rivale, tutti ripartono da zero!"
+UI_MODE_COLLECT_DESC,"One gem of each of the {0} colours, then grab the golden gem to win. If a rival grabs it, everyone starts over!","Una gemma per ognuno dei {0} colori, poi prendi la gemma d'oro per vincere. Se la prende un rivale, tutti da capo!"
+UI_COLORS_N,{0} colours,{0} colori
 UI_TARGET_GEMS,{0} gems,{0} gemme
+UI_SELECT_TARGET,Target,Traguardo
 UI_SELECT_ARENA,Arena,Arena
 UI_GAMEPADS_NONE,Keyboard ready - plug in gamepads for more players,Tastiera pronta - collega i gamepad per più giocatori
 UI_GAMEPADS_FOUND,Gamepads: {0},Gamepad: {0}

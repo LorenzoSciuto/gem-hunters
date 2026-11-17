@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ArenaBackdrop.tscn" id="2_backdrop"]
 [ext_resource type="Script" path="res://scenes/ui/ControlsDialog.gd" id="3_controls"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HowToPlayDialog.tscn" id="4_help"]
+[ext_resource type="Script" path="res://scenes/ui/OptionStepper.gd" id="5_stepper"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -17,105 +18,117 @@ layout_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 900.0
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="Column" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 alignment = 1
 
-[node name="TitleLabel" type="Label" parent="Margin/VBox"]
+[node name="Header" type="BoxContainer" parent="Margin/Column"]
 layout_mode = 2
-theme_type_variation = &"TitleLabel"
+
+[node name="Title" type="VBoxContainer" parent="Margin/Column/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="Margin/Column/Header/Title"]
+layout_mode = 2
+theme_type_variation = &"MenuTitleLabel"
 text = "UI_TITLE"
 
-[node name="SubtitleLabel" type="Label" parent="Margin/VBox"]
+[node name="SubtitleLabel" type="Label" parent="Margin/Column/Header/Title"]
 modulate = Color(1, 0.55, 0.75, 1)
 layout_mode = 2
 theme_type_variation = &"HeadingLabel"
 text = "UI_SUBTITLE"
 
-[node name="Panel" type="PanelContainer" parent="Margin/VBox"]
+[node name="Utility" type="HBoxContainer" parent="Margin/Column/Header"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="HelpButton" type="Button" parent="Margin/Column/Header/Utility"]
+layout_mode = 2
+text = "UI_HOW_TO_PLAY"
+
+[node name="ControlsButton" type="Button" parent="Margin/Column/Header/Utility"]
+layout_mode = 2
+text = "UI_CONTROLS"
+
+[node name="LangButton" type="Button" parent="Margin/Column/Header/Utility"]
+layout_mode = 2
+text = "UI_LANGUAGE"
+
+[node name="QuitButton" type="Button" parent="Margin/Column/Header/Utility"]
+layout_mode = 2
+text = "UI_QUIT"
+
+[node name="Card" type="PanelContainer" parent="Margin/Column"]
 layout_mode = 2
 
-[node name="Options" type="VBoxContainer" parent="Margin/VBox/Panel"]
+[node name="Sections" type="BoxContainer" parent="Margin/Column/Card"]
 layout_mode = 2
 
-[node name="PlayersTitle" type="Label" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-theme_type_variation = &"HeadingLabel"
-text = "UI_SELECT_PLAYERS"
-
-[node name="PlayersRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-
-[node name="HumansRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options/PlayersRow"]
+[node name="Who" type="VBoxContainer" parent="Margin/Column/Card/Sections"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BotsTitle" type="Label" parent="Margin/VBox/Panel/Options/PlayersRow"]
+[node name="Players" type="HBoxContainer" parent="Margin/Column/Card/Sections/Who"]
 layout_mode = 2
-theme_type_variation = &"HeadingLabel"
-text = "UI_BOTS"
+script = ExtResource("5_stepper")
 
-[node name="BotsRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options/PlayersRow"]
+[node name="Bots" type="HBoxContainer" parent="Margin/Column/Card/Sections/Who"]
+layout_mode = 2
+script = ExtResource("5_stepper")
+
+[node name="Arena" type="HBoxContainer" parent="Margin/Column/Card/Sections/Who"]
+layout_mode = 2
+script = ExtResource("5_stepper")
+
+[node name="ArenaDescBox" type="Control" parent="Margin/Column/Card/Sections/Who"]
+clip_contents = true
+layout_mode = 2
+
+[node name="ArenaDesc" type="Label" parent="Margin/Column/Card/Sections/Who/ArenaDescBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_type_variation = &"SubtleLabel"
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="Goal" type="VBoxContainer" parent="Margin/Column/Card/Sections"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ModeTitle" type="Label" parent="Margin/VBox/Panel/Options"]
+[node name="Mode" type="HBoxContainer" parent="Margin/Column/Card/Sections/Goal"]
 layout_mode = 2
-theme_type_variation = &"HeadingLabel"
-text = "UI_SELECT_MODE"
+script = ExtResource("5_stepper")
 
-[node name="ModeRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
+[node name="Target" type="HBoxContainer" parent="Margin/Column/Card/Sections/Goal"]
+layout_mode = 2
+script = ExtResource("5_stepper")
+
+[node name="ModeDescBox" type="Control" parent="Margin/Column/Card/Sections/Goal"]
+clip_contents = true
 layout_mode = 2
 
-[node name="TargetRow" type="HBoxContainer" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-
-[node name="ModeDesc" type="Label" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
+[node name="ModeDesc" type="Label" parent="Margin/Column/Card/Sections/Goal/ModeDescBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 theme_type_variation = &"SubtleLabel"
+autowrap_mode = 3
 
-[node name="ArenaTitle" type="Label" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-theme_type_variation = &"HeadingLabel"
-text = "UI_SELECT_ARENA"
-
-[node name="ArenaGrid" type="GridContainer" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-columns = 3
-
-[node name="ArenaDesc" type="Label" parent="Margin/VBox/Panel/Options"]
-layout_mode = 2
-theme_type_variation = &"SubtleLabel"
-
-[node name="StartButton" type="Button" parent="Margin/VBox"]
+[node name="StartButton" type="Button" parent="Margin/Column"]
 layout_mode = 2
 theme_type_variation = &"BigButton"
 text = "UI_START"
 
-[node name="BottomRow" type="HBoxContainer" parent="Margin/VBox"]
-layout_mode = 2
-
-[node name="HelpButton" type="Button" parent="Margin/VBox/BottomRow"]
-layout_mode = 2
-text = "UI_HOW_TO_PLAY"
-
-[node name="ControlsButton" type="Button" parent="Margin/VBox/BottomRow"]
-layout_mode = 2
-text = "UI_CONTROLS"
-
-[node name="LangButton" type="Button" parent="Margin/VBox/BottomRow"]
-layout_mode = 2
-text = "UI_LANGUAGE"
-
-[node name="QuitButton" type="Button" parent="Margin/VBox/BottomRow"]
-layout_mode = 2
-text = "UI_QUIT"
-
-[node name="GamepadStatusLabel" type="Label" parent="Margin/VBox"]
+[node name="GamepadStatusLabel" type="Label" parent="Margin/Column"]
 layout_mode = 2
 theme_type_variation = &"SubtleLabel"
 

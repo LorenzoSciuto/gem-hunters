@@ -10,6 +10,9 @@ GODOT="${GODOT:-godot}"
 TEST_TIMEOUT=180
 failed=0
 
+# A fresh checkout has no import cache: its first import parses scripts before
+# the resources they preload exist. That pass only builds the cache.
+"$GODOT" --headless --path . --import >/dev/null 2>&1
 output=$("$GODOT" --headless --path . --import 2>&1)
 if grep -q "SCRIPT ERROR" <<<"$output"; then
 	echo "FAIL import"
