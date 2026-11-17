@@ -2,7 +2,8 @@
 ## One hunter's heads-up display inside their split-screen view: gems, rank,
 ## zone, goal bar, clock and (survival) lives, plus the components
 ##   ItemPad (item slots + superpower), Toast (messages), MiniMap (radar),
-##   DebuffOverlay (full-screen debuff effects), LivesRow (hearts).
+##   DebuffOverlay (full-screen debuff effects), LivesRow (hearts),
+##   CollectionRow (collector mode colours).
 ## SplitScreenManager connects only this hunter's signals to it; GameManager
 ## drives scores, lives, the clock and match-wide events.
 extends CanvasLayer
@@ -48,6 +49,12 @@ func setup(player: Player, color: Color) -> void:
 		lives.setup(player_id)
 		zone_label.add_sibling(lives)
 		zone_label.get_parent().move_child(lives, zone_label.get_index())
+	if GameManager.is_collector():
+		var collection: CollectionRow = CollectionRow.new()
+		collection.setup(player_id)
+		goal_bar.add_sibling(collection)
+		GameManager.collection_completed.connect(_on_collection_completed)
+		GameManager.collections_reset.connect(_on_collections_reset)
 	item_pad.setup(player_id)
 	var config: LevelConfig = GameManager.level_config
 	mini_map.setup(player_id, maxf(config.columns, config.rows) * config.cell_size)
@@ -205,6 +212,18 @@ func show_result(winner_id: int, hold: float) -> void:
 
 func show_eliminated() -> void:
 	toast.show_message(tr("MSG_ELIMINATED"), null, Toast.Tone.BAD, ELIMINATED_HOLD)
+
+
+func _on_collection_completed(pid: int) -> void:
+	if pid == player_id:
+		toast.show_message(tr("MSG_COLLECT_COMPLETE_MINE"), null, Toast.Tone.GOOD)
+	else:
+		toast.show_message(tr("MSG_COLLECT_COMPLETE_THEIRS").format([pid + 1]), null, Toast.Tone.BAD)
+
+
+func _on_collections_reset(pid: int) -> void:
+	toast.show_message(tr("MSG_COLLECT_RESET").format([pid + 1]), null,
+		Toast.Tone.GOOD if pid == player_id else Toast.Tone.BAD)
 
 
 func _on_chaos_gem_taken(finder_id: int, lost: Dictionary) -> void:

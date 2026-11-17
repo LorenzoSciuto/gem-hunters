@@ -19,6 +19,8 @@ const GOLDEN_SCALE_FACTOR: float = 1.6
 @export var gem_type: Constants.GemType = Constants.GemType.STANDARD
 @export var value: int = 1
 @export var is_golden: bool = false
+## Collector mode: index into Constants.COLLECT_COLORS (-1 = a regular gem).
+var color_index: int = -1
 
 signal collected(by_player_id: int, gem_value: int)
 
@@ -69,6 +71,11 @@ func _apply_visuals() -> void:
 				mat = MAT_STANDARD
 				light_col = Color(0.3, 0.9, 1.0)
 
+	if color_index >= 0:
+		light_col = Constants.COLLECT_COLORS[color_index]
+		mat = MAT_STANDARD.duplicate()
+		(mat as ShaderMaterial).set_shader_parameter("base_color", light_col)
+
 	crown_mesh.set_surface_override_material(0, mat)
 	pavilion_mesh.set_surface_override_material(0, mat)
 
@@ -88,8 +95,10 @@ func _on_body_entered(body: Node3D) -> void:
 		GameManager.add_life(player.player_id)
 		_popup(player, "MSG_LIFE_GAINED_POP")
 		AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
+	elif is_golden and GameManager.is_collector():
+		GameManager.take_golden_gem(player.player_id)
 	else:
-		player.collect_gem(value)
+		player.collect_gem(value, true, color_index)
 		if is_golden and GameManager.is_survival():
 			# Survival: the golden gem also tops lives back up.
 			GameManager.refill_lives(player.player_id, Constants.GOLDEN_REFILL_LIVES)

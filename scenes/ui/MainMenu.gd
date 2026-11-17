@@ -1,5 +1,5 @@
 ## MainMenu.gd
-## Lobby: choose player count, match goal (time, gem target or survival) and arena, then play.
+## Lobby: choose player count, match goal (time, gem target, survival or collector) and arena, then play.
 ## Works with mouse, keyboard and gamepad (standard ui_* focus navigation).
 extends Control
 
@@ -46,7 +46,7 @@ func _ready() -> void:
 	_level = GameManager.level_config if GameManager.level_config else _levels[0]
 
 	_player_buttons = _make_toggles(players_row, range(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS + 1), _select_players)
-	_mode_buttons = _make_toggles(mode_row, [Constants.MatchMode.TIME, Constants.MatchMode.SCORE, Constants.MatchMode.LIVES], _select_mode)
+	_mode_buttons = _make_toggles(mode_row, Constants.MatchMode.values(), _select_mode)
 	_arena_buttons = _make_toggles(arena_grid, range(_levels.size()), func(i: int) -> void: _select_arena(_levels[i]))
 
 	start_btn.pressed.connect(_on_start_pressed)
@@ -125,6 +125,7 @@ func _refresh_texts() -> void:
 	_mode_buttons[0].text = tr("UI_MODE_TIME")
 	_mode_buttons[1].text = tr("UI_MODE_SCORE")
 	_mode_buttons[2].text = tr("UI_MODE_LIVES")
+	_mode_buttons[3].text = tr("UI_MODE_COLLECT")
 	for i: int in _mode_buttons.size():
 		_mode_buttons[i].set_pressed_no_signal(i == _mode)
 
@@ -137,6 +138,7 @@ func _refresh_texts() -> void:
 	match _mode:
 		Constants.MatchMode.TIME: mode_desc.text = tr("UI_MODE_TIME_DESC")
 		Constants.MatchMode.SCORE: mode_desc.text = tr("UI_MODE_SCORE_DESC").format([_target])
+		Constants.MatchMode.COLLECT: mode_desc.text = tr("UI_MODE_COLLECT_DESC").format([Constants.COLLECT_COLORS.size()])
 		_: mode_desc.text = tr("UI_MODE_LIVES_DESC").format([Constants.START_LIVES, Constants.GEMS_PER_LIFE])
 
 	for i: int in _arena_buttons.size():
