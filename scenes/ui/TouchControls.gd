@@ -1,11 +1,11 @@
 ## TouchControls.gd
 ## On-screen controls for P1 on a touch screen, over the whole match view:
 ##   left half   - a stick that appears under the thumb (move)
-##   right half  - drag to look around
+##   right half  - a second stick (look around), like a pad's right stick
 ##   bottom right - the HUD's item pad, moved under the right thumb, enlarged
 ##                  and made tappable, with the jump button beside it
 ##   top right   - pause, under the clock
-## The stick and the jump button press P1's own input actions, so the hunter
+## The sticks and the jump button press P1's own input actions, so the hunter
 ## code is the same as with a keyboard or a pad.
 ## SplitScreenManager adds it once InputManager.touch_active is set.
 extends CanvasLayer
@@ -16,8 +16,10 @@ signal pause_requested
 ## Sizes are in canvas pixels, which ScreenLayout already enlarges on a phone.
 const STICK_RADIUS: float = 105.0
 const KNOB_RADIUS: float = 46.0
-## Where the idle stick is drawn, from the bottom-left corner.
+## Where the idle move stick is drawn, from the bottom-left corner.
 const STICK_REST: Vector2 = Vector2(130.0, 190.0)
+## The idle look stick sits this far above the item pad.
+const LOOK_STICK_GAP: float = 24.0
 const JUMP_RADIUS: float = 70.0
 ## The jump button sits this far left of the item pad and above the bottom edge.
 const JUMP_GAP: float = 20.0
@@ -34,7 +36,25 @@ const OUTLINE: Color = Color(1.0, 1.0, 1.0, 0.6)
 const OUTLINE_WIDTH: float = 4.0
 const NO_TOUCH: int = -1
 
-var player: Player = null
+
+## One stick: the finger holding it, where that finger landed, how far it is
+## pushed (length 0..1) and the four P1 actions it presses.
+class Stick:
+	var touch: int = NO_TOUCH
+	var origin: Vector2 = Vector2.ZERO
+	var value: Vector2 = Vector2.ZERO
+	var left: String
+	var right: String
+	var up: String
+	var down: String
+
+	func _init(left_action: String, right_action: String, up_action: String, down_action: String) -> void:
+		left = left_action
+		right = right_action
+		up = up_action
+		down = down_action
+
+
 ## P1's item pad. shortcut: its place on screen is read as if P1's view filled
 ## the window, true for one human; a split-screen touch match needs a transform.
 var item_pad: ItemPad = null
@@ -42,10 +62,9 @@ var item_pad: ItemPad = null
 var _canvas: Control = null
 var _jump: TouchScreenButton = null
 var _pause: Button = null
-var _stick_touch: int = NO_TOUCH
-var _stick_origin: Vector2 = Vector2.ZERO
-var _stick: Vector2 = Vector2.ZERO
-var _look_touch: int = NO_TOUCH
+var _move: Stick = Stick.new("move_left", "move_right", "move_forward", "move_back")
+var _look: Stick = Stick.new("look_left", "look_right", "look_up", "look_down")
+var _sticks: Array[Stick] = [_move, _look]
 
 
 func _ready() -> void:
@@ -79,7 +98,8 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	_set_stick(Vector2.ZERO)
+	for stick: Stick in _sticks:
+		_set_stick(stick, Vector2.ZERO)
 
 
 func _layout() -> void:
@@ -94,38 +114,33 @@ func _input(event: InputEvent) -> void:
 		var touch: InputEventScreenTouch = event as InputEventScreenTouch
 		if not touch.pressed:
 			_release(touch.index)
-		elif _on_button(touch.position):
-			pass  # The buttons handle their own touches.
-		elif touch.position.x < _screen().x * 0.5:
-			if _stick_touch == NO_TOUCH:
-				_stick_touch = touch.index
-				_stick_origin = touch.position
+		elif not _on_button(touch.position):  # The buttons handle their own touches.
+			var stick: Stick = _move if touch.position.x < _screen().x * 0.5 else _look
+			if stick.touch == NO_TOUCH:
+				stick.touch = touch.index
+				stick.origin = touch.position
 				_canvas.queue_redraw()
-		elif _look_touch == NO_TOUCH:
-			_look_touch = touch.index
 	elif event is InputEventScreenDrag:
 		var drag: InputEventScreenDrag = event as InputEventScreenDrag
-		if drag.index == _stick_touch:
-			_set_stick(((drag.position - _stick_origin) / STICK_RADIUS).limit_length(1.0))
-		elif drag.index == _look_touch and player.controls_enabled:
-			player.look.look_by(drag.relative)
+		for stick: Stick in _sticks:
+			if drag.index == stick.touch:
+				_set_stick(stick, ((drag.position - stick.origin) / STICK_RADIUS).limit_length(1.0))
 
 
 func _release(index: int) -> void:
-	if index == _stick_touch:
-		_stick_touch = NO_TOUCH
-		_set_stick(Vector2.ZERO)
-	elif index == _look_touch:
-		_look_touch = NO_TOUCH
+	for stick: Stick in _sticks:
+		if index == stick.touch:
+			stick.touch = NO_TOUCH
+			_set_stick(stick, Vector2.ZERO)
 
 
-## Presses P1's move actions as far as the stick is pushed.
-func _set_stick(value: Vector2) -> void:
-	_stick = value
-	_press("move_left", -value.x)
-	_press("move_right", value.x)
-	_press("move_forward", -value.y)
-	_press("move_back", value.y)
+## Presses the stick's actions as far as it is pushed.
+func _set_stick(stick: Stick, value: Vector2) -> void:
+	stick.value = value
+	_press(stick.left, -value.x)
+	_press(stick.right, value.x)
+	_press(stick.up, -value.y)
+	_press(stick.down, value.y)
 	if _canvas:
 		_canvas.queue_redraw()
 
@@ -154,15 +169,26 @@ func _jump_center() -> Vector2:
 	return Vector2(_pad_rect().position.x - JUMP_GAP - JUMP_RADIUS, _screen().y - JUMP_BOTTOM)
 
 
+## Where a stick is drawn: under its finger, or at rest (move in the bottom-left
+## corner, look above the item pad).
+func _stick_base(stick: Stick) -> Vector2:
+	if stick.touch != NO_TOUCH:
+		return stick.origin
+	if stick == _move:
+		return Vector2(STICK_REST.x, _screen().y - STICK_REST.y)
+	var pad: Rect2 = _pad_rect()
+	return Vector2(pad.get_center().x, pad.position.y - LOOK_STICK_GAP - STICK_RADIUS)
+
+
 func _on_button(pos: Vector2) -> bool:
 	return _pad_rect().has_point(pos) or pos.distance_to(_jump_center()) <= JUMP_RADIUS
 
 
 func _draw_controls() -> void:
-	var screen: Vector2 = _screen()
-	var base: Vector2 = _stick_origin if _stick_touch != NO_TOUCH else Vector2(STICK_REST.x, screen.y - STICK_REST.y)
-	_draw_button(base, STICK_RADIUS)
-	_canvas.draw_circle(base + _stick * STICK_RADIUS, KNOB_RADIUS, KNOB)
+	for stick: Stick in _sticks:
+		var base: Vector2 = _stick_base(stick)
+		_draw_button(base, STICK_RADIUS)
+		_canvas.draw_circle(base + stick.value * STICK_RADIUS, KNOB_RADIUS, KNOB)
 	_draw_button(_jump_center(), JUMP_RADIUS)
 	var text: String = tr("ACTION_JUMP")
 	var font: Font = Constants.DISPLAY_FONT

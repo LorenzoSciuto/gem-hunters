@@ -1,5 +1,5 @@
 ## PlayerLook.gd
-## Where a hunter looks: stick, mouse and touch look (inverted / wobbling under
+## Where a hunter looks: stick and mouse look (inverted / wobbling under
 ## debuffs), the first/third-person camera view, and P1's mouse buttons
 ## (wheel arms a slot, left click fires it, right click jumps).
 ## Child node "Look" of Player.
@@ -74,7 +74,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Pointer look: a mouse move or a touch drag of [param pixels].
+## Pointer look: a mouse move of [param pixels].
 func look_by(pixels: Vector2) -> void:
 	if player.status.has(Constants.DebuffType.FROZEN):
 		return

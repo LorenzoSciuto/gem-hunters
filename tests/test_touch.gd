@@ -1,5 +1,5 @@
 ## Touch controls, driven by synthetic screen touches: the stick moves the
-## hunter, a drag on the right turns it, the jump button jumps, an item slot
+## hunter, the look stick on the right turns it, the jump button jumps, an item slot
 ## fires its item and the pause button pauses.
 extends "res://tests/match_test.gd"
 
@@ -29,9 +29,16 @@ func _run_test() -> void:
 	_touch(1, look_at, true)
 	_drag(1, look_at, look_at + Vector2.RIGHT * LOOK_DRAG)
 	await wait(0.2)
-	expect(not is_equal_approx(hunter.rotation.y, yaw), "a drag on the right turns the hunter")
+	expect(not is_equal_approx(hunter.rotation.y, yaw), "the look stick turns the hunter")
+	yaw = hunter.rotation.y
+	await wait(0.2)
+	expect(not is_equal_approx(hunter.rotation.y, yaw), "a held look stick keeps turning")
 
 	_touch(1, look_at, false)
+	await wait(0.1)
+	yaw = hunter.rotation.y
+	await wait(0.2)
+	expect(is_equal_approx(hunter.rotation.y, yaw), "releasing the look stick stops the turn")
 	_touch(0, stick_at, false)
 	await wait(0.5)
 	expect(hunter.velocity.length() < 0.5, "releasing the stick stops the hunter")

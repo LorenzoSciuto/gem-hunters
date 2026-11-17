@@ -223,7 +223,6 @@ func _begin_countdown() -> void:
 		hud.visible = true
 	if InputManager.touch_active:
 		var touch: TouchControls = TouchControls.new()
-		touch.player = _players[InputManager.KEYBOARD_PLAYER]
 		touch.item_pad = _huds[InputManager.KEYBOARD_PLAYER].item_pad
 		touch.pause_requested.connect(func() -> void:
 			if GameManager.is_playing():
