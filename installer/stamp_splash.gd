@@ -11,7 +11,7 @@ const SPLASH_PATH: String = "res://assets/ui/splash.png"
 const GLYPHS_PATH: String = "res://installer/splash_version_glyphs.png"
 const GLYPH_ORDER: String = "0123456789.v"
 ## Top-left corner of the version text on the splash (right of "Wennovate").
-const ORIGIN: Vector2i = Vector2i(671, 672)
+const ORIGIN: Vector2i = Vector2i(690, 672)
 const GLYPH_SPACING: int = 2
 
 
