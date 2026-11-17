@@ -100,6 +100,7 @@ UI_PROMPT_KB,{0} / {1}: browse   {2}: ready   {3}: back,{0} / {1}: scorri   {2}:
 UI_PROMPT_KB_LOCKED,{0}: change hunter,{0}: cambia hunter
 UI_BACK,Back,Indietro
 UI_CHANGE,Change,Cambia
+UI_CHOOSE,Choose,Scegli
 UI_CHANGE_HUNTERS,Change hunters,Cambia hunter
 UI_CONTROLS_HINT,"Player 1 plays with keyboard and mouse, everyone else with a gamepad.
 Mouse: the wheel picks an item or the superpower, left click uses it, right click jumps; the right trigger also jumps.

@@ -2,10 +2,13 @@
 ## Per-quadrant character selection: each player browses archetypes with their
 ## own device and locks in independently.
 ##   Keyboard: the player's move left / right keys browse, jump locks in
-##   (P0 also browses with the mouse wheel and locks with a click).
+##   (P0 also browses with the mouse wheel).
 ##   Gamepad: stick / D-pad to browse, A or Start to lock.
+##   Mouse and touch: the arrows browse, the Choose button locks in.
 ##   Back (pad B, Esc or right click for P0, or the
 ##   on-screen button): unlocks a locked choice, otherwise leaves to the menu.
+## A locked card shows it: green border, "READY!" in the title and beside the
+## Change button (theme variation ReadyPanel).
 extends Control
 class_name CharacterSelector
 
@@ -33,6 +36,7 @@ const STICK_PRESS: float = 0.6
 const STICK_RELEASE: float = 0.3
 ## Keep the panel inside small (4-player) quadrants.
 const FIT_MARGIN: float = 0.95
+const READY_COLOR: Color = Color(0.45, 1.0, 0.55)
 
 @onready var panel: PanelContainer = $Panel
 @onready var player_title: Label = $Panel/VBox/PlayerTitle
@@ -50,10 +54,12 @@ const FIT_MARGIN: float = 0.95
 @onready var jump_bar: ProgressBar = $Panel/VBox/Stats/JumpBar
 @onready var defense_bar: ProgressBar = $Panel/VBox/Stats/DefenseBar
 @onready var prompt_label: Label = $Panel/VBox/PromptLabel
-@onready var ready_badge: Label = $Panel/VBox/ReadyBadge
-@onready var back_btn: Button = $Panel/VBox/BackButton
+@onready var ready_badge: Label = $Panel/VBox/Actions/ReadyBadge
+@onready var back_btn: Button = $Panel/VBox/Actions/BackButton
+@onready var confirm_btn: Button = $Panel/VBox/Actions/ConfirmButton
 
 var player_id: int = 0
+var _color: Color = Color.WHITE
 var _index: int = 0
 var _is_locked: bool = false
 var _stick_latched: bool = false
@@ -64,18 +70,19 @@ func _ready() -> void:
 	prev_btn.pressed.connect(_cycle.bind(-1))
 	next_btn.pressed.connect(_cycle.bind(1))
 	back_btn.pressed.connect(_back)
+	confirm_btn.pressed.connect(lock_in)
+	ready_badge.modulate = READY_COLOR
 	resized.connect(_fit_panel)
 	panel.resized.connect(_fit_panel)
 
 
 func setup(pid: int, color: Color, preselected: CharacterData = null) -> void:
 	player_id = pid
-	player_title.text = "%s  %s" % [tr("UI_PLAYER_SHORT").format([pid + 1]), tr("UI_SELECT_HERO")]
-	player_title.modulate = color
+	_color = color
 	_index = CHARACTERS.find(preselected) if preselected else pid % CHARACTERS.size()
 	if _index < 0:
 		_index = 0
-	_update_prompt()
+	_update_lock_state()
 	_update_display()
 
 
@@ -83,7 +90,21 @@ func _uses_pad() -> bool:
 	return InputManager.has_pad(player_id) or not InputManager.has_keyboard(player_id)
 
 
+## Everything on the card that tells a locked choice from an open one.
+func _update_lock_state() -> void:
+	panel.theme_type_variation = &"ReadyPanel" if _is_locked else &""
+	player_title.text = "%s  %s" % [tr("UI_PLAYER_SHORT").format([player_id + 1]),
+		tr("UI_READY" if _is_locked else "UI_SELECT_HERO")]
+	player_title.modulate = READY_COLOR if _is_locked else _color
+	ready_badge.visible = _is_locked
+	confirm_btn.visible = not _is_locked
+	prev_btn.disabled = _is_locked
+	next_btn.disabled = _is_locked
+	_update_prompt()
+
+
 func _update_prompt() -> void:
+	prompt_label.visible = not InputManager.touch_active  # No keys on a touch screen.
 	super_heading.text = tr("UI_SUPER_PRESS").format([InputManager.prompt_text(player_id, "super")])
 	if _uses_pad():
 		prompt_label.text = tr("UI_PROMPT_PAD_LOCKED" if _is_locked else "UI_PROMPT_PAD")
@@ -140,7 +161,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_WHEEL_UP: step = -1
 			MOUSE_BUTTON_WHEEL_DOWN: step = 1
-			MOUSE_BUTTON_LEFT: lock = true
 
 	if step != 0:
 		_cycle(step)
@@ -168,10 +188,7 @@ func _back() -> void:
 		back_requested.emit(player_id)
 		return
 	_is_locked = false
-	_show_ready_badge(false)
-	prev_btn.disabled = false
-	next_btn.disabled = false
-	_update_prompt()
+	_update_lock_state()
 	AudioManager.play_sfx(AudioManager.SoundEffect.TIMER_TICK)
 	character_unlocked.emit(player_id)
 
@@ -205,20 +222,11 @@ func _update_display() -> void:
 	character_previewed.emit(player_id, c)
 
 
-## The badge always keeps its space (only its opacity changes), so the card's
-## layout doesn't move when a player locks in.
-func _show_ready_badge(shown: bool) -> void:
-	ready_badge.modulate.a = 1.0 if shown else 0.0
-
-
 func lock_in() -> void:
 	if _is_locked:
 		return
 	_is_locked = true
 	preview_rig.play_lock_animation()
-	_show_ready_badge(true)
-	prev_btn.disabled = true
-	next_btn.disabled = true
-	_update_prompt()
+	_update_lock_state()
 	AudioManager.play_sfx(AudioManager.SoundEffect.POWERUP_GRAB)
 	character_locked.emit(player_id, CHARACTERS[_index])

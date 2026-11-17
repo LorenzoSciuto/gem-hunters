@@ -144,15 +144,22 @@ layout_mode = 2
 theme_type_variation = &"SubtleLabel"
 horizontal_alignment = 1
 
-[node name="BackButton" type="Button" parent="Panel/VBox"]
+[node name="Actions" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
-size_flags_horizontal = 4
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Panel/VBox/Actions"]
+layout_mode = 2
 focus_mode = 0
 text = "UI_BACK"
 
-[node name="ReadyBadge" type="Label" parent="Panel/VBox"]
-modulate = Color(0.45, 1, 0.55, 0)
+[node name="ConfirmButton" type="Button" parent="Panel/VBox/Actions"]
+layout_mode = 2
+focus_mode = 0
+text = "UI_CHOOSE"
+
+[node name="ReadyBadge" type="Label" parent="Panel/VBox/Actions"]
+visible = false
 layout_mode = 2
 theme_type_variation = &"BannerLabel"
 text = "UI_READY"
-horizontal_alignment = 1
