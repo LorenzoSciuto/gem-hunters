@@ -73,7 +73,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 - `AudioManager` (`play_sfx`), `LocalizationManager` (en/it).
 - `UiMotion`: every Button grows a few pixels on hover/focus and squishes on press, and plain `PanelContainer` cards pop in. `pulse(control)` is the shared "value changed" pop.
 - `ScreenLayout`: on a tall window (a phone held upright) it turns the base canvas on its side, and on a handheld it draws the whole UI larger (up to 1.5x on a phone, 1x on a tablet). Screens read `portrait` and listen to `layout_changed`. Every screen must fit a 1280x720 canvas and a 720x1280 one.
-- `RenderQuality`: phones, tablets and console browsers (Xbox: the full look loses the WebGL context there) get the lite profile (3D at 70% resolution, views of 1080 lines at most, no multisampling, bloom or sun shadows, flat ambient light, no small lights on gems and boxes). It is applied to nodes as they enter the tree, so scenes describe the full look only. On an integrated GPU with the Compatibility renderer a 4-hunter match goes from about 30 to about 120 fps.
+- `RenderQuality`: phones, tablets and every browser get the lite profile (the full look loses the WebGL context on the Xbox browser, which cannot be told from a desktop one) (3D at 70% resolution, views of 1080 lines at most, no multisampling, bloom or sun shadows, flat ambient light, no small lights on gems and boxes). It is applied to nodes as they enter the tree, so scenes describe the full look only. On an integrated GPU with the Compatibility renderer a 4-hunter match goes from about 30 to about 120 fps.
 - `Settings` (static helper, not an autoload): reads and writes one section of `user://settings.cfg` (language, last match setup).
 
 ### A match

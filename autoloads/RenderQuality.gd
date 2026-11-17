@@ -1,9 +1,10 @@
 ## RenderQuality.gd
 ## Decides how much the renderer does. Handheld devices (ScreenLayout.handheld)
-## and console browsers get the lite profile; everything else keeps the full
-## look. A console browser gives a page little graphics memory: with the full
-## look (multisampled views, bloom and shadow buffers) it drops the WebGL
-## context, which ends the game.
+## and every browser get the lite profile; desktop builds keep the full look.
+## A browser can give a page little graphics memory: on the Xbox one the full
+## look (multisampled views, bloom and shadow buffers) drops the WebGL context,
+## which ends the game. That browser reports a plain desktop user agent, so
+## the page cannot tell a console from a PC.
 ##
 ## Lite: the 3D view is drawn at LITE_3D_SCALE of the screen resolution and
 ## upscaled, with no multisampling, bloom or sun shadows, and without the small
@@ -19,22 +20,13 @@ extends Node
 
 const LITE_3D_SCALE: float = 0.7
 const LITE_MAX_VIEW_LINES: float = 1080.0
-## Browser user agents that name a console.
-const CONSOLE_USER_AGENTS: Array[String] = ["Xbox", "PlayStation", "Nintendo"]
 
 var lite: bool = false
 
 
 func _ready() -> void:
-	if ScreenLayout.handheld or _is_console_browser():
+	if ScreenLayout.handheld or OS.has_feature("web"):
 		enable_lite()
-
-
-func _is_console_browser() -> bool:
-	if not OS.has_feature("web"):
-		return false
-	var user_agent: String = str(JavaScriptBridge.eval("navigator.userAgent"))
-	return CONSOLE_USER_AGENTS.any(func(console: String) -> bool: return user_agent.contains(console))
 
 
 ## Switches to the lite profile for everything added from now on (and the
