@@ -1,5 +1,5 @@
 ## One human and three bots play a whole timed match: every bot keeps moving
-## and the bots collect gems.
+## (one of them starts outside the walls) and the bots collect gems.
 extends "res://tests/match_test.gd"
 
 const BOTS: int = 3
@@ -11,6 +11,15 @@ const MIN_DISTANCE: float = 60.0
 
 func _run_test() -> void:
 	var players: Array[Node] = await start_match(BOTS + 1, constants.MatchMode.TIME, BOTS)
+	# A bot thrown outside the walls follows no maze path: it heads straight
+	# for the return pad (and run.sh fails the test on any script error).
+	var thrown: Node3D = players[1] as Node3D
+	var config: Resource = game.level_config
+	thrown.global_position = Vector3(config.columns * config.cell_size, 1.0, 0.0)
+	var bot: Node = thrown.find_children("*", "PlayerBot", false, false)[0]
+	bot._think()
+	expect(bot._path.is_empty(), "a bot outside the walls follows no maze path")
+
 	Engine.time_scale = TIME_SCALE
 	var last: Array[Vector3] = []
 	var travelled: Array[float] = []
