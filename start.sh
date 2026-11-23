@@ -4,9 +4,9 @@ set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Locate a Godot 4.3 binary: bundled copy, $GODOT_BIN, then PATH.
+# Locate a Godot 4.7 binary: bundled copy, $GODOT_BIN, then PATH.
 GODOT_EXEC=""
-for candidate in "$PROJECT_DIR/.tools/Godot_v4.3-stable_linux.x86_64" "$GODOT_BIN" \
+for candidate in "$PROJECT_DIR/.tools/Godot_v4.7.2-stable_linux.x86_64" "$GODOT_BIN" \
 		"$(command -v godot4 2>/dev/null || true)" "$(command -v godot 2>/dev/null || true)"; do
 	if [ -n "$candidate" ] && [ -x "$candidate" ]; then
 		GODOT_EXEC="$candidate"
@@ -15,7 +15,7 @@ for candidate in "$PROJECT_DIR/.tools/Godot_v4.3-stable_linux.x86_64" "$GODOT_BI
 done
 
 if [ -z "$GODOT_EXEC" ]; then
-	echo "Error: Godot 4.3 not found. Download it from https://godotengine.org/download/archive/4.3-stable/"
+	echo "Error: Godot 4.7 not found. Download it from https://godotengine.org/download/archive/4.7.2-stable/"
 	echo "and put it in $PROJECT_DIR/.tools/, set GODOT_BIN, or add godot to your PATH."
 	exit 1
 fi

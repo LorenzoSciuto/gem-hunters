@@ -8,7 +8,7 @@
 
 Split-screen 3D chaos in freshly generated mazes, made with Godot 4 by **Wennovate**.
 
-[![Godot 4.3](https://img.shields.io/badge/Godot-4.3-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org/)
+[![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 ![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)
 ![Players](https://img.shields.io/badge/players-2--4%20local-ff6f61)
@@ -90,7 +90,7 @@ On a phone or tablet (in the browser) Player 1 plays with touch controls: a stic
 
 ## Run from source
 
-1. Install **Godot 4.3 stable** (the standard build, not .NET) from the [Godot archive](https://godotengine.org/download/archive/4.3-stable/).
+1. Install **Godot 4.7 stable** (the standard build, not .NET) from the [Godot archive](https://godotengine.org/download/archive/4.7.2-stable/).
 2. Clone this repository and launch:
 
 ```bash
@@ -100,7 +100,7 @@ cd gem-hunters
 ./start.sh --windowed --resolution 1600x900  # extra arguments go to Godot
 ```
 
-`start.sh` finds Godot in `.tools/Godot_v4.3-stable_linux.x86_64`, then in `$GODOT_BIN`, then as `godot4` or `godot` on your `PATH`. On Windows or macOS, open `project.godot` in the Godot editor and press **F5**.
+`start.sh` finds Godot in `.tools/Godot_v4.7.2-stable_linux.x86_64`, then in `$GODOT_BIN`, then as `godot4` or `godot` on your `PATH`. On Windows or macOS, open `project.godot` in the Godot editor and press **F5**.
 
 CI (`.github/workflows/release.yml`) runs on pushes to master. When master gets a version (`config/version` in `project.godot`) that has no release yet, CI tags the commit `v<version>` and publishes the release with the installers and portable packages. To ship a new version, bump that number. Any branch can be built by hand from the Actions tab.
 
