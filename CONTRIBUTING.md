@@ -4,7 +4,7 @@ Thanks for helping! This guide explains how the game is put together and the rul
 
 ## Setup
 
-You need **Godot 4.3 stable** (standard build). See [Run from source](README.md#run-from-source).
+You need **Godot 4.7 stable** (standard build). See [Run from source](README.md#run-from-source).
 
 ```bash
 ./start.sh                                    # run the game
@@ -15,8 +15,10 @@ godot --headless --path . --import            # re-import; shows parse and load 
 Before opening a PR, run the checks and play a match in each mode you touched:
 
 ```bash
-GODOT=.tools/Godot_v4.3-stable_linux.x86_64 tests/run.sh
+GODOT=.tools/Godot_v4.7.2-stable_linux.x86_64 tests/run.sh
 ```
+
+Commit the `.uid` file Godot writes next to each new script or shader: scenes refer to it by that id.
 
 It runs the headless import, which must print no `SCRIPT ERROR`, then every `tests/test_*.gd`. CI runs the same script before it exports anything. A headless run prints many harmless `Parameter "m" is null` and `Unicode parsing error` lines (that's the dummy renderer).
 
@@ -30,7 +32,7 @@ To drive the game from a script, run a `extends SceneTree` script with `-s <scri
 
 ## Releases
 
-`.github/workflows/release.yml` exports the game with the presets in `export_presets.cfg`. It packages a Windows installer (Inno Setup, `installer/windows/`), a Linux `.deb` (`installer/linux/`) and portable zip/tar.gz builds. It runs on its own only for pushes to master, and each one is a new version: the commit is tagged `v<version>` and published as a GitHub Release. The version is `MAJOR.MINOR.PATCH`. Bump `MAJOR.MINOR` by hand in `config/version` of `project.godot`; never touch `PATCH`, the workflow counts it up from the last `v<MAJOR.MINOR>.*` tag and stamps it into the exported game. The actions and the build image are pinned to a commit hash / digest. The splash (`assets/ui/splash.png`) is committed without a version: `installer/stamp_splash.gd` writes the number next to "Wennovate" during the release build, with the glyphs of `installer/splash_version_glyphs.png`. To build any other branch, start the workflow by hand (Actions → *Build & release* → *Run workflow*). Manual runs never publish. The Windows export writes the icon and version info into the `.exe` with rcedit, and the build fails if they are missing.
+`.github/workflows/release.yml` exports the game with the presets in `export_presets.cfg`. It packages a Windows installer (Inno Setup, `installer/windows/`), a Linux `.deb` (`installer/linux/`) and portable zip/tar.gz builds. It runs on its own only for pushes to master, and each one is a new version: the commit is tagged `v<version>` and published as a GitHub Release. The version is `MAJOR.MINOR.PATCH`. Bump `MAJOR.MINOR` by hand in `config/version` of `project.godot`; never touch `PATCH`, the workflow counts it up from the last `v<MAJOR.MINOR>.*` tag and stamps it into the exported game. The actions and the build image are pinned to a commit hash / digest. The splash (`assets/ui/splash.png`) is committed without a version: `installer/stamp_splash.gd` writes the number next to "Wennovate" during the release build, with the glyphs of `installer/splash_version_glyphs.png`. To build any other branch, start the workflow by hand (Actions → *Build & release* → *Run workflow*). Manual runs never publish. The Windows export writes the icon and version info into the `.exe` (Godot does it natively, no rcedit), and the build fails if they are missing.
 
 **Web build.** The same project exports to the browser with the `Web` preset (`godot --headless --path . --export-release Web`, output in `build/web/`; serve that folder over HTTP to try it). Browsers run the Compatibility renderer instead of Forward Plus, so check new shaders and effects with `--rendering-method gl_compatibility` too. The export is single-threaded, so any static file server works with no special headers. The release build renames its files with the version (`installer/version_web_build.sh`: `index.wasm` becomes `index.1.2.3.wasm`), so a browser can't keep serving a cached old release; only `index.html` keeps its name. Gamepads need HTTPS. When the browser drops the WebGL context, the engine shows an alert; a script in the preset's `html/head_include` adds a short report to it: whether the game had started and for how long, seconds since the page opened, canvas size, GPU and user agent. Code that only makes sense on one side branches on `OS.has_feature("web")` (the Quit buttons are hidden there). On master pushes the `deploy-web` job publishes the build on GitHub Pages (https://lorenzosciuto.github.io/gem-hunters/).
 
